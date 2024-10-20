@@ -1,0 +1,73 @@
+# Stage 1: Base image with PHP and Swoole
+FROM php:8.3-cli AS gogitidze
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    zip \
+    unzip \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libpq-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd pdo pdo_pgsql zip exif pdo_mysql bcmath pcntl sockets
+
+# Install Swoole extension
+RUN pecl install swoole && docker-php-ext-enable swoole
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Enable additional PHP extensions
+RUN docker-php-ext-enable opcache
+
+# Set recommended PHP.ini settings
+RUN { \
+    echo 'opcache.memory_consumption=128'; \
+    echo 'opcache.interned_strings_buffer=8'; \
+    echo 'opcache.max_accelerated_files=4000'; \
+    echo 'opcache.revalidate_freq=2'; \
+    echo 'opcache.fast_shutdown=1'; \
+    echo 'opcache.enable_cli=1'; \
+    } > /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+
+# Install MongoDB extension
+RUN pecl install mongodb && docker-php-ext-enable mongodb
+
+# Stage 2: Build Laravel application using the base image
+FROM gogitidze AS application
+
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Copy your Laravel application into the container
+COPY . .
+
+# Allow Composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+# Install PHP dependencies
+RUN composer install --ignore-platform-reqs --no-interaction --no-scripts --no-autoloader --prefer-dist
+
+# Generate autoload files
+RUN composer dump-autoload --optimize
+
+# Set permissions for Laravel
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Install PHP dependencies and Laravel Octane with Swoole
+##RUN composer install --ignore-platform-reqs --no-interaction --prefer-dist \
+##    && composer require laravel/octane "^2.3" --no-interaction \
+##    && php artisan octane:install --server=swoole --no-interaction
+
+# Expose the port for Laravel Octane (usually 8000)
+EXPOSE 8585
+
+# Start Octane with Swoole
+CMD ["php", "artisan", "octane:start", "--host=0.0.0.0", "--port=8585"]
