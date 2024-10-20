@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Services;
+
+use App\Traits\Resp;
+
+class AuthenticationService
+{
+    use Resp;
+
+    public function __construct(private readonly UserService $userService, private  readonly UserInformationService  $userInformationService,
+    private readonly OtpCodeService $otpCodeService)
+    {
+    }
+
+    public function registration($username, $password, $user_information)
+    {
+        $user = $this->userService->create($username, $password);
+        $this->userInformationService->create( $user->id,$user_information);
+        $user['access_token'] = $user->createToken('API Token')->accessToken;
+        return $user;
+    }
+
+    public function otpRegistration($username)
+    {
+        $this->otpCodeService->create($username,random_int(100000, 999999),'registration');
+        return true;
+    }
+
+
+
+    public function logout()
+    {
+        auth()->user()->AuthAcesToken()->delete();
+
+        return ['status' => 200, 'message' => 'Successfully logouted'];
+    }
+
+}
