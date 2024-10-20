@@ -19,4 +19,11 @@ class UserInformationService
     {
         return $this->userInformationRepository->createUserInformation($user_id,$user_information);
     }
+
+    public function findUserId($username)
+    {
+        return $this->userInformationRepository->findUserId($username);
+    }
+
+
 }

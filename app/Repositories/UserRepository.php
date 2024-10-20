@@ -26,7 +26,7 @@ class UserRepository
         $user->id = Str::uuid();
         $user->username = $username;
         $user->password = \Hash::make($password);
-        $user->is_active = 0;
+        $user->is_active = 1;
         $user->save();
         return $user;
     }

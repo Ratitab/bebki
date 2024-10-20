@@ -41,4 +41,17 @@ class UserInformationRepository
             return true;
     }
 
+    public function findUserId($username)
+    {
+        return $this->userInformationModel
+            ->whereIn('user_information_type_id', [5, 6])
+            ->where(function($query) use ($username) {
+                $query->where('value', $username)
+                    ->orWhere('users.username', $username);
+            })
+            ->leftJoin('users', 'user_information.user_id', '=', 'users.id')
+            ->select('user_information.user_id', 'users.password')
+            ->first();
+    }
+
 }

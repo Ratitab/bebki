@@ -18,6 +18,29 @@ class AuthenticationController extends Controller
     {
     }
 
+    public function login(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'username' => $request->username,
+                'password' => $request->password,
+            ],
+            [
+                'username' => 'required',
+                'password' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $login = $this->authenticationService->login($request->username, $request->password);
+        if ($login) {
+            return $this->apiResponseSuccess(['data' => $login]);
+        }
+        return $this->apiResponseFail('Something went wrong');
+    }
+
     public function registration(Request $request)
     {
         $validator = Validator::make(

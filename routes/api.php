@@ -12,4 +12,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::post('/signup', [AuthenticationController::class, 'registration']);
+Route::post('/signin', [AuthenticationController::class, 'login']);
 Route::post('/otp-registration', [AuthenticationController::class, 'otp_registration']);
+
+/*
+|--------------------------------------------------------------------------
+| AUTHORIZED ENDPOINTS
+|--------------------------------------------------------------------------
+|
+|
+*/
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('/auth/check', function(Request $request){
+        return auth()->user();
+    });
+
+
+
+    Route::post('logout', [AuthenticationController::class, 'logout']);
+});
