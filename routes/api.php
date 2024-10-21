@@ -26,8 +26,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/auth/check', function(Request $request){
         return auth()->user();
     });
+    Route::post('/update-email-or-phone', [AuthenticationController::class, 'update_email_or_phone']);
 
-
+    Route::post('/otp-update-email-or-phone', [AuthenticationController::class, 'otp_update_email_or_phone']);
 
     Route::post('logout', [AuthenticationController::class, 'logout']);
 });

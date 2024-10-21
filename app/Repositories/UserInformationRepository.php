@@ -54,4 +54,11 @@ class UserInformationRepository
             ->first();
     }
 
+    public function findByUserIdAndType($userId,$typeId)
+    {
+        return $this->userInformationModel->where('user_id', $userId)
+            ->where('user_information_type_id', $typeId)
+            ->first();
+    }
+
 }

@@ -41,6 +41,39 @@ class AuthenticationService
         return true;
     }
 
+    public function otpUpdateEmailOrPhone($username)
+    {
+        $this->otpCodeService->create($username, random_int(100000, 999999), 'update_email_or_phone');
+        return true;
+    }
+
+    public function updateEmailOrPhone($user, $username)
+    {
+        if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
+            $userInformation = $this->userInformationService->findByUserIdAndType($user->id, 6);
+            if ($userInformation) {
+                $userInformation->value = $username;
+                $userInformation->save();
+            }else{
+                $user_information['email'] = $username;
+                $this->userInformationService->create($user->id, $user_information);
+            }
+        } elseif (preg_match('/^\+?[0-9]{7,15}$/', $username)) {
+            $userInformation = $this->userInformationService->findByUserIdAndType($user->id, 5);
+            if ($userInformation) {
+                $userInformation->value = $username;
+                $userInformation->save();
+            }else{
+                $user_information['phone'] = $username;
+                $this->userInformationService->create($user->id, $user_information);
+            }
+        }else{
+            return false;
+        }
+        $user->username = $username;
+        $user->save();
+        return $user;
+    }
 
     public function logout()
     {
