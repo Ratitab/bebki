@@ -25,6 +25,11 @@ class AuthenticationService
     public function registration($username, $password, $user_information)
     {
         $user = $this->userService->create($username, $password);
+        if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
+            $user_information['email'] = $username;
+        } elseif (preg_match('/^\+?[0-9]{7,15}$/', $username)) {
+            $user_information['phone'] = $username;
+        }
         $this->userInformationService->create($user->id, $user_information);
         $user['access_token'] = $user->createToken('Bearer')->accessToken;
         return $user;
