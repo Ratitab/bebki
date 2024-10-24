@@ -114,12 +114,10 @@ class AuthenticationController extends Controller
         $validator = Validator::make(
             [
                 'username' => $request->username,
-                'password' => $request->password,
                 'code' => $request->code,
             ],
             [
                 'username' => ['required',new ValidUniqueUser],
-                'password' => 'required',
                 'code' => ['required', new ValidUpdateEmailOrPhoneCode($request->username)],
             ]
         );

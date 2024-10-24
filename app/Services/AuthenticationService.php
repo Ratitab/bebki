@@ -37,13 +37,13 @@ class AuthenticationService
 
     public function otpRegistration($username)
     {
-        $this->otpCodeService->create($username, random_int(100000, 999999), 'registration');
+        return $this->otpCodeService->create($username, random_int(100000, 999999), 'registration');
         return true;
     }
 
     public function otpUpdateEmailOrPhone($username)
     {
-        $this->otpCodeService->create($username, random_int(100000, 999999), 'update_email_or_phone');
+        return $this->otpCodeService->create($username, random_int(100000, 999999), 'update_email_or_phone');
         return true;
     }
 
