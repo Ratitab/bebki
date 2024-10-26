@@ -21,6 +21,11 @@ class UserService
         return $this->userRepository->create($username, $password);
     }
 
+    public function changeForgotPassword($username, $password)
+    {
+        return $this->userRepository->changePassword($username, $password);
+    }
+
     public function changePassword($user, $password)
     {
         $user->password = \Hash::make($password);

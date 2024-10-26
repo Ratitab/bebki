@@ -47,6 +47,12 @@ class AuthenticationService
         return true;
     }
 
+    public function otpForgotPassword($username)
+    {
+        return $this->otpCodeService->create($username, random_int(100000, 999999), 'forgot_password');
+        return true;
+    }
+
     public function updateEmailOrPhone($user, $username)
     {
         if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
@@ -75,12 +81,23 @@ class AuthenticationService
         return $user;
     }
 
+    public function updateUserInformation(int $userId, array $userInformation): bool
+    {
+        return $this->userInformationService->updateUserInformation($userId, $userInformation);
+    }
+
     public function changePassword($user,$old_password,$password){
 
         if (\Hash::check($old_password, $user->password)) {
             return 0;
         }
         $this->userService->changePassword($user,$password);
+        return 1;
+    }
+
+    public function forgotPassword($username,$password)
+    {
+        $this->userService->changeForgotPassword($username,$password);
         return 1;
     }
 

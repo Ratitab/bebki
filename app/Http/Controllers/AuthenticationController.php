@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\ValidForgotPasswordCode;
 use App\Rules\ValidRegistrationCode;
 use App\Rules\ValidUniqueUser;
 use App\Rules\ValidUpdateEmailOrPhoneCode;
@@ -133,6 +134,25 @@ class AuthenticationController extends Controller
         return $this->apiResponseFail('User Already Exists');
     }
 
+
+    public function update_user_information(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_information' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $update = $this->authenticationService->updateUserInformation(auth()->user()->id, $request->user_information);
+
+        if ($update) {
+            return $this->apiResponseSuccess(['message' => 'User information updated successfully']);
+        }
+        return $this->apiResponseFail('Failed to update user information');
+    }
+
     public function change_password(Request $request)
     {
         $validator = Validator::make(
@@ -152,6 +172,53 @@ class AuthenticationController extends Controller
         $change_password = $this->authenticationService->changePassword(auth()->user(), $request->old_password,$request->password);
         if ($change_password) {
             return $this->apiResponseSuccess(['data' => $change_password]);
+        }
+        return $this->apiResponseFail('User Already Exists');
+    }
+
+
+    public function otp_forgot_password(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'username' => $request->username,
+            ],
+            [
+                'username' => ['required'],
+            ]
+        );
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $otp = $this->authenticationService->otpForgotPassword($request->username);
+        if ($otp) {
+            return $this->apiResponseSuccess(['data' => $otp]);
+        }
+        return $this->apiResponseFail('Something Went Wrong');
+    }
+
+    public function forgot_password(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'username' => $request->username,
+                'code' => $request->code,
+                'password' => $request->password,
+            ],
+            [
+                'username' => ['required'],
+                'code' => ['required', new ValidForgotPasswordCode($request->username)],
+            ]
+        );
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $forgot_password = $this->authenticationService->forgotPassword($request->username,$request->password);
+        if ($forgot_password) {
+            $this->otpCodeService->makeUsed($request->username,$request->code,'forgot_password',1);
+            return $this->apiResponseSuccess(['data' => $forgot_password]);
         }
         return $this->apiResponseFail('User Already Exists');
     }

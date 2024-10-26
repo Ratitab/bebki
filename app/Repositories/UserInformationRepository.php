@@ -41,6 +41,32 @@ class UserInformationRepository
             return true;
     }
 
+    public function updateUserInformation($userId, array $userInformation)
+    {
+        $informationTypes = $this->userInformationTypeRepository->getAllInformationTypes();
+        $bulkUpdateData = [];
+
+        foreach ($informationTypes as $typeName => $typeId) {
+            if (isset($userInformation[$typeName])) {
+                $bulkUpdateData[] = [
+                    'user_id' => $userId,
+                    'user_information_type_id' => $typeId,
+                    'value' => $userInformation[$typeName],
+                    'verified_at' => null,
+                ];
+            }
+        }
+        $this->userInformationModel->upsert(
+            $bulkUpdateData,
+            ['user_id', 'user_information_type_id'],
+            ['value', 'verified_at']
+        );
+
+        return true;
+    }
+
+
+
     public function findUserId($username)
     {
         return $this->userInformationModel

@@ -31,4 +31,13 @@ class UserRepository
         return $user;
     }
 
+
+    public function changePassword($username, $password)
+    {
+        $user = $this->userModel->where('username', $username)->first();
+        $user->password = \Hash::make($password);
+        $user->save();
+        return $user;
+    }
+
 }

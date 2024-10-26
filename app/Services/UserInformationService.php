@@ -20,6 +20,11 @@ class UserInformationService
         return $this->userInformationRepository->createUserInformation($user_id,$user_information);
     }
 
+    public function updateUserInformation(int $user_id, array $userInformation): bool
+    {
+        return $this->userInformationRepository->updateUserInformation($user_id, $userInformation);
+    }
+
     public function findUserId($username)
     {
         return $this->userInformationRepository->findUserId($username);
