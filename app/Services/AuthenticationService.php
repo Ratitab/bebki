@@ -75,6 +75,16 @@ class AuthenticationService
         return $user;
     }
 
+    public function changePassword($user,$old_password,$password){
+
+        if (\Hash::check($old_password, $user->password)) {
+            return 0;
+        }
+        $this->userService->changePassword($user,$password);
+        return 1;
+    }
+
+
     public function logout()
     {
         auth()->user()->AuthAcesToken()->delete();

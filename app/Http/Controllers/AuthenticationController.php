@@ -133,6 +133,29 @@ class AuthenticationController extends Controller
         return $this->apiResponseFail('User Already Exists');
     }
 
+    public function change_password(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'password' => $request->password,
+                'old_password' => $request->old_password,
+            ],
+            [
+                'password' => ['required'],
+                'old_password' => ['required'],
+            ]
+        );
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $change_password = $this->authenticationService->changePassword(auth()->user(), $request->old_password,$request->password);
+        if ($change_password) {
+            return $this->apiResponseSuccess(['data' => $change_password]);
+        }
+        return $this->apiResponseFail('User Already Exists');
+    }
+
     public function logout(Request $request)
     {
         $logout = $this->authenticationService->logout();

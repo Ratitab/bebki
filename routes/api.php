@@ -30,5 +30,8 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::post('/otp-update-email-or-phone', [AuthenticationController::class, 'otp_update_email_or_phone']);
 
+
+    Route::post('/change-password', [AuthenticationController::class, 'change_password']);
+
     Route::post('logout', [AuthenticationController::class, 'logout']);
 });
