@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\CompanyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,23 @@ Route::middleware(['auth:api'])->group(function () {
 
 
     Route::post('/change-password', [AuthenticationController::class, 'change_password']);
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | COMPANY
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
+    Route::prefix('company')->group(function () {
+        Route::post('/add', [CompanyController::class, 'store']);
+        Route::put('/update/{company_id}', [CompanyController::class, 'update']);
+    });
+
+
+
 
     Route::post('logout', [AuthenticationController::class, 'logout']);
 });
