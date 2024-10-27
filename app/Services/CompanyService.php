@@ -26,11 +26,13 @@ class CompanyService
         \DB::transaction(function ()use($user,$identification_number, $company_type_id, $company_information, $company_address) {
         $company = $this->companyRepository->create($identification_number, $company_type_id);
         $this->companyInformationService->create($company->id, $company_information);
-        $this->addressService->createOrUpdate($company->id, $company_address['address'],$company_address['city'],$company_address['state'],$company_address['lat'],
-            $company_address['long'],$company_address['email'],
-            $company_address['phone'],
-            $company_address['postal_code'],$company_address['is_same_time'],$company_address['start_time'],$company_address['end_time'],null);
+        foreach($company_address as $companyAddress) {
+            $this->addressService->createOrUpdate($company->id, $companyAddress['address'], $companyAddress['city'], $companyAddress['state'], $companyAddress['lat'],
+                $companyAddress['long'], $companyAddress['email'],
+                $companyAddress['phone'],
+                $companyAddress['postal_code'], $companyAddress['is_same_time'], $companyAddress['start_time'], $companyAddress['end_time'], null);
             $this->companyUserRepository->create($company->id, $user->id);
+        }
             return $company;
         });
        return 0;
