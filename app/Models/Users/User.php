@@ -52,7 +52,7 @@ class User extends Authenticatable
 
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $appends = ['information', 'active_profile_id'];
+    protected $appends = ['information'];
 
     public function getInformationAttribute()
     {
@@ -67,9 +67,5 @@ class User extends Authenticatable
         }
 
         return $userInformationCollection;
-    }
-    public function getActiveProfileIdAttribute()
-    {
-        return SwitchProfile::where('user_id', $this->id)->value('active_profile_id') ?: $this->id;
     }
 }
