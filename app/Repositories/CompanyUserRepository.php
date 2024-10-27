@@ -15,16 +15,11 @@ class CompanyUserRepository
 
     public function findByUser($userId)
     {
-        $companyIds = $this->companyUserModel
-            ->where('user_id', $userId)
-            ->pluck('company_id');
 
-        if ($companyIds->isEmpty()) {
-            return [];
-        }
         $companies = $this->companyUserModel
             ->select([
                 'companies.id as company_id',
+                'companies.identification_number',
                 'company_users.user_id',
                 'company_information.value',
                 'company_information_types.name as info_type',
@@ -42,25 +37,26 @@ class CompanyUserRepository
                 'addresses.end_time'
             ])
             ->leftJoin('companies', 'company_users.company_id', '=', 'companies.id')
-            ->leftJoin('company_information', function($join) {
+            ->leftJoin('company_information', function ($join) {
                 $join->on('companies.id', '=', 'company_information.company_id')
                     ->whereNull('company_information.deleted_at');
             })
             ->leftJoin('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
-            ->leftJoin('addresses', function($join) {
+            ->leftJoin('addresses', function ($join) {
                 $join->on('companies.id', '=', 'addresses.company_id')
                     ->whereNull('addresses.deleted_at');
             })
             ->where('company_users.user_id', $userId)
-            ->whereIn('company_users.company_id', $companyIds)
+            ->where('user_id', $userId)
             ->orderBy('companies.id')
-            ->cursor();
+            ->get();
 
         $result = [];
         $currentCompany = null;
         $companyData = null;
 
         foreach ($companies as $company) {
+            // Check if we're on a new company, add the last one to results if so
             if ($currentCompany !== $company->company_id) {
                 if ($companyData !== null) {
                     $result[] = $companyData;
@@ -69,17 +65,23 @@ class CompanyUserRepository
                 $companyData = [
                     'company_id' => $company->company_id,
                     'user_id' => $company->user_id,
+                    'identification_number' => $company->identification_number,
                     'information' => [],
                     'addresses' => []
                 ];
+                $addressIds = [];  // Hash map for unique addresses in the current company
             }
+
             if ($company->info_type) {
                 $companyData['information'][$company->info_type] = $company->value;
             }
 
-            if ($company->address_id && !array_key_exists($company->address_id, array_column($companyData['addresses'], 'id'))) {
+            // Only add the address if it’s unique within the current company
+            $addressId = $company->address_id;
+            if ($addressId && !isset($addressIds[$addressId])) {
+                $addressIds[$addressId] = true;
                 $companyData['addresses'][] = [
-                    'id' => $company->address_id,
+                    'id' => $addressId,
                     'address' => $company->address,
                     'city' => $company->city,
                     'state' => $company->state,
@@ -92,12 +94,15 @@ class CompanyUserRepository
                 ];
             }
         }
+
         if ($companyData !== null) {
             $result[] = $companyData;
         }
 
         return $result;
     }
+
+
     public function create($company_id, $user_id)
     {
         $company_user = new $this->companyUserModel;
