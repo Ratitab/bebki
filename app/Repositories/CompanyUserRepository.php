@@ -46,7 +46,9 @@ class CompanyUserRepository
                 $join->on('companies.id', '=', 'addresses.company_id')
                     ->whereNull('addresses.deleted_at');
             })
-            ->leftJoin('cities', 'addresses.city', '=', 'cities.id')
+            ->leftJoin('cities', function ($join) {
+                $join->on('addresses.city', '=', \DB::raw('CAST(cities.id AS VARCHAR)')); // Cast cities.id to VARCHAR
+            })
             ->where('company_users.user_id', $userId)
             ->where('user_id', $userId)
             ->orderBy('companies.id')
