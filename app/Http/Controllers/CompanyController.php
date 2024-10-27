@@ -15,6 +15,11 @@ class CompanyController extends Controller
     {
     }
 
+    public function index(Request $request)
+    {
+        return $this->apiResponseSuccess(['data' => $this->companyService->findByUser(auth()->user())]);
+    }
+
     public function store(Request $request)
     {
 
@@ -33,7 +38,7 @@ class CompanyController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $company = $this->companyService->create($request->identification_number, $request->company_type_id, $request->company_information,$request->addresses);
+        $company = $this->companyService->create(auth()->user(), $request->identification_number, $request->company_type_id, $request->company_information, $request->addresses);
 
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
@@ -41,7 +46,7 @@ class CompanyController extends Controller
         return $this->apiResponseFail('Company Already Exists');
     }
 
-    public function update(Request $request,$company_id)
+    public function update(Request $request, $company_id)
     {
 
         $validator = Validator::make(

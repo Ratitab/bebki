@@ -53,7 +53,6 @@ class User extends Authenticatable
     protected $keyType = 'string';
     public $incrementing = false;
     protected $appends = ['information', 'active_profile_id'];
-    protected $with = ['account_connection'];
 
     public function getInformationAttribute()
     {

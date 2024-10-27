@@ -25,11 +25,6 @@ trait HasUser{
         return $this->belongsTo(User::class);
     }
 
-    public function account_connection()
-    {
-        return $this->hasMany(AccountConnection::class);
-    }
-
     public function user_status()
     {
         return $this->belongsTo(UserStatus::class);
