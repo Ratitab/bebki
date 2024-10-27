@@ -103,10 +103,10 @@ class AuthenticationService
     }
 
 
-    public function logout()
+    public function logout($token)
     {
-        auth()->user()->AuthAcesToken()->delete();
-
+        \Cache::forget('auth_user_' . substr($token,0,90));
+        auth()->user()->tokens()->delete();
         return ['status' => 200, 'message' => 'Successfully logouted'];
     }
 

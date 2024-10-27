@@ -226,7 +226,7 @@ class AuthenticationController extends Controller
 
     public function logout(Request $request)
     {
-        $logout = $this->authenticationService->logout();
+        $logout = $this->authenticationService->logout($request->bearerToken());
         return $this->apiResponseSuccess(['data' => $logout['message']]);
     }
 }
