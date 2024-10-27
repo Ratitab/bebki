@@ -39,7 +39,7 @@ class CompanyController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $company = $this->companyService->create(auth()->cachedUser(), $request->identification_number, $request->company_type_id, $request->company_information, $request->addresses);
+        $company = $this->companyService->create(auth()->user(), $request->identification_number, $request->company_type_id, $request->company_information, $request->addresses);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }

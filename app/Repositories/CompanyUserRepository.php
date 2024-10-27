@@ -25,7 +25,7 @@ class CompanyUserRepository
                 'company_information_types.name as info_type',
                 'addresses.id as address_id',
                 'addresses.address',
-                'addresses.city',
+                'cities.name as city',
                 'addresses.state',
                 'addresses.lat',
                 'addresses.long',
@@ -46,6 +46,7 @@ class CompanyUserRepository
                 $join->on('companies.id', '=', 'addresses.company_id')
                     ->whereNull('addresses.deleted_at');
             })
+            ->leftJoin('cities', 'addresses.city', '=', 'cities.id')
             ->where('company_users.user_id', $userId)
             ->where('user_id', $userId)
             ->orderBy('companies.id')
