@@ -37,7 +37,6 @@ class CompanyService
             $this->companyUserRepository->create($company->id, $user->id);
             return $company;
         });
-        return 0;
     }
 
     public function update($company_id, $companyInformation)
