@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/signup', [AuthenticationController::class, 'registration']);
 Route::post('/signin', [AuthenticationController::class, 'login']);
 Route::post('/otp-registration', [AuthenticationController::class, 'otp_registration']);
+Route::post('/otp-forgot-password', [AuthenticationController::class, 'otp_forgot_password']);
+Route::post('/forgot-password', [AuthenticationController::class, 'forgot_password']);
 
 /*
 |--------------------------------------------------------------------------

@@ -209,6 +209,7 @@ class AuthenticationController extends Controller
             [
                 'username' => ['required'],
                 'code' => ['required', new ValidForgotPasswordCode($request->username)],
+                'password' => ['required'],
             ]
         );
         if ($validator->fails()) {
