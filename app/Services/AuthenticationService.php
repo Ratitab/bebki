@@ -104,18 +104,9 @@ class AuthenticationService
     }
 
 
-    public function logout($token)
+    public function logout()
     {
-        $user = auth()->user();
-        if ($user) {
-            // Delete all tokens
-            $user->tokens()->delete();
-            // Or delete current token
-            // $user->currentAccessToken()->delete();
-        }
-
-        // Clear the cache
-        CachedTokenGuard::forgetCache($token);
+        auth()->user()->tokens()->delete();
         return ['status' => 200, 'message' => 'Successfully logouted'];
     }
 
