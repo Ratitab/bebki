@@ -24,7 +24,7 @@ class CompanyService
 
     public function create($user, $identification_number, $company_type_id, $company_information, $company_address)
     {
-        \DB::transaction(function () use ($user, $identification_number, $company_type_id, $company_information, $company_address) {
+        return \DB::transaction(function () use ($user, $identification_number, $company_type_id, $company_information, $company_address) {
             $company = $this->companyRepository->create($identification_number, $company_type_id);
             $this->companyInformationService->create($company->id, $company_information);
             foreach ($company_address as $companyAddress) {

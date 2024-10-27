@@ -34,6 +34,7 @@ class AddressRepository
         $addresses->is_same_time = $is_same_time ?? true;
         $addresses->start_time = $start_time ?? null;
         $addresses->end_time = $end_time ?? null;
+        $addresses->save();
         return $addresses;
     }
 

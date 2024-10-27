@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\ValidUniqueCompanyIdentification;
 use App\Services\CompanyService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class CompanyController extends Controller
                 'company_information' => $request->company_information,
             ],
             [
-                'identification_number' => ['required'],
+                'identification_number' => ['required', new ValidUniqueCompanyIdentification()],
                 'company_type_id' => ['required'],
                 'company_information' => ['required'],
             ]
@@ -39,7 +40,6 @@ class CompanyController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
         $company = $this->companyService->create(auth()->user(), $request->identification_number, $request->company_type_id, $request->company_information, $request->addresses);
-
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }
