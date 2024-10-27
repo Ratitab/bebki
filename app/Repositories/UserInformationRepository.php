@@ -56,11 +56,14 @@ class UserInformationRepository
                 ];
             }
         }
-        $this->userInformationModel->upsert(
-            $bulkUpdateData,
-            ['user_id', 'user_information_type_id'],
-            ['value', 'verified_at']
-        );
+        \DB::transaction(function () use ($userId, $bulkUpdateData) {
+            $this->userInformationModel
+                ->where('user_id', $userId)
+                ->whereIn('user_information_type_id', array_column($bulkUpdateData, 'user_information_type_id'))
+                ->delete();
+
+            $this->userInformationModel->insert($bulkUpdateData);
+        });
 
         return true;
     }

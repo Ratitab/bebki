@@ -20,7 +20,7 @@ class UserInformationService
         return $this->userInformationRepository->createUserInformation($user_id,$user_information);
     }
 
-    public function updateUserInformation(int $user_id, array $userInformation): bool
+    public function updateUserInformation($user_id,$userInformation)
     {
         return $this->userInformationRepository->updateUserInformation($user_id, $userInformation);
     }

@@ -60,7 +60,7 @@ class AuthenticationService
             if ($userInformation) {
                 $userInformation->value = $username;
                 $userInformation->save();
-            }else{
+            } else {
                 $user_information['email'] = $username;
                 $this->userInformationService->create($user->id, $user_information);
             }
@@ -69,11 +69,11 @@ class AuthenticationService
             if ($userInformation) {
                 $userInformation->value = $username;
                 $userInformation->save();
-            }else{
+            } else {
                 $user_information['phone'] = $username;
                 $this->userInformationService->create($user->id, $user_information);
             }
-        }else{
+        } else {
             return false;
         }
         $user->username = $username;
@@ -81,23 +81,24 @@ class AuthenticationService
         return $user;
     }
 
-    public function updateUserInformation(int $userId, array $userInformation): bool
+    public function updateUserInformation($userId, $userInformation)
     {
         return $this->userInformationService->updateUserInformation($userId, $userInformation);
     }
 
-    public function changePassword($user,$old_password,$password){
+    public function changePassword($user, $old_password, $password)
+    {
 
-        if (\Hash::check($old_password, $user->password)) {
+        if (!\Hash::check($old_password, $user->password)) {
             return 0;
         }
-        $this->userService->changePassword($user,$password);
+        $this->userService->changePassword($user, $password);
         return 1;
     }
 
-    public function forgotPassword($username,$password)
+    public function forgotPassword($username, $password)
     {
-        $this->userService->changeForgotPassword($username,$password);
+        $this->userService->changeForgotPassword($username, $password);
         return 1;
     }
 
