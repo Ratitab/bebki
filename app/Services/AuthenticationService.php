@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Guards\CachedTokenGuard;
 use App\Traits\Resp;
 
 class AuthenticationService
@@ -105,8 +106,16 @@ class AuthenticationService
 
     public function logout($token)
     {
-        \Cache::forget('auth_user_' . substr($token,0,90));
-        auth()->user()->tokens()->delete();
+        $user = auth()->user();
+        if ($user) {
+            // Delete all tokens
+            $user->tokens()->delete();
+            // Or delete current token
+            // $user->currentAccessToken()->delete();
+        }
+
+        // Clear the cache
+        CachedTokenGuard::forgetCache($token);
         return ['status' => 200, 'message' => 'Successfully logouted'];
     }
 

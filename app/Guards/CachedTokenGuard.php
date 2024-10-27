@@ -54,4 +54,24 @@ class CachedTokenGuard extends TokenGuard
             return parent::user(); // Call the original TokenGuard user method
         });
     }
+    /**
+     * Delete cache when token is deleted/revoked
+     */
+    public function logout(): void
+    {
+        $token = $this->request->bearerToken();
+        if ($token) {
+            Cache::forget('auth_user_'.substr($token,0,90));
+        }
+    }
+
+    /**
+     * Delete cache for specific token
+     */
+    public static function forgetCache($token): void
+    {
+        if ($token) {
+            Cache::forget('auth_user_'.substr($token,0,90));
+        }
+    }
 }
