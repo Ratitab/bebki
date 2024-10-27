@@ -13,22 +13,20 @@ class Address extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $appends = ['working_hours'];
-
-    public function working_hours(){
-        return $this->hasMany(WorkingHour::class);
-    }
-
-    public function getWorkingHoursAttribute()
-    {
-        return $this->working_hours()->get()->mapWithKeys(function ($workingHour) {
-            return [
-                $workingHour->day_of_week => [
-                    'start_time' => $workingHour->start_time,
-                    'end_time' => $workingHour->end_time,
-                    'is_selected' => $workingHour->is_selected,
-                ],
-            ];
-        });
-    }
+//    public function working_hours(){
+//        return $this->hasMany(WorkingHour::class);
+//    }
+//
+//    public function getWorkingHoursAttribute()
+//    {
+//        return $this->working_hours()->get()->mapWithKeys(function ($workingHour) {
+//            return [
+//                $workingHour->day_of_week => [
+//                    'start_time' => $workingHour->start_time,
+//                    'end_time' => $workingHour->end_time,
+//                    'is_selected' => $workingHour->is_selected,
+//                ],
+//            ];
+//        });
+//    }
 }

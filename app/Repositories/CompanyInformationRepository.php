@@ -48,12 +48,14 @@ class CompanyInformationRepository
                 ];
             }
         }
-        $this->companyInformationModel->upsert(
-            $bulkUpdateData,
-            ['company_id', 'company_information_type_id'],
-            ['value', 'verified_at']
-        );
+        \DB::transaction(function () use ($companyId, $bulkUpdateData) {
+            $this->companyInformationModel
+                ->where('company_id', $companyId)
+                ->whereIn('company_information_type_id', array_column($bulkUpdateData, 'company_information_type_id'))
+                ->delete();
 
+            $this->companyInformationModel->insert($bulkUpdateData);
+        });
         return true;
     }
 }
