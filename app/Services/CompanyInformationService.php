@@ -17,7 +17,7 @@ class CompanyInformationService
         return $this->companyInformationRepository->createCompanyInformation($company_id,$company_information);
     }
 
-    public function update(int $company_id, array $companyInformation)
+    public function update($company_id, $companyInformation)
     {
         return $this->companyInformationRepository->updateCompanyInformation($company_id, $companyInformation);
     }
