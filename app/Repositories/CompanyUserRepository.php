@@ -72,7 +72,7 @@ class CompanyUserRepository
     public function findOneByUser($userId,$companyId)
     {
 
-        $companies = $this->companyUserModel
+        $company = $this->companyUserModel
             ->select([
                 'companies.id as company_id',
                 'companies.identification_number',
@@ -116,7 +116,6 @@ class CompanyUserRepository
         $currentCompany = null;
         $companyData = null;
 
-        foreach ($companies as $company) {
             // Check if we're on a new company, add the last one to results if so
             if ($currentCompany !== $company->company_id) {
                 if ($companyData !== null) {
@@ -155,7 +154,6 @@ class CompanyUserRepository
                     'is_same_time' => $company->is_same_time,
                 ];
             }
-        }
 
         if ($companyData !== null) {
             $result[] = $companyData;
