@@ -162,9 +162,9 @@ class CompanyUserRepository
 
     }
 
-    public function delete($id)
+    public function deleteByCompanyId($companyId)
     {
-        return $this->companyUserModel->where('id', $id)->delete();
+        return $this->companyUserModel->where('company_id', $companyId)->delete();
     }
 
 }

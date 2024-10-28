@@ -51,6 +51,7 @@ class CompanyService
 
     public function delete($company_id)
     {
+        $this->companyUserRepository->deleteByCompanyId($company_id);
         return $this->companyRepository->delete($company_id);
     }
 

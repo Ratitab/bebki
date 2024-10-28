@@ -74,4 +74,26 @@ class CompanyController extends Controller
         }
         return $this->apiResponseFail('Company Already Exists');
     }
+
+    public function delete(Request $request, $company_id)
+    {
+
+        $validator = Validator::make(
+            [
+                'company_id' => $company_id,
+            ],
+            [
+                'company_id' => ['required'],
+            ]
+        );
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $company = $this->companyService->delete($company_id);
+
+        if ($company) {
+            return $this->apiResponseSuccess(['data' => $company]);
+        }
+        return $this->apiResponseFail('Company Already Delted');
+    }
 }
