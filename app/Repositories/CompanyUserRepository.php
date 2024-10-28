@@ -20,6 +20,7 @@ class CompanyUserRepository
             ->select([
                 'companies.id as company_id',
                 'companies.identification_number',
+                'companies.company_type_id',
                 'company_users.user_id',
                 'company_information.value',
                 'company_information_types.name as info_type',
