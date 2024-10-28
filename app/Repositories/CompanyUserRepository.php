@@ -70,6 +70,7 @@ class CompanyUserRepository
                     'company_id' => $company->company_id,
                     'user_id' => $company->user_id,
                     'identification_number' => $company->identification_number,
+                    'company_type_id' => $company->company_type_id,
                     'information' => [],
                     'addresses' => []
                 ];
