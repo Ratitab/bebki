@@ -6,6 +6,7 @@ use App\Rules\ValidForgotPasswordCode;
 use App\Rules\ValidRegistrationCode;
 use App\Rules\ValidUniqueUser;
 use App\Rules\ValidUpdateEmailOrPhoneCode;
+use App\Rules\ValidUser;
 use App\Services\AuthenticationService;
 use App\Services\OtpCodeService;
 use App\Traits\Resp;
@@ -207,7 +208,7 @@ class AuthenticationController extends Controller
                 'password' => $request->password,
             ],
             [
-                'username' => ['required'],
+                'username' => ['required', new ValidUser()],
                 'code' => ['required', new ValidForgotPasswordCode($request->username)],
                 'password' => ['required'],
             ]
