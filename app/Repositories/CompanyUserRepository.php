@@ -13,7 +13,63 @@ class CompanyUserRepository
     ) {
     }
 
-    public function findByUser($userId)
+    public function findManyByUser($userId)
+    {
+
+        $companies = $this->companyUserModel
+            ->select([
+                'companies.id as company_id',
+                'companies.identification_number',
+                'companies.company_type_id',
+                'company_users.user_id',
+                'company_information.value',
+                'company_information_types.name as info_type'
+            ])
+            ->leftJoin('companies', 'company_users.company_id', '=', 'companies.id')
+            ->leftJoin('company_information', function ($join) {
+                $join->on('companies.id', '=', 'company_information.company_id')
+                    ->whereNull('company_information.deleted_at');
+            })
+            ->leftJoin('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
+            ->where('company_users.user_id', $userId)
+            ->where('user_id', $userId)
+            ->orderBy('companies.id')
+            ->get();
+
+        $result = [];
+        $currentCompany = null;
+        $companyData = null;
+
+        foreach ($companies as $company) {
+            // Check if we're on a new company, add the last one to results if so
+            if ($currentCompany !== $company->company_id) {
+                if ($companyData !== null) {
+                    $result[] = $companyData;
+                }
+                $currentCompany = $company->company_id;
+                $companyData = [
+                    'company_id' => $company->company_id,
+                    'user_id' => $company->user_id,
+                    'identification_number' => $company->identification_number,
+                    'company_type_id' => $company->company_type_id,
+                    'information' => [],
+                ];
+                $addressIds = [];  // Hash map for unique addresses in the current company
+            }
+
+            if ($company->info_type) {
+                $companyData['information'][$company->info_type] = $company->value;
+            }
+        }
+
+        if ($companyData !== null) {
+            $result[] = $companyData;
+        }
+
+        return $result;
+    }
+
+    public function findOneByUser($userId,$companyId)
     {
 
         $companies = $this->companyUserModel
@@ -51,9 +107,10 @@ class CompanyUserRepository
                 $join->on('addresses.city', '=', \DB::raw('CAST(cities.id AS VARCHAR)')); // Cast cities.id to VARCHAR
             })
             ->where('company_users.user_id', $userId)
+            ->where('company_users.company_id', $companyId)
             ->where('user_id', $userId)
             ->orderBy('companies.id')
-            ->get();
+            ->first();
 
         $result = [];
         $currentCompany = null;

@@ -61,6 +61,7 @@ Route::middleware(['auth:api'])->group(function () {
     */
     Route::prefix('company')->group(function () {
         Route::get('/', [CompanyController::class, 'index']);
+        Route::get('/{company_id}', [CompanyController::class, 'show']);
         Route::post('/add', [CompanyController::class, 'store']);
         Route::put('/update/{company_id}', [CompanyController::class, 'update']);
     });

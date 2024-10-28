@@ -18,7 +18,12 @@ class CompanyController extends Controller
 
     public function index(Request $request)
     {
-        return $this->apiResponseSuccess(['data' => $this->companyService->findByUser(auth()->user())]);
+        return $this->apiResponseSuccess(['data' => $this->companyService->findManyByUser(auth()->user())]);
+    }
+
+    public function show(Request $request,$company_id)
+    {
+        return $this->apiResponseSuccess(['data' => $this->companyService->findOneByUser(auth()->user(),$company_id)]);
     }
 
     public function store(Request $request)

@@ -17,9 +17,14 @@ class CompanyService
     {
     }
 
-    public function findByUser($user)
+    public function findManyByUser($user)
     {
-        return $this->companyUserRepository->findByUser($user->id);
+        return $this->companyUserRepository->findManyByUser($user->id);
+    }
+
+    public function findOneByUser($user,$company_id)
+    {
+        return $this->companyUserRepository->findOneByUser($user->id,$company_id);
     }
 
     public function create($user, $identification_number, $company_type_id, $company_information, $company_address)
