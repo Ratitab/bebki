@@ -71,8 +71,7 @@ class CompanyUserRepository
 
     public function findOneByUser($userId,$companyId)
     {
-
-        $company = $this->companyUserModel
+        $companyData = $this->companyUserModel
             ->select([
                 'companies.id as company_id',
                 'companies.identification_number',
@@ -108,45 +107,48 @@ class CompanyUserRepository
             })
             ->where('company_users.user_id', $userId)
             ->where('company_users.company_id', $companyId)
-            ->first();
+            ->get();
 
-        if (!$company) {
-            return [];
+        if ($companyData->isEmpty()) {
+            return (object) [];
         }
 
-        $result = [
-            'company_id' => $company->company_id,
-            'user_id' => $company->user_id,
-            'identification_number' => $company->identification_number,
-            'company_type_id' => $company->company_type_id,
-            'information' => [],
+        $result = (object) [
+            'company_id' => $companyData[0]->company_id,
+            'user_id' => $companyData[0]->user_id,
+            'identification_number' => $companyData[0]->identification_number,
+            'company_type_id' => $companyData[0]->company_type_id,
+            'information' => (object) [],
             'addresses' => []
         ];
 
-        if ($company->info_type) {
-            $result['information'][$company->info_type] = $company->value;
-        }
+        $addressIds = [];
 
-        $addressIds = [];  // Track unique addresses for this company
-        if ($company->address_id && !in_array($company->address_id, $addressIds, true)) {
-            $addressIds[] = $company->address_id;
-            $result['addresses'][] = [
-                'id' => $company->address_id,
-                'address' => $company->address,
-                'city' => $company->city,
-                'state' => $company->state,
-                'lat' => $company->lat,
-                'long' => $company->long,
-                'email' => $company->email,
-                'phone' => $company->phone,
-                'postal_code' => $company->postal_code,
-                'is_same_time' => $company->is_same_time,
-                'start_time' => $company->start_time,
-                'end_time' => $company->end_time
-            ];
+        foreach ($companyData as $company) {
+            if ($company->info_type) {
+                $result->information->{$company->info_type} = $company->value;
+            }
+            if ($company->address_id && !in_array($company->address_id, $addressIds, true)) {
+                $addressIds[] = $company->address_id;
+                $result->addresses[] = (object) [
+                    'id' => $company->address_id,
+                    'address' => $company->address,
+                    'city' => $company->city,
+                    'state' => $company->state,
+                    'lat' => $company->lat,
+                    'long' => $company->long,
+                    'email' => $company->email,
+                    'phone' => $company->phone,
+                    'postal_code' => $company->postal_code,
+                    'is_same_time' => $company->is_same_time,
+                    'start_time' => $company->start_time,
+                    'end_time' => $company->end_time
+                ];
+            }
         }
 
         return $result;
+
     }
 
 
