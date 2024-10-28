@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Guards\CachedTokenGuard;
 use App\Traits\Resp;
 
 class AuthenticationService

@@ -104,59 +104,46 @@ class CompanyUserRepository
                     ->whereNull('addresses.deleted_at');
             })
             ->leftJoin('cities', function ($join) {
-                $join->on('addresses.city', '=', \DB::raw('CAST(cities.id AS VARCHAR)')); // Cast cities.id to VARCHAR
+                $join->on('addresses.city', '=', \DB::raw('CAST(cities.id AS VARCHAR)'));
             })
             ->where('company_users.user_id', $userId)
             ->where('company_users.company_id', $companyId)
-            ->where('user_id', $userId)
-            ->orderBy('companies.id')
             ->first();
 
-        $result = [];
-        $currentCompany = null;
-        $companyData = null;
+        if (!$company) {
+            return [];
+        }
 
-            // Check if we're on a new company, add the last one to results if so
-            if ($currentCompany !== $company->company_id) {
-                if ($companyData !== null) {
-                    $result[] = $companyData;
-                }
-                $currentCompany = $company->company_id;
-                $companyData = [
-                    'company_id' => $company->company_id,
-                    'user_id' => $company->user_id,
-                    'identification_number' => $company->identification_number,
-                    'company_type_id' => $company->company_type_id,
-                    'information' => [],
-                    'addresses' => []
-                ];
-                $addressIds = [];  // Hash map for unique addresses in the current company
-            }
+        $result = [
+            'company_id' => $company->company_id,
+            'user_id' => $company->user_id,
+            'identification_number' => $company->identification_number,
+            'company_type_id' => $company->company_type_id,
+            'information' => [],
+            'addresses' => []
+        ];
 
-            if ($company->info_type) {
-                $companyData['information'][$company->info_type] = $company->value;
-            }
+        if ($company->info_type) {
+            $result['information'][$company->info_type] = $company->value;
+        }
 
-            // Only add the address if it’s unique within the current company
-            $addressId = $company->address_id;
-            if ($addressId && !isset($addressIds[$addressId])) {
-                $addressIds[$addressId] = true;
-                $companyData['addresses'][] = [
-                    'id' => $addressId,
-                    'address' => $company->address,
-                    'city' => $company->city,
-                    'state' => $company->state,
-                    'lat' => $company->lat,
-                    'long' => $company->long,
-                    'email' => $company->email,
-                    'phone' => $company->phone,
-                    'postal_code' => $company->postal_code,
-                    'is_same_time' => $company->is_same_time,
-                ];
-            }
-
-        if ($companyData !== null) {
-            $result[] = $companyData;
+        $addressIds = [];  // Track unique addresses for this company
+        if ($company->address_id && !in_array($company->address_id, $addressIds, true)) {
+            $addressIds[] = $company->address_id;
+            $result['addresses'][] = [
+                'id' => $company->address_id,
+                'address' => $company->address,
+                'city' => $company->city,
+                'state' => $company->state,
+                'lat' => $company->lat,
+                'long' => $company->long,
+                'email' => $company->email,
+                'phone' => $company->phone,
+                'postal_code' => $company->postal_code,
+                'is_same_time' => $company->is_same_time,
+                'start_time' => $company->start_time,
+                'end_time' => $company->end_time
+            ];
         }
 
         return $result;
