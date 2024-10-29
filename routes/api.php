@@ -48,7 +48,9 @@ Route::post('/forgot-password', [AuthenticationController::class, 'forgot_passwo
 */
 Route::middleware(['auth:api'])->group(function () {
     Route::get('/auth/check', function(Request $request){
-        return auth()->user();
+        $user = auth()->user();
+        $user->information;
+        return $user;
     });
     Route::post('/update-email-or-phone', [AuthenticationController::class, 'update_email_or_phone']);
 
