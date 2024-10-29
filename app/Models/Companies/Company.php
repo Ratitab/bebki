@@ -19,7 +19,7 @@ class Company extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $appends = ['information'];
+//    protected $appends = ['information'];
 
 
     public function getInformationAttribute()
