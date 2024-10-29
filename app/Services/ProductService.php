@@ -62,6 +62,8 @@ class ProductService
                 $product->creator = null;
             }
 
+            unset($product->created_by);
+            unset($product->representative);
             return $product;
         });
 
