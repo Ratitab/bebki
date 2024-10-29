@@ -59,7 +59,7 @@ class ProductRepository
     private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags)
     {
         $product->created_by = ['id' => $createdBy['id'], 'type' => $createdBy['type']];
-        $product->representative = ['user_id' => $user->id, 'name' => $user->information?->first_name . ' ' . $user->information?->last_name];
+        $product->representative = ['user_id' => $user->id, 'name' => $user->information['first_name'] . ' ' . $user->information['last_name']];
         $product->title = $title;
         $product->category = $category;
         $product->material = $material;
