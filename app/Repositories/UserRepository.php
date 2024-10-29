@@ -46,7 +46,7 @@ class UserRepository
                 }
             }
             // Attach information directly to the user without using an accessor
-            $user->information = $informationCollection;
+            $user->attributes['information'] = $informationCollection;
             return $user;
         });
 
