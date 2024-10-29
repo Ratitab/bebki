@@ -23,9 +23,16 @@ class ValidUserCompany implements ValidationRule
             ->where('user_id', $this->identifier)
             ->exists();
         $userPostingAsSelf = $this->identifier == $value;
-
-        if (!$userCompany || !$userPostingAsSelf) {
-            $fail('Permission Denied');
+        $type = request()->input('created_by.type');
+        if($type == 'company'){
+            if (!$userCompany) {
+                $fail('Permission Denied');
+            }
+        }
+        if($type == 'user'){
+            if (!$userPostingAsSelf) {
+                $fail('Permission Denied');
+            }
         }
     }
 }
