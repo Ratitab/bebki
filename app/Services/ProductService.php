@@ -49,9 +49,11 @@ class ProductService
             $product = $product->toArray(); // Convert to array if you need it as JSON
 
             if ($entityType === 'company') {
-                $product['creator'] = $companies->get($entityId);
+                $company_data = $companies->get($entityId);
+                $product['creator'] = ['name'=>$company_data?->information['name'],'logo'=>$company_data?->information['logo']];
             } elseif ($entityType === 'user') {
-                $product['creator'] = $users->get($entityId);
+                $user_data = $users->get($entityId);
+                $product['creator'] =['first_name'=>$user_data?->information['first_name'],'last_name'=>$user_data?->information['last_name']];
             } else {
                 $product['creator'] = null;
             }
