@@ -50,10 +50,16 @@ class ProductService
 
             if ($entityType === 'company') {
                 $company_data = $companies->get($entityId);
-                $product['creator'] = ['name'=>$company_data?->information['name'],'logo'=>$company_data?->information['logo']];
+                $product['creator'] = [
+                    'name' => $company_data?->information['name'] ?? null,
+                    'logo' => $company_data?->information['logo'] ?? null
+                ];
             } elseif ($entityType === 'user') {
                 $user_data = $users->get($entityId);
-                $product['creator'] =['first_name'=>$user_data?->information['first_name'],'last_name'=>$user_data?->information['last_name']];
+                $product['creator'] = [
+                    'first_name' => $user_data?->information['first_name'] ?? null,
+                    'last_name' => $user_data?->information['last_name'] ?? null
+                ];
             } else {
                 $product['creator'] = null;
             }
