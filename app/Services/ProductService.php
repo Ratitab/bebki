@@ -18,11 +18,11 @@ class ProductService
     {
         $products = $this->productRepository->findMany();
 
-        // Step 2: Separate company and user IDs based on `created_by.type`
+// Step 2: Separate company and user IDs based on `created_by.type`
         $companyIds = $products->where('created_by.type', 'company')
             ->pluck('created_by.id')
             ->unique()
-            ->values()  // This ensures we get a clean array
+            ->values()
             ->toArray();
 
         $userIds = $products->where('created_by.type', 'user')
@@ -31,8 +31,7 @@ class ProductService
             ->values()
             ->toArray();
 
-        // Step 3: Fetch company and user data in separate queries
-        // Only fetch if we have IDs to prevent unnecessary queries
+// Step 3: Fetch company and user data in separate queries
         $companies = !empty($companyIds)
             ? $this->companyRepository->findManyById($companyIds)->keyBy('id')
             : collect();
@@ -41,33 +40,32 @@ class ProductService
             ? $this->userRepository->findManyById($userIds)->keyBy('id')
             : collect();
 
-        // Step 4: Map the respective data (company or user) to each product
-        $productsWithDetails = $products->map(function ($product) use ($companies, $users) {
+// Step 4: Modify product items directly in the paginator
+        $products->getCollection()->transform(function ($product) use ($companies, $users) {
             $entityId = $product->created_by['id'] ?? null;
             $entityType = $product->created_by['type'] ?? null;
 
-            $product = $product->toArray(); // Convert to array if you need it as JSON
-
+            // Prepare creator information based on type
             if ($entityType === 'company') {
                 $company_data = $companies->get($entityId);
-                $product['creator'] = [
+                $product->creator = [
                     'name' => $company_data?->information['name'] ?? null,
                     'logo' => $company_data?->information['logo'] ?? null
                 ];
             } elseif ($entityType === 'user') {
                 $user_data = $users->get($entityId);
-                $product['creator'] = [
+                $product->creator = [
                     'first_name' => $user_data?->information['first_name'] ?? null,
                     'last_name' => $user_data?->information['last_name'] ?? null
                 ];
             } else {
-                $product['creator'] = null;
+                $product->creator = null;
             }
 
             return $product;
         });
 
-        return $productsWithDetails;
+        return $products;
     }
 
     public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags)
