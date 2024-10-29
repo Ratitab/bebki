@@ -35,7 +35,7 @@ class CompanyRepository
                     $informationCollection[$info->name] = $info->value;
                 }
             }
-            $company->information = $informationCollection;  // Dynamically set the information attribute
+            $company->setAttribute('information',$informationCollection);  // Dynamically set the information attribute
             return $company;
         });
         return $companies;

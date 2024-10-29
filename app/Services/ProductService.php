@@ -49,14 +49,14 @@ class ProductService
             if ($entityType === 'company') {
                 $company_data = $companies->get($entityId);
                 $product->creator = [
-                    'name' => $company_data?->information['name'] ?? null,
-                    'logo' => $company_data?->information['logo'] ?? null
+                    'name' => $company_data->getAttributes()['information']['name'] ?? null,
+                    'logo' => $company_data->getAttributes()['information']['logo'] ?? null
                 ];
             } elseif ($entityType === 'user') {
                 $user_data = $users->get($entityId);
                 $product->creator = [
-                    'first_name' => $user_data?->information['first_name'] ?? null,
-                    'last_name' => $user_data?->information['last_name'] ?? null
+                    'first_name' => $user_data->getAttributes()['information']['first_name'] ?? null,
+                    'last_name' => $user_data->getAttributes()['information']['last_name'] ?? null
                 ];
             } else {
                 $product->creator = null;

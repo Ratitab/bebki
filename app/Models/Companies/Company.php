@@ -19,23 +19,24 @@ class Company extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
+    protected ?array $information = null;
 //    protected $appends = ['information'];
 
 
-//    public function getInformationAttribute()
-//    {
-//        $companyInformationCollection = [];
-//
-//        $companyInformation = CompanyInformation::leftJoin('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
-//            ->where('company_information.company_id', $this->id)
-//            ->whereNull('company_information.deleted_at')
-//            ->select('company_information.value', 'company_information_types.name')
-//            ->get();
-//
-//        foreach ($companyInformation as $info) {
-//            $companyInformationCollection[$info->name] = $info->value;
-//        }
-//
-//        return $companyInformationCollection;
-//    }
+    public function getInformationAttribute()
+    {
+        $companyInformationCollection = [];
+
+        $companyInformation = CompanyInformation::leftJoin('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
+            ->where('company_information.company_id', $this->id)
+            ->whereNull('company_information.deleted_at')
+            ->select('company_information.value', 'company_information_types.name')
+            ->get();
+
+        foreach ($companyInformation as $info) {
+            $companyInformationCollection[$info->name] = $info->value;
+        }
+
+        return $companyInformationCollection;
+    }
 }
