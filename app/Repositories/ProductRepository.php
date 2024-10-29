@@ -12,6 +12,11 @@ class ProductRepository
     ) {
     }
 
+    public function findMany()
+    {
+
+        return $this->productModel->cursorPaginate(12);
+    }
     public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags)
     {
         $product = new $this->productModel;

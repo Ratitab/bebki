@@ -17,6 +17,12 @@ class ProductController extends Controller
     public function __construct(private readonly ProductService $productService)
     {
     }
+
+
+    public function index(Request $request)
+    {
+        return $this->apiResponseSuccess(['data' => $this->productService->findMany()]);
+    }
     public function store(Request $request)
     {
 

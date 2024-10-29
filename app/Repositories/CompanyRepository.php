@@ -15,6 +15,10 @@ class CompanyRepository
     ) {
     }
 
+    public function findManyById($companyId)
+    {
+        return $this->companyModel->whereIn('id',$companyId)->get();
+    }
     public function create($identification_number, $company_type_id)
     {
         $company = new $this->companyModel;

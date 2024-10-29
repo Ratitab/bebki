@@ -20,6 +20,10 @@ class UserRepository
             ->exists();
     }
 
+    public function findManyById($userId)
+    {
+        return $this->userModel->whereIn('id',$userId)->get();
+    }
     public function create($username, $password)
     {
         $user = new $this->userModel;
