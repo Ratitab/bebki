@@ -52,20 +52,20 @@ class User extends Authenticatable
 
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $appends = ['information'];
+//    protected $appends = ['information'];
 
-    public function getInformationAttribute()
-    {
-        $userInformationCollection = [];
-        $userInformation = UserInformation::leftJoin('user_information_types', 'user_information.user_information_type_id', '=', 'user_information_types.id')
-            ->where('user_information.user_id', $this->id)
-            ->whereNull('user_information.deleted_at')
-            ->select('user_information.value', 'user_information_types.name')
-            ->get();
-        foreach ($userInformation as $info) {
-            $userInformationCollection[$info->name] = $info->value;
-        }
-
-        return $userInformationCollection;
-    }
+//    public function getInformationAttribute()
+//    {
+//        $userInformationCollection = [];
+//        $userInformation = UserInformation::leftJoin('user_information_types', 'user_information.user_information_type_id', '=', 'user_information_types.id')
+//            ->where('user_information.user_id', $this->id)
+//            ->whereNull('user_information.deleted_at')
+//            ->select('user_information.value', 'user_information_types.name')
+//            ->get();
+//        foreach ($userInformation as $info) {
+//            $userInformationCollection[$info->name] = $info->value;
+//        }
+//
+//        return $userInformationCollection;
+//    }
 }
