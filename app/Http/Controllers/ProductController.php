@@ -21,7 +21,7 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        return $this->apiResponseSuccess(['data' => $this->productService->findMany()]);
+        return $this->apiResponseSuccess($this->productService->findMany());
     }
     public function store(Request $request)
     {
