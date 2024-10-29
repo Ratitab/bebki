@@ -52,6 +52,7 @@ class User extends Authenticatable
 
     protected $keyType = 'string';
     public $incrementing = false;
+    protected ?array $information = null;
 //    protected $appends = ['information'];
 
     public function getInformationAttribute()
