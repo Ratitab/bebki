@@ -73,7 +73,7 @@ class ProductRepository
         $product->gem = $gem;
         $product->size = $size;
         $product->description = $description;
-        $product->customization = ['available' => $customization['available'], 'details' => $customization['details']];
+        $product->customization = ['available' => !is_null($customization) ? $customization['available'] :false, 'details' => is_null($customization)? $customization['details'] : ''];
         $product->city = $city;
         $product->price = $price;
         if (!isset($product->views_count)) {
