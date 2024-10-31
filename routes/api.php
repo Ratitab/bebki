@@ -80,6 +80,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::prefix('product')->group(function () {
         Route::post('/add', [ProductController::class, 'store']);
+        Route::post('/images', [ProductController::class, 'upload_images']);
     });
 
 

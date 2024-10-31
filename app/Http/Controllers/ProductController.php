@@ -54,8 +54,6 @@ class ProductController extends Controller
         return $this->apiResponseFail('Company Already Exists');
     }
 
-
-
     public function upload_images(Request $request)
     {
         $validator = Validator::make(
