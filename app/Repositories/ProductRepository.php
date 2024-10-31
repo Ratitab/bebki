@@ -17,7 +17,7 @@ class ProductRepository
 
         return $this->productModel->cursorPaginate(12);
     }
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
     {
         $product = new $this->productModel;
         return $this->setProductAttributes(
@@ -35,11 +35,12 @@ class ProductRepository
             $customization,
             $city,
             $price,
-            $tags
+            $tags,
+            $imageUrls
         );
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
     {
         $product = $this->productModel->find($id);
         return $this->setProductAttributes(
@@ -61,7 +62,7 @@ class ProductRepository
         );
     }
 
-    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags)
+    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
     {
         $product->created_by = ['id' => $createdBy['id'], 'type' => $createdBy['type']];
         $product->representative = ['user_id' => $user->id, 'name' => $user->information['first_name'] . ' ' . $user->information['last_name']];
@@ -80,6 +81,7 @@ class ProductRepository
             $product->views_count = 0;
         }
         $product->tags = $tags;
+        $product->image_urls = $imageUrls;
 
         $product->save();
         return $product;

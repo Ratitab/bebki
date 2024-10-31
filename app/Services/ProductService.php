@@ -6,6 +6,7 @@ use App\Repositories\CompanyRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductService
@@ -70,9 +71,18 @@ class ProductService
         return $products;
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$images)
     {
-        return $this->productRepository->create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags);
+        $imageUrls = [];
+
+        // Upload each image and store the URLs
+        if ($images) {
+            foreach ($images as $image) {
+                $imagePath = Storage::disk('spaces')->put('product-images', $image, 'public');
+                $imageUrls[] = Storage::disk('spaces')->url($imagePath);
+            }
+        }
+        return $this->productRepository->create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls);
     }
 
 }

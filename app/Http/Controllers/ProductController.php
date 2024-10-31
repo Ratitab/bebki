@@ -34,20 +34,22 @@ class ProductController extends Controller
                 'created_by.id' => $request->input('created_by.id'),
                 'created_by.type' => $request->input('created_by.type'),
                 'title' => $request->title,
+                'images' => $request->file('images'),
             ],
             [
                 'created_by' => ['required'],
                 'created_by.id' => ['required', new ValidUserCompany($user->id)],
                 'created_by.type' => ['required'],
                 'title' => ['required'],
+                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
             ]
         );
 
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-
-        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags);
+        $images = $request->file('images');
+        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags,$images);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }
