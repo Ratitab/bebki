@@ -73,15 +73,6 @@ class ProductService
 
     public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$images)
     {
-        $imageUrls = [];
-
-        // Upload each image and store the URLs
-        if ($images) {
-            foreach ($images as $image) {
-                $imagePath = Storage::disk('spaces')->put('product-images', $image, 'public');
-                $imageUrls[] = Storage::disk('spaces')->url($imagePath);
-            }
-        }
         return $this->productRepository->create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls);
     }
 
