@@ -28,7 +28,7 @@ class UploadService
                     $originalUrl = Storage::disk('spaces')->url($imagePath);
 
                     // Replace the Spaces URL with the CDN URL
-                    $cdnUrl = 'https://gegold.fra1.cdn.digitaloceanspaces.com';
+                    $cdnUrl = 'https://cdn.gegold.ge';
                     $cdnImageUrl = str_replace('https://fra1.digitaloceanspaces.com', $cdnUrl, $originalUrl);
 
                     $imageUrls[] = $cdnImageUrl;
