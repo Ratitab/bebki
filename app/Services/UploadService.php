@@ -29,7 +29,7 @@ class UploadService
 
                     // Replace the Spaces URL with the CDN URL
                     $cdnUrl = 'https://gegold.fra1.cdn.digitaloceanspaces.com';
-                    $cdnImageUrl = str_replace('https://gegold.fra1.digitaloceanspaces.com', $cdnUrl, $originalUrl);
+                    $cdnImageUrl = str_replace('https://fra1.digitaloceanspaces.com', $cdnUrl, $originalUrl);
 
                     $imageUrls[] = $cdnImageUrl;
                 }catch (\Exception $e) {
