@@ -59,9 +59,11 @@ class ProductController extends Controller
         $validator = Validator::make(
             [
                 'images' => $request->file('images'),
+                'image_for' => $request->image_for,
             ],
             [
                 'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'image_for' => ['required','in:individual,company'],
             ]
         );
 
@@ -69,7 +71,8 @@ class ProductController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
         $images = $request->file('images');
-        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProductImages($images)]);
+        $user = auth()->user();
+        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProductImages($images,$user,$request->image_for)]);
     }
 
 }

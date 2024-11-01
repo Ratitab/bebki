@@ -17,15 +17,21 @@ class UploadService
     {
     }
 
-    public function uploadProductImages($images)
+    public function uploadProductImages($images,$user,$image_for)
     {
-        $imageUrls = [];
-
-        if ($images) {
+        if (is_array($images)) {
             foreach ($images as $image) {
-                $imagePath = Storage::disk('spaces')->put('product-images', $image, 'public');
-                $imageUrls[] = Storage::disk('spaces')->url($imagePath);
+                try {
+                    // Upload image to DigitalOcean Spaces
+                    $imagePath = Storage::disk('spaces')->put($user->id .'/'.$image_for.'/product-images', $image, 'public');
+                    $imageUrls[] = Storage::disk('spaces')->url($imagePath);
+                } catch (\Exception $e) {
+                    // Log the error or handle it accordingly
+                    \Log::error('Image upload failed: ' . $e->getMessage());
+                }
             }
+        } else {
+            \Log::warning('Provided images data is not an array.');
         }
         return $imageUrls;
     }
