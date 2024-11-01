@@ -9,6 +9,7 @@ use App\Rules\ValidUpdateEmailOrPhoneCode;
 use App\Rules\ValidUser;
 use App\Services\AuthenticationService;
 use App\Services\OtpCodeService;
+use App\Services\UploadService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -17,7 +18,7 @@ class AuthenticationController extends Controller
 {
     use Resp;
 
-    public function __construct(private readonly AuthenticationService $authenticationService, private readonly OtpCodeService   $otpCodeService)
+    public function __construct(private readonly AuthenticationService $authenticationService, private readonly OtpCodeService   $otpCodeService, private readonly UploadService $uploadService)
     {
     }
 
@@ -223,6 +224,26 @@ class AuthenticationController extends Controller
             return $this->apiResponseSuccess(['data' => $forgot_password]);
         }
         return $this->apiResponseFail('User Already Exists');
+    }
+    public function upload_images(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'images' => $request->file('images'),
+                'image_for' => $request->image_for,
+            ],
+            [
+                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'image_for' => ['required','in:individual,company'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $images = $request->file('images');
+        $user = auth()->user();
+        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProductImages($images,$user,$request->image_for)]);
     }
 
     public function logout(Request $request)

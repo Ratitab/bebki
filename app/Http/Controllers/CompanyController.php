@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Rules\ValidUniqueCompanyIdentification;
 use App\Services\CompanyService;
+use App\Services\UploadService;
+use App\Services\UserService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -12,7 +14,7 @@ class CompanyController extends Controller
 {
     use Resp;
 
-    public function __construct(private readonly CompanyService $companyService)
+    public function __construct(private readonly CompanyService $companyService, private readonly UploadService $uploadService)
     {
     }
 
@@ -26,6 +28,26 @@ class CompanyController extends Controller
         return $this->apiResponseSuccess(['data' => $this->companyService->findOneByUser(auth()->user(),$company_id)]);
     }
 
+    public function upload_images(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'images' => $request->file('images'),
+                'image_for' => $request->image_for,
+            ],
+            [
+                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'image_for' => ['required','in:individual,company'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $images = $request->file('images');
+        $user = auth()->user();
+        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProfileOrCompanyImage($images,$user,$request->image_for)]);
+    }
     public function store(Request $request)
     {
 

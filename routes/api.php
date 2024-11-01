@@ -52,7 +52,7 @@ Route::middleware(['auth:api'])->group(function () {
         return $user->append('information');
     });
     Route::post('/update-email-or-phone', [AuthenticationController::class, 'update_email_or_phone']);
-
+    Route::post('/upload-profile-image', [AuthenticationController::class, 'upload_images']);
     Route::post('/otp-update-email-or-phone', [AuthenticationController::class, 'otp_update_email_or_phone']);
 
     Route::put('/update-user-information', [AuthenticationController::class, 'update_user_information']);
@@ -73,6 +73,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/', [CompanyController::class, 'index']);
         Route::get('/{company_id}', [CompanyController::class, 'show']);
         Route::post('/add', [CompanyController::class, 'store']);
+        Route::post('/upload-profile-image', [CompanyController::class, 'upload_images']);
         Route::put('/update/{company_id}', [CompanyController::class, 'update']);
         Route::delete('/delete/{company_id}', [CompanyController::class, 'delete']);
     });
