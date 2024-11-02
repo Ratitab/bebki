@@ -37,7 +37,7 @@ class CompanyController extends Controller
             ],
             [
                 'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
-                'image_for' => ['required','in:individual,company'],
+                'image_for' => ['required','in:individual,pawnshop,store'],
             ]
         );
 
