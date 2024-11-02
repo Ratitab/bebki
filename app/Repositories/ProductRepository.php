@@ -12,10 +12,16 @@ class ProductRepository
     ) {
     }
 
-    public function findMany()
+    public function findMany($type,$createdById)
     {
-
-        return $this->productModel->cursorPaginate(12);
+        $query = $this->productModel;
+        if ($type) {
+            $query = $query->where('created_by.type', $type);
+        }
+        if ($createdById) {
+            $query = $query->where('created_by._id', $createdById);
+        }
+        return $query->cursorPaginate(12);
     }
     public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
     {

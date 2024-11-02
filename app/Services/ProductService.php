@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\SearchProductsDTO;
 use App\Repositories\CompanyRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
@@ -15,9 +16,9 @@ class ProductService
     {
     }
 
-    public function findMany()
+    public function findMany(SearchProductsDTO $searchDTO)
     {
-        $products = $this->productRepository->findMany();
+        $products = $this->productRepository->findMany($searchDTO->type,$searchDTO->createdById);
 
 // Step 2: Separate company and user IDs based on `created_by.type`
         $companyIds = $products->where('created_by.type', 'company')

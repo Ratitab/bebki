@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\SearchProductsDTO;
 use App\Rules\ValidUniqueCompanyIdentification;
 use App\Rules\ValidUserCompany;
 use App\Services\CompanyService;
@@ -22,7 +23,8 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        return $this->apiResponseSuccess($this->productService->findMany());
+        $searchDTO = SearchProductsDTO::fromRequest($request);
+        return $this->apiResponseSuccess($this->productService->findMany($searchDTO));
     }
     public function store(Request $request)
     {
