@@ -58,7 +58,8 @@ class ProductRepository
             $customization,
             $city,
             $price,
-            $tags
+            $tags,
+            $imageUrls
         );
     }
 
