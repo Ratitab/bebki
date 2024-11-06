@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\DTO\SearchProductsDTO;
 use App\Repositories\CompanyRepository;
+use App\Repositories\FreeLimitRepository;
+use App\Repositories\LimitRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
@@ -12,13 +14,30 @@ use Illuminate\Support\Str;
 
 class ProductService
 {
-    public function __construct(private readonly ProductRepository $productRepository, private readonly CompanyRepository $companyRepository, private readonly UserRepository $userRepository)
+    public function __construct(private readonly ProductRepository $productRepository, private readonly CompanyRepository $companyRepository,
+                                private readonly UserRepository $userRepository,
+                                private readonly FreeLimitRepository $freeLimitRepository,
+                                private readonly LimitRepository $limitRepository)
     {
     }
 
     public function findMany(SearchProductsDTO $searchDTO)
     {
-        $products = $this->productRepository->findMany($searchDTO->type,$searchDTO->createdById);
+        $products = $this->productRepository->findMany(
+            type: $searchDTO->type,
+            createdById: $searchDTO->createdById,
+            category: $searchDTO->category,
+            gem: $searchDTO->gem,
+            material: $searchDTO->material,
+            min_price: $searchDTO->minPrice,
+            max_price: $searchDTO->maxPrice,
+            city: $searchDTO->city,
+            search: $searchDTO->search,
+            tags: $searchDTO->tags,
+            stamp: $searchDTO->stamp,
+            weight: $searchDTO->weight,
+            customization_available: $searchDTO->customizationAvailable
+        );
 
 // Step 2: Separate company and user IDs based on `created_by.type`
         $companyIds = $products->where('created_by.type', 'company')
@@ -74,7 +93,35 @@ class ProductService
 
     public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
     {
-        return $this->productRepository->create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls);
+        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls) {
+
+            $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
+
+            if (!$freeLimit) {
+                $limit = $this->limitRepository->useLimit($createdBy['id']);
+                if(!$limit){
+                    return false;
+                }
+            }
+
+            return $this->productRepository->create(
+                $createdBy,
+                $user,
+                $title,
+                $category,
+                $material,
+                $stamp,
+                $weight,
+                $gem,
+                $size,
+                $description,
+                $customization,
+                $city,
+                $price,
+                $tags,
+                $imageUrls
+            );
+        });
     }
 
 }

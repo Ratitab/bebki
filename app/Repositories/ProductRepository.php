@@ -12,15 +12,80 @@ class ProductRepository
     ) {
     }
 
-    public function findMany($type,$createdById)
+    public function findMany($type, $createdById, $category,$gem,$material,$min_price,$max_price,$city,$search,$tags,$stamp,$weight,$customization_available)
     {
         $query = $this->productModel;
+
+        // Base filters
         if ($type) {
             $query = $query->where('created_by.type', $type);
         }
         if ($createdById) {
             $query = $query->where('created_by._id', $createdById);
         }
+
+        // Category filter
+        if ($category) {
+            $query = $query->where('category', $category);
+        }
+
+        // Gem filter
+        if ($gem) {
+            $query = $query->where('gem', $gem);
+        }
+
+        // Material filter
+        if ($material) {
+            $query = $query->where('material', $material);
+        }
+
+        // Price range filter
+        if ($min_price) {
+            $query = $query->where('price', '>=', $min_price);
+        }
+        if ($max_price) {
+            $query = $query->where('price', '<=', $max_price);
+        }
+
+        // City filter
+        if ($city) {
+            $query = $query->where('city', $city);
+        }
+
+        // Search term (assuming you want to search in name and description)
+        if ($search) {
+            $searchTerm = $search;
+            $query = $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                    ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Tags filter (assuming tags is an array)
+        if ($tags) {
+            if (is_array($tags) && !empty($tags)) {
+                $query = $query->whereIn('tags', $tags);
+            } else if (!is_array($tags)) {
+                $query = $query->where('tags', $tags);
+            }
+        }
+
+        if ($stamp) {
+            $query = $query->where('stamp', (string)$stamp);
+        }
+
+        if ($weight) {
+            $query = $query->where('weight', (string)$weight);
+        }
+
+        if ($customization_available !== null) {
+            $query = $query->where('customization.available',
+                (bool)$customization_available);
+        }
+
+        // Sort by created_at in descending order by default
+        $query = $query->orderBy('created_at', 'desc');
+
         return $query->cursorPaginate(12);
     }
     public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
