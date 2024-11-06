@@ -53,7 +53,7 @@ class ProductController extends Controller
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }
-        return $this->apiResponseFail('Company Already Exists');
+        return $this->apiResponseFail('Out Of Limits');
     }
 
     public function upload_images(Request $request)
