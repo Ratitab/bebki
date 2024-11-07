@@ -17,6 +17,48 @@ class CompanyRepository
     ) {
     }
 
+    public function findAll($companyTypeId = null)
+    {
+        $query = $this->companyModel->newQuery()
+            ->select(['id','company_type_id'])
+            ->when($companyTypeId !== null, fn($q) => $q->where('company_type_id', $companyTypeId));
+
+        $companies = $query->orderBy('id')->cursorPaginate(12);
+
+        if ($companies->count()) {
+            $companyIds = array_column($companies->items(), 'id');
+
+            $companyInfo = CompanyInformation::select([
+                'company_information.company_id',
+                'company_information.value',
+                'company_information_types.name'
+            ])
+                ->join('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
+                ->whereIn('company_information.company_id', $companyIds)
+                ->whereNull('company_information.deleted_at')
+                ->whereNotIn('company_information_types.name', ['phone_numbers', 'email'])
+                ->get();
+
+            // Pre-build information arrays for all companies
+            $infoArray = [];
+            foreach($companyInfo as $info) {
+                $infoArray[$info->company_id][$info->name] = $info->value;
+            }
+
+            // Convert to array with pre-built information
+            $companiesArray = array_map(function($company) use ($infoArray) {
+                $data = $company->toArray();
+                $data['information'] = $infoArray[$company->id] ?? [];
+                return $data;
+            }, $companies->items());
+
+            $companies->setCollection(collect($companiesArray));
+        }
+
+        return $companies;
+    }
+
+
     public function findManyById($companyIds)
     {
         $companies = $this->companyModel->whereIn('id', $companyIds)->get();

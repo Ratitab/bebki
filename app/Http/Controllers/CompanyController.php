@@ -18,6 +18,22 @@ class CompanyController extends Controller
     {
     }
 
+    public function findAll(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'type_id' => $request->type_id,
+            ],
+            [
+                'type_id' => ['nullable','in:1,2,3'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        return $this->apiResponseSuccess(['data' => $this->companyService->findAll($request->type_id)]);
+    }
     public function index(Request $request)
     {
         return $this->apiResponseSuccess(['data' => $this->companyService->findManyByUser(auth()->user())]);
