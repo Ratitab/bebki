@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\LimitInformationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -70,7 +71,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::post('/change-password', [AuthenticationController::class, 'change_password']);
 
-
+    Route::get('/user/limits', [LimitInformationController::class, 'user_limits']);
 
     /*
     |--------------------------------------------------------------------------
@@ -86,6 +87,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/upload-profile-image', [CompanyController::class, 'upload_images']);
         Route::put('/update/{company_id}', [CompanyController::class, 'update']);
         Route::delete('/delete/{company_id}', [CompanyController::class, 'delete']);
+
+        Route::get('/limits/{company_id}', [LimitInformationController::class, 'company_limits']);
     });
 
 

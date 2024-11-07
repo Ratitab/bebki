@@ -12,11 +12,14 @@ class LimitRepository
     )
     {
     }
-
+    public function findById($createdById)
+    {
+        return $this->limitModel->where('created_by._id', $createdById)->first();
+    }
 
     public function useLimit($createdById)
     {
-        $limit = $this->limitModel->where('created_by._id', $createdById)->first();
+        $limit = $this->findById($createdById);
         if (!$limit) {
             return false;
         }

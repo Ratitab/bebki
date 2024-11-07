@@ -19,7 +19,7 @@ class FreeLimitRepository
 
     public function useLimit($createdBy, $user, $freeLimit_count = 2, $freeLimit_for = 'user')
     {
-        $freeLimit = $this->freeLimitModel->where('created_by._id', $createdBy['id'])->first();
+        $freeLimit = $this->findById($createdBy['id']);
         if (!$freeLimit) {
             $this->create($createdBy, $user, $freeLimit_count, $freeLimit_for);
             return true;
