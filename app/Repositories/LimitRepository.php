@@ -70,7 +70,7 @@ class LimitRepository
         $limit->price = $price;
         $limit->package = $package;
         $limit->bought_limits = $package;
-        $limit->limit_count = $limit_count;
+        $limit->limit_count = $bought_limits;
         $limit->limit_for = $limit_for;
         $limit->expires_at = $expires_at;
         $limit->save();
