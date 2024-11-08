@@ -39,6 +39,14 @@ Route::get('company-list', [CompanyController::class, 'findAll']);
 
 /*
 |--------------------------------------------------------------------------
+| CALLBACKS
+|--------------------------------------------------------------------------
+|
+|
+*/
+Route::post('/activate-limit-callback', [LimitInformationController::class, 'activate_limits']);
+/*
+|--------------------------------------------------------------------------
 | AUTHENTICATION
 |--------------------------------------------------------------------------
 |
@@ -97,8 +105,9 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/upload-images', [ProductController::class, 'upload_images']);
     });
 
-
-
+    Route::prefix('limits')->group(function () {
+        Route::post('/buy', [LimitInformationController::class, 'buy_limits']);
+    });
 
     Route::post('logout', [AuthenticationController::class, 'logout']);
 });

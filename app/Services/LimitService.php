@@ -9,6 +9,7 @@ use App\Repositories\CompanyUserRepository;
 use App\Repositories\CountryRepository;
 use App\Repositories\FreeLimitRepository;
 use App\Repositories\LimitRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -61,5 +62,10 @@ class LimitService
         return $result;
     }
 
+    public function buyLimits($createdBy, $user, $price, $package, $limit_count, $limit_for)
+    {
+        $expires_at = Carbon::now()->addDays(30)->format('Y-m-d');
+        return $this->limitRepository->create($createdBy, $user, $price, $package, $limit_count, $limit_for, $expires_at);
+    }
 
 }

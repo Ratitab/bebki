@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Products\Limit;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class LimitRepository
@@ -14,7 +15,7 @@ class LimitRepository
     }
     public function findById($createdById)
     {
-        return $this->limitModel->where('created_by._id', $createdById)->first();
+        return $this->limitModel->where('created_by._id', $createdById)->where('expires_at', '>=', Carbon::now()->format('Y-m-d'))->first();
     }
 
     public function useLimit($createdById)
