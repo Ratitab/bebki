@@ -31,7 +31,7 @@ class LimitRepository
         $limit->save();
         return true;
     }
-    public function create($createdBy, $user, $price, $package, $limit_count, $limit_for, $expires_at)
+    public function create($createdBy, $user, $price, $package,$bought_limits, $limit_count, $limit_for, $expires_at)
     {
         $limit = new $this->limitModel;
         return $this->setLimitAttributes(
@@ -40,13 +40,14 @@ class LimitRepository
             $user,
             $price,
             $package,
+            $bought_limits,
             $limit_count,
             $limit_for,
             $expires_at
         );
     }
 
-    public function update($id, $createdBy, $user, $price, $package, $limit_count, $limit_for, $expires_at)
+    public function update($id, $createdBy, $user, $price, $package,$bought_limits, $limit_count, $limit_for, $expires_at)
     {
         $limit = $this->limitModel->find($id);
         return $this->setLimitAttributes(
@@ -55,18 +56,20 @@ class LimitRepository
             $user,
             $price,
             $package,
+            $bought_limits,
             $limit_count,
             $limit_for,
             $expires_at
         );
     }
 
-    private function setLimitAttributes($limit, $createdBy, $user, $price, $package, $limit_count, $limit_for, $expires_at)
+    private function setLimitAttributes($limit, $createdBy, $user, $price, $package,$bought_limits, $limit_count, $limit_for, $expires_at)
     {
         $limit->created_by = ['id' => $createdBy['id'], 'type' => $createdBy['type']];
         $limit->representative = ['user_id' => $user->id, 'name' => $user->information['first_name'] . ' ' . $user->information['last_name']];
         $limit->price = $price;
         $limit->package = $package;
+        $limit->bought_limits = $package;
         $limit->limit_count = $limit_count;
         $limit->limit_for = $limit_for;
         $limit->expires_at = $expires_at;

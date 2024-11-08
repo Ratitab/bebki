@@ -96,6 +96,7 @@ class LimitInformationController extends Controller
             'user'=>['id'=>$user->id,'information'=>['first_name'=>$user->information['first_name'],'last_name'=>$user->information['last_name']]],
             'price'=>$packages[$request->package]['price'],
             'package'=>$packages[$request->package]['package'],
+            'bought_limits'=>$packages[$request->package]['limit_count'],
             'limit_count'=>$packages[$request->package]['limit_count'],
             'limit_for'=>$request->type
         ];
@@ -133,6 +134,7 @@ class LimitInformationController extends Controller
             (object) $request->input('user'),
             $request->input('price'),
             $request->input('package'),
+            $request->input('bought_limits'),
             $request->input('limit_count'),
             $request->input('limit_for'))]);
     }

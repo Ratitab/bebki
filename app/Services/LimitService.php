@@ -62,10 +62,10 @@ class LimitService
         return $result;
     }
 
-    public function buyLimits($createdBy, $user, $price, $package, $limit_count, $limit_for)
+    public function buyLimits($createdBy, $user, $price, $package,$bought_limits, $limit_count, $limit_for)
     {
         $expires_at = Carbon::now()->addDays(30)->format('Y-m-d');
-        return $this->limitRepository->create($createdBy, $user, $price, $package, $limit_count, $limit_for, $expires_at);
+        return $this->limitRepository->create($createdBy, $user, $price, $package,$bought_limits, $limit_count, $limit_for, $expires_at);
     }
 
 }
