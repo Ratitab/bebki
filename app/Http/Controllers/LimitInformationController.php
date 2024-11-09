@@ -59,6 +59,10 @@ class LimitInformationController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
+        $checkIfContainsLimits = $this->limitService->checkIfContainsLimits($request->company_id ?? $user->id);
+        if(!$checkIfContainsLimits->isEmpty() && $checkIfContainsLimits->limit_count>0){
+            return $this->apiResponseFail('Already have limits');
+        }
         $packages = [
             'starter' => [
                 'package' => 'Starter',

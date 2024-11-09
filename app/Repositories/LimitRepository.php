@@ -15,7 +15,7 @@ class LimitRepository
     }
     public function findById($createdById)
     {
-        return $this->limitModel->where('created_by._id', $createdById)->where('expires_at', '>=', Carbon::now()->format('Y-m-d'))->first();
+        return $this->limitModel->where('created_by._id', $createdById)->where('expires_at', '>=', Carbon::now()->format('Y-m-d'))->latest()->first();
     }
 
     public function useLimit($createdById)
