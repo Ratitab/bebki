@@ -21,7 +21,7 @@ class LimitInformationController extends Controller
         return $this->apiResponseSuccess(['data' => $this->limitService->userLimits(auth()->user())]);
     }
 
-    public function company_limits(Request $request,$company_id)
+    public function company_limits(Request $request, $company_id)
     {
         $user = auth()->user();
 
@@ -50,9 +50,9 @@ class LimitInformationController extends Controller
                 'type' => $request->type,
             ],
             [
-                'package' => ['required','in:starter,basic,pro,premium'],
+                'package' => ['required', 'in:starter,basic,pro,premium'],
                 'company_id' => $request->company_id ? ['nullable', new ValidCompanyBelongsUser($user->id)] : ['nullable'],
-                'type' => ['required','in:individual,shop,pawnshop'],
+                'type' => ['required', 'in:individual,shop,pawnshop'],
             ]
         );
 
@@ -60,7 +60,7 @@ class LimitInformationController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
         $checkIfContainsLimits = $this->limitService->checkIfContainsLimits($request->company_id ?? $user->id);
-        if(!$checkIfContainsLimits->isEmpty() && $checkIfContainsLimits->limit_count>0){
+        if ($checkIfContainsLimits && $checkIfContainsLimits->limit_count > 0) {
             return $this->apiResponseFail('Already have limits');
         }
         $packages = [
@@ -95,14 +95,14 @@ class LimitInformationController extends Controller
         ];
 
         //TODO: generate payment url
-        $payload =[
-            'createdBy'=>['id'=>$request->company_id ? $request->company_id : $user->id, 'type'=>$request->type],
-            'user'=>['id'=>$user->id,'information'=>['first_name'=>$user->information['first_name'],'last_name'=>$user->information['last_name']]],
-            'price'=>$packages[$request->package]['price'],
-            'package'=>$packages[$request->package]['package'],
-            'bought_limits'=>$packages[$request->package]['limit_count'],
-            'limit_count'=>$packages[$request->package]['limit_count'],
-            'limit_for'=>$request->type
+        $payload = [
+            'createdBy' => ['id' => $request->company_id ? $request->company_id : $user->id, 'type' => $request->type],
+            'user' => ['id' => $user->id, 'information' => ['first_name' => $user->information['first_name'], 'last_name' => $user->information['last_name']]],
+            'price' => $packages[$request->package]['price'],
+            'package' => $packages[$request->package]['package'],
+            'bought_limits' => $packages[$request->package]['limit_count'],
+            'limit_count' => $packages[$request->package]['limit_count'],
+            'limit_for' => $request->type
         ];
         // Simulate activate_limits request with the same payload structure
         $activateRequest = new Request($payload);
@@ -135,7 +135,7 @@ class LimitInformationController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
         return $this->apiResponseSuccess(['data' => $this->limitService->buyLimits($request->input('createdBy'),
-            (object) $request->input('user'),
+            (object)$request->input('user'),
             $request->input('price'),
             $request->input('package'),
             $request->input('bought_limits'),
