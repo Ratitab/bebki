@@ -23,7 +23,7 @@ class FavouriteRepository
     {
         $favourite = $this->favouriteModel->where('user_id', $userId)->where('data_id', $dataId)->first();
         if ($favourite) {
-            return $favourite->delete();
+            return $favourite->forceDelete();
         }
         $favourite = new $this->favouriteModel;
 
