@@ -88,7 +88,7 @@ class ProductController extends Controller
     public function user_favourite_products(Request $request)
     {
         $userId = auth()->id();
-        return $this->apiResponseSuccess( $this->productService->userFavouriteProducts($userId));
+        return $this->apiResponseSuccess( ['data'=>$this->productService->userFavouriteProducts($userId)]);
     }
 
     public function upload_images(Request $request)
