@@ -79,7 +79,7 @@ class FavouriteRepository
 
         // Update outdated data fields
         foreach ($cursor as $favorite) {
-            $storedData = json_decode($favorite->data, true);
+            $storedData = (array)$favorite->data;
             $currentProduct = (array)$favorite->product;
 
             // Clean up MongoDB specific fields from product data
