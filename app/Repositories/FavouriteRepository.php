@@ -88,11 +88,11 @@ class FavouriteRepository
             // If stored data doesn't match current product data, update it
             if ($storedData != $currentProduct) {
                 $this->favouriteModel->where('_id', $favorite->_id)->update([
-                    'data' => json_encode($currentProduct)
+                    'data' => $currentProduct
                 ]);
 
                 // Update the cursor document as well
-                $favorite->data = json_encode($currentProduct);
+                $favorite->data = $currentProduct;
             }
         }
 
