@@ -26,7 +26,7 @@ class FavouriteRepository
 
     public function userFavouriteProducts($userId)
     {
-        return $this->favouriteModel
+        $cursor = $this->favouriteModel
             ->raw(function($collection) use ($userId) {
                 return $collection->aggregate([
                     [
@@ -76,6 +76,27 @@ class FavouriteRepository
                     ]
                 ]);
             });
+
+        // Update outdated data fields
+        foreach ($cursor as $favorite) {
+            $storedData = json_decode($favorite->data, true);
+            $currentProduct = (array)$favorite->product;
+
+            // Clean up MongoDB specific fields from product data
+            unset($currentProduct['_id']);
+
+            // If stored data doesn't match current product data, update it
+            if ($storedData != $currentProduct) {
+                $this->favouriteModel->where('_id', $favorite->_id)->update([
+                    'data' => json_encode($currentProduct)
+                ]);
+
+                // Update the cursor document as well
+                $favorite->data = json_encode($currentProduct);
+            }
+        }
+
+        return $cursor;
     }
 
     public function createOrDelete($userId, $dataId, $data = null, $type = null)
