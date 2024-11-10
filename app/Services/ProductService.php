@@ -71,7 +71,7 @@ class ProductService
                 $favouriteIds = $this->favouriteRepository->findByUserProductIds(
                     $searchDTO->toArray()['user_id'],
                     $productIds
-                )->pluck('product_id');
+                )->pluck('data_id');
             }
         }
 // Step 4: Modify product items directly in the paginator
