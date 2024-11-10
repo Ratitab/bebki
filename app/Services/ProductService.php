@@ -107,7 +107,17 @@ class ProductService
 
     public function makeFavourite($user,$dataId)
     {
-        return $this->favouriteRepository->createOrDelete($user->id,$dataId);
+        $data = $this->productRepository->findOneById($dataId);
+        return $this->favouriteRepository->createOrDelete($user->id,$dataId,$data,'product');
+    }
+    public function countUserFavourites($userId)
+    {
+        return $this->favouriteRepository->countUserFavourites($userId);
+    }
+
+    public function userFavouriteProducts($userId)
+    {
+        return $this->favouriteRepository->userFavouriteProducts($userId);
     }
 
     public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls)

@@ -11,6 +11,7 @@ use App\Services\UploadService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
@@ -72,6 +73,22 @@ class ProductController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
         return $this->apiResponseSuccess($this->productService->makeFavourite(auth()->user(),$request->data_id));
+    }
+
+    public function count_user_favourites(Request $request)
+    {
+        $userId = auth()->id();
+        return $this->apiResponseSuccess(
+            Cache::remember('user_favourites_count_' . $userId, now()->addMinutes(3), function () use ($userId) {
+                return $this->productService->countUserFavourites($userId);
+            })
+        );
+    }
+
+    public function user_favourite_products(Request $request)
+    {
+        $userId = auth()->id();
+        return $this->apiResponseSuccess( $this->productService->userFavouriteProducts($userId));
     }
 
     public function upload_images(Request $request)

@@ -88,6 +88,11 @@ class ProductRepository
 
         return $query->cursorPaginate(12);
     }
+
+    public function findOneById($id)
+    {
+        return $this->productModel->where('_id',$id)->first();
+    }
     public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
     {
         $product = new $this->productModel;

@@ -80,6 +80,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/change-password', [AuthenticationController::class, 'change_password']);
 
     Route::get('/user/limits', [LimitInformationController::class, 'user_limits']);
+    Route::get('/user/count-favourites', [ProductController::class, 'count_user_favourites']);
+    Route::get('/user/favourites', [ProductController::class, 'user_favourite_products']);
 
     /*
     |--------------------------------------------------------------------------
