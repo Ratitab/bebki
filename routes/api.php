@@ -103,6 +103,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('product')->group(function () {
         Route::post('/add', [ProductController::class, 'store']);
         Route::post('/upload-images', [ProductController::class, 'upload_images']);
+        Route::post('/make-favourite', [ProductController::class, 'make_favourite']);
     });
 
     Route::prefix('limits')->group(function () {

@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\DTO\SearchProductsDTO;
+use App\Models\Products\Product;
 use App\Repositories\CompanyRepository;
+use App\Repositories\FavouriteRepository;
 use App\Repositories\FreeLimitRepository;
 use App\Repositories\LimitRepository;
 use App\Repositories\ProductRepository;
@@ -14,10 +16,12 @@ use Illuminate\Support\Str;
 
 class ProductService
 {
-    public function __construct(private readonly ProductRepository $productRepository, private readonly CompanyRepository $companyRepository,
-                                private readonly UserRepository $userRepository,
+    public function __construct(private readonly ProductRepository   $productRepository, private readonly CompanyRepository $companyRepository,
+                                private readonly UserRepository      $userRepository,
                                 private readonly FreeLimitRepository $freeLimitRepository,
-                                private readonly LimitRepository $limitRepository)
+                                private readonly LimitRepository     $limitRepository,
+                                private readonly FavouriteRepository $favouriteRepository
+    )
     {
     }
 
@@ -51,7 +55,6 @@ class ProductService
             ->unique()
             ->values()
             ->toArray();
-
 // Step 3: Fetch company and user data in separate queries
         $companies = !empty($companyIds)
             ? $this->companyRepository->findManyById($companyIds)->keyBy('id')
@@ -60,9 +63,19 @@ class ProductService
         $users = !empty($userIds)
             ? $this->userRepository->findManyById($userIds)->keyBy('id')
             : collect();
-
+// Fetch favorites if user is authenticated
+        $favouriteIds = collect();
+        if ($searchDTO->isAuthenticated()) {
+            $productIds = $products->pluck('id')->values()->toArray();
+            if (!empty($productIds)) {
+                $favouriteIds = $this->favouriteRepository->findByUserProductIds(
+                    $searchDTO->toArray()['user_id'],
+                    $productIds
+                )->pluck('product_id');
+            }
+        }
 // Step 4: Modify product items directly in the paginator
-        $products->getCollection()->transform(function ($product) use ($companies, $users) {
+        $products->getCollection()->transform(function ($product) use ($companies, $users, $favouriteIds) {
             $entityId = $product->created_by['id'] ?? null;
             $entityType = $product->created_by['type'] ?? null;
 
@@ -83,6 +96,7 @@ class ProductService
                 $product->creator = null;
             }
 
+            $product->is_favourite = $favouriteIds->contains($product->id);
             unset($product->created_by);
             unset($product->representative);
             return $product;
@@ -91,7 +105,12 @@ class ProductService
         return $products;
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
+    public function makeFavourite($user,$dataId)
+    {
+        return $this->favouriteRepository->createOrDelete($user->id,$dataId);
+    }
+
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls)
     {
         return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls) {
 
@@ -99,7 +118,7 @@ class ProductService
 
             if (!$freeLimit) {
                 $limit = $this->limitRepository->useLimit($createdBy['id']);
-                if(!$limit){
+                if (!$limit) {
                     return false;
                 }
             }

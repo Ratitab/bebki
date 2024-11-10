@@ -2,12 +2,14 @@
 
 namespace App\DTO;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 
 class SearchProductsDTO
 {
 
     public function __construct(
+        public readonly ?Authenticatable $user = null,
         public readonly ?string $type = null,
         public readonly ?string $createdById = null,
         public readonly ?string $category = null,
@@ -29,7 +31,9 @@ class SearchProductsDTO
 
     public static function fromRequest(Request $request): self
     {
+        $user = auth('api')->user();
         return new self(
+            user: $user,
             type: $request->input('type'),
             createdById: $request->input('createdById'),
             category: $request->input('category'),
@@ -51,6 +55,7 @@ class SearchProductsDTO
     public function toArray(): array
     {
         return array_filter([
+            'user_id' => $this->user?->id,
             'type' => $this->type,
             'created_by_id' => $this->createdById,
             'category' => $this->category,
@@ -67,5 +72,10 @@ class SearchProductsDTO
             'per_page' => $this->perPage,
             'cursor' => $this->cursor,
         ], fn($value) => !is_null($value));
+    }
+
+    public function isAuthenticated(): bool
+    {
+        return $this->user !== null;
     }
 }

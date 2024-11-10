@@ -10,6 +10,7 @@ use App\Services\ProductService;
 use App\Services\UploadService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
@@ -54,6 +55,23 @@ class ProductController extends Controller
             return $this->apiResponseSuccess(['data' => $company]);
         }
         return $this->apiResponseFail('Out Of Limits');
+    }
+
+    public function make_favourite(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'data_id' => $request->data_id,
+            ],
+            [
+                'data_id' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        return $this->apiResponseSuccess($this->productService->makeFavourite(auth()->user(),$request->data_id));
     }
 
     public function upload_images(Request $request)
