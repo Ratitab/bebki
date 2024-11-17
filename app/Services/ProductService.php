@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\SearchProductsDTO;
+use App\DTO\SingleProductDTO;
 use App\Models\Products\Product;
 use App\Repositories\CompanyRepository;
 use App\Repositories\FavouriteRepository;
@@ -44,13 +45,13 @@ class ProductService
         );
 
 // Step 2: Separate company and user IDs based on `created_by.type`
-        $companyIds = $products->where('created_by.type', 'company')
+        $companyIds = $products->whereIn('created_by.type', ['store', 'pawnshop'])
             ->pluck('created_by.id')
             ->unique()
             ->values()
             ->toArray();
 
-        $userIds = $products->where('created_by.type', 'user')
+        $userIds = $products->where('created_by.type', 'individual')
             ->pluck('created_by.id')
             ->unique()
             ->values()
@@ -105,11 +106,56 @@ class ProductService
         return $products;
     }
 
-    public function makeFavourite($user,$dataId)
+    public function findOne(SingleProductDTO $productDTO)
+    {
+// Step 1: Fetch the product
+        $product = $this->productRepository->findOneById($productDTO->productId);
+
+        if (!$product) {
+            return null;
+        }
+
+// Step 2: Get entity ID and type from created_by
+        $entityId = $product->created_by['id'] ?? null;
+        $entityType = $product->created_by['type'] ?? null;
+// Step 3: Fetch creator data based on type
+        $creator = null;
+        if ($entityType === 'store' || $entityType === 'pawnshop') {
+            $company = $this->companyRepository->findOneById($entityId);
+            $creator = [
+                'name' => $company?->getAttributes()['information']['name'] ?? null,
+                'logo' => $company?->getAttributes()['information']['logo'] ?? null
+            ];
+        } elseif ($entityType === 'individual') {
+            $user = $this->userRepository->findOneById($entityId);
+            $creator = [
+                'first_name' => $user?->getAttributes()['information']['first_name'] ?? null,
+                'last_name' => $user?->getAttributes()['information']['last_name'] ?? null
+            ];
+        }
+// Step 4: Check if product is favourite for authenticated user
+        $isFavourite = false;
+        if ($productDTO->isAuthenticated()) {
+            $isFavourite = $this->favouriteRepository->findByUserProductIds(
+                $productDTO->toArray()['user_id'],
+                [$product->id]
+            )->isNotEmpty();
+        }
+// Step 5: Transform the product
+        unset($product->created_by);
+        unset($product->representative);
+        $product->creator = $creator;
+        $product->is_favourite = $isFavourite;
+
+        return $product;
+    }
+
+    public function makeFavourite($user, $dataId)
     {
         $data = $this->productRepository->findOneById($dataId);
-        return $this->favouriteRepository->createOrDelete($user->id,$dataId,$data,'product');
+        return $this->favouriteRepository->createOrDelete($user->id, $dataId, $data, 'product');
     }
+
     public function countUserFavourites($userId)
     {
         return $this->favouriteRepository->countUserFavourites($userId);

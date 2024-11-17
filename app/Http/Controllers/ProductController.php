@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\SearchProductsDTO;
+use App\DTO\SingleProductDTO;
 use App\Rules\ValidUniqueCompanyIdentification;
 use App\Rules\ValidUserCompany;
 use App\Services\CompanyService;
@@ -27,6 +28,28 @@ class ProductController extends Controller
     {
         $searchDTO = SearchProductsDTO::fromRequest($request);
         return $this->apiResponseSuccess($this->productService->findMany($searchDTO));
+    }
+
+    public function show(Request $request, string $productId)
+    {
+        $validator = Validator::make(
+            [
+                'productId' => $productId,
+            ],
+            [
+                'productId' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $productDTO = SingleProductDTO::fromRequest($request,$productId);
+        $singleProduct = $this->productService->findOne($productDTO);
+        if(!is_null($singleProduct)){
+            return $this->apiResponseSuccess($singleProduct);
+        }
+        return $this->apiResponseFail('product not found');
     }
     public function store(Request $request)
     {

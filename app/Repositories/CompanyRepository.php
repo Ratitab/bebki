@@ -82,6 +82,43 @@ class CompanyRepository
         });
         return $companies;
     }
+
+    public function findOneById(string $companyId)
+    {
+        // Step 1: Fetch the company
+        $company = $this->companyModel->find($companyId);
+
+        if (!$company) {
+            return null;
+        }
+
+        // Step 2: Fetch company information in a single query
+        $companyInformation = $this->companyInformationModel
+            ->leftJoin(
+                'company_information_types',
+                'company_information.company_information_type_id',
+                '=',
+                'company_information_types.id'
+            )
+            ->where('company_information.company_id', $companyId)
+            ->whereNull('company_information.deleted_at')
+            ->select(
+                'company_information.value',
+                'company_information_types.name'
+            )
+            ->get();
+
+        // Step 3: Transform information into associative array
+        $informationCollection = [];
+        foreach ($companyInformation as $info) {
+            $informationCollection[$info->name] = $info->value;
+        }
+
+        // Step 4: Set the information attribute
+        $company->setAttribute('information', $informationCollection);
+
+        return $company;
+    }
     public function create($identification_number, $company_type_id)
     {
         $company = new $this->companyModel;

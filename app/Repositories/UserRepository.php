@@ -52,6 +52,43 @@ class UserRepository
 
         return $users;
     }
+
+    public function findOneById(string $userId)
+    {
+        // Step 1: Fetch the user
+        $user = $this->userModel->find($userId);
+
+        if (!$user) {
+            return null;
+        }
+
+        // Step 2: Fetch user information in a single query
+        $userInformation = $this->userInformationModel
+            ->leftJoin(
+                'user_information_types',
+                'user_information.user_information_type_id',
+                '=',
+                'user_information_types.id'
+            )
+            ->where('user_information.user_id', $userId)
+            ->whereNull('user_information.deleted_at')
+            ->select(
+                'user_information.value',
+                'user_information_types.name'
+            )
+            ->get();
+
+        // Step 3: Transform information into associative array
+        $informationCollection = [];
+        foreach ($userInformation as $info) {
+            $informationCollection[$info->name] = $info->value;
+        }
+
+        // Step 4: Set the information attribute
+        $user->setAttribute('information', $informationCollection);
+
+        return $user;
+    }
     public function create($username, $password)
     {
         $user = new $this->userModel;
