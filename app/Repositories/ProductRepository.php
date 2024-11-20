@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Products\Product;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class ProductRepository
@@ -93,7 +94,7 @@ class ProductRepository
     {
         return $this->productModel->where('_id',$id)->first();
     }
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
     {
         $product = new $this->productModel;
         return $this->setProductAttributes(
@@ -112,13 +113,17 @@ class ProductRepository
             $city,
             $price,
             $tags,
-            $imageUrls
+            $imageUrls,
+            $passportUrls
         );
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
     {
-        $product = $this->productModel->find($id);
+        $product = $this->findOneById($id);
+        if (!$product) {
+            return null;
+        }
         return $this->setProductAttributes(
             $product,
             $createdBy,
@@ -135,11 +140,27 @@ class ProductRepository
             $city,
             $price,
             $tags,
-            $imageUrls
+            $imageUrls,
+            $passportUrls
         );
     }
 
-    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls)
+
+    public function setProductUpdateDate($id)
+    {
+        $product = $this->findOneById($id);
+
+        if (is_null($product)) {
+            return null;
+        }
+
+        $product->update_date = Carbon::now()->format('Y-m-d\TH:i:s.vP');
+        $product->save();
+
+        return $product;
+    }
+
+    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
     {
         $product->created_by = ['id' => $createdBy['id'], 'type' => $createdBy['type']];
         $product->representative = ['user_id' => $user->id, 'name' => $user->information['first_name'] . ' ' . $user->information['last_name']];
@@ -159,6 +180,10 @@ class ProductRepository
         }
         $product->tags = $tags;
         $product->image_urls = $imageUrls;
+        $product->passport_urls = $passportUrls;
+        if (!isset($product->update_date)) {
+            $product->update_date = Carbon::now()->format('Y-m-d\TH:i:s.vP');
+        }
 
         $product->save();
         return $product;

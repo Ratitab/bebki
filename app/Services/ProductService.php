@@ -166,9 +166,9 @@ class ProductService
         return $this->favouriteRepository->userFavouriteProducts($userId);
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
     {
-        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls) {
+        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls) {
 
             $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
 
@@ -194,8 +194,47 @@ class ProductService
                 $city,
                 $price,
                 $tags,
-                $imageUrls
+                $imageUrls,
+                $passportUrls
             );
+        });
+    }
+
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
+    {
+        return $this->productRepository->update($id,
+            $createdBy,
+            $user,
+            $title,
+            $category,
+            $material,
+            $stamp,
+            $weight,
+            $gem,
+            $size,
+            $description,
+            $customization,
+            $city,
+            $price,
+            $tags,
+            $imageUrls,
+            $passportUrls
+        );
+    }
+
+    public function update_product_order($id, $createdBy, $user)
+    {
+        return \DB::transaction(function () use ($id, $createdBy, $user) {
+            $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
+
+            if (!$freeLimit) {
+                $limit = $this->limitRepository->useLimit($createdBy['id']);
+                if (!$limit) {
+                    return false;
+                }
+            }
+
+            return $this->productRepository->setProductUpdateDate($id);
         });
     }
 

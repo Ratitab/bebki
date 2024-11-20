@@ -6,6 +6,7 @@ use App\DTO\SearchProductsDTO;
 use App\DTO\SingleProductDTO;
 use App\Rules\ValidUniqueCompanyIdentification;
 use App\Rules\ValidUserCompany;
+use App\Rules\ValidUserOrCompanyProduct;
 use App\Services\CompanyService;
 use App\Services\ProductService;
 use App\Services\UploadService;
@@ -74,9 +75,68 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags,$request->image_urls);
+        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags,$request->image_urls,$request->passport_urls);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
+        }
+        return $this->apiResponseFail('Out Of Limits');
+    }
+
+    public function update(Request $request, $product_id)
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make(
+            [
+                'product_id' => $product_id,
+                'created_by' => $request->created_by,
+                'created_by.id' => $request->input('created_by.id'),
+                'created_by.type' => $request->input('created_by.type'),
+                'title' => $request->title,
+            ],
+            [
+                'product_id' => ['required', new ValidUserOrCompanyProduct()],
+                'created_by' => ['required'],
+                'created_by.id' => ['required', new ValidUserCompany($user->id)],
+                'created_by.type' => ['required'],
+                'title' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $updateProduct = $this->productService->update($product_id,$request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags,$request->image_urls,$request->passport_urls);
+        if ($updateProduct) {
+            return $this->apiResponseSuccess(['data' => $updateProduct]);
+        }
+        return $this->apiResponseFail('Something went wrong');
+    }
+
+    public function update_product_order(Request $request, $product_id)
+    {
+
+        $user = auth()->user();
+
+        $validator = Validator::make(
+            [
+                'product_id' => $product_id,
+                'created_by.id' => $request->input('created_by.id'),
+                'created_by.type' => $request->input('created_by.type'),
+            ],
+            [
+                'product_id' => ['required'],
+                'created_by.id' => ['required', new ValidUserCompany($user->id)],
+                'created_by.type' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $updateProductOrder = $this->productService->update_product_order($product_id,$request->created_by,$user);
+        if ($updateProductOrder) {
+            return $this->apiResponseSuccess(['data' => $updateProductOrder]);
         }
         return $this->apiResponseFail('Out Of Limits');
     }

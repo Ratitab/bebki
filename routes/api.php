@@ -105,6 +105,8 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::prefix('product')->group(function () {
         Route::post('/add', [ProductController::class, 'store']);
+        Route::put('/update/{product_id}', [ProductController::class, 'update']);
+        Route::put('/update-product-order/{product_id}', [ProductController::class, 'update_product_order']);
         Route::post('/upload-images', [ProductController::class, 'upload_images']);
         Route::post('/make-favourite', [ProductController::class, 'make_favourite']);
     });
