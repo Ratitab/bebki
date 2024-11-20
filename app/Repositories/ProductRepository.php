@@ -84,8 +84,8 @@ class ProductRepository
                 (bool)$customization_available);
         }
 
-        // Sort by created_at in descending order by default
-        $query = $query->orderBy('created_at', 'desc');
+        // Sort by update_date in descending order by default
+        $query = $query->orderBy('update_date', 'desc');
 
         return $query->cursorPaginate(12);
     }
