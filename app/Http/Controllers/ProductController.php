@@ -121,11 +121,13 @@ class ProductController extends Controller
         $validator = Validator::make(
             [
                 'product_id' => $product_id,
+                'created_by' => $request->created_by,
                 'created_by.id' => $request->input('created_by.id'),
                 'created_by.type' => $request->input('created_by.type'),
             ],
             [
                 'product_id' => ['required'],
+                'created_by' => ['required'],
                 'created_by.id' => ['required', new ValidUserCompany($user->id)],
                 'created_by.type' => ['required'],
             ]
