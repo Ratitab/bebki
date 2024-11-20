@@ -23,7 +23,7 @@ class ValidUserOrCompanyProduct implements ValidationRule
         }
 
         // Check if created_by matches
-        if ($product->created_by['_id'] !== $requestedCreatedById ||
+        if ($product->created_by['id'] !== $requestedCreatedById ||
             $product->created_by['type'] !== $requestedCreatedByType) {
             $fail('Permission Denied');
         }
