@@ -126,7 +126,7 @@ class ProductController extends Controller
                 'created_by.type' => $request->input('created_by.type'),
             ],
             [
-                'product_id' => ['required'],
+                'product_id' => ['required', new ValidUserOrCompanyProduct()],
                 'created_by' => ['required'],
                 'created_by.id' => ['required', new ValidUserCompany($user->id)],
                 'created_by.type' => ['required'],
