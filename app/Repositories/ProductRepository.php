@@ -85,7 +85,12 @@ class ProductRepository
         }
 
         // Sort by update_date in descending order by default
-        $query = $query->orderBy('update_date', 'desc');
+        $query = $query->orderByRaw("
+        CASE
+            WHEN paid_adv_expires_at IS NOT NULL THEN 1
+            ELSE 2
+        END
+    ")->orderBy('update_date', 'desc');
 
         return $query->cursorPaginate(12);
     }
