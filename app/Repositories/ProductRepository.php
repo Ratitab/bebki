@@ -154,7 +154,7 @@ class ProductRepository
             return null;
         }
 
-        $product->update_date = Carbon::now()->format('Y-m-d\TH:i:s.vP');
+        $product->update_date = Carbon::now()->toDateTime();
         $product->save();
 
         return $product;
