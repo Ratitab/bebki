@@ -247,7 +247,7 @@ class ProductService
         if (!$product) {
             return false;
         }
-        $expiryDate = Carbon::now()->addDays($paid_adv_expires_at)->toDateTime()->format('Y-m-d\TH:i:s.v\Z');
+        $expiryDate = Carbon::now()->addDays($paid_adv_expires_at)->toDateTime();
         $this->boostRepository->setPaidAdvAttributes($product,$expiryDate);
         return true;
     }
