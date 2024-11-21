@@ -19,5 +19,5 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })->withSchedule(function (Schedule $schedule) {
         $schedule->call(new \App\Tasks\CheckPaidAdvExpiration)
-            ->everyMinute();  // or hourly()/daily()
+            ->hourly();  // or hourly()/daily()
     })->create();
