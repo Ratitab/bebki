@@ -10,7 +10,7 @@ class CheckPaidAdvExpiration
     public function __invoke()
     {
         // Your model import here
-        Product::where('paid_adv_expires_at', '<', Carbon::now()->toDateTime()->format('Y-m-d\TH:i:s.v\Z'))
+        Product::where('paid_adv_expires_at', '<', Carbon::now()->toDateTime())
             ->update([
                 '$unset' => [
                     'paid_adv_expires_at' => 1,
