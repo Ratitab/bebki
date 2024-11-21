@@ -5,12 +5,14 @@ namespace App\Services;
 use App\DTO\SearchProductsDTO;
 use App\DTO\SingleProductDTO;
 use App\Models\Products\Product;
+use App\Repositories\BoostRepository;
 use App\Repositories\CompanyRepository;
 use App\Repositories\FavouriteRepository;
 use App\Repositories\FreeLimitRepository;
 use App\Repositories\LimitRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -21,7 +23,8 @@ class ProductService
                                 private readonly UserRepository      $userRepository,
                                 private readonly FreeLimitRepository $freeLimitRepository,
                                 private readonly LimitRepository     $limitRepository,
-                                private readonly FavouriteRepository $favouriteRepository
+                                private readonly FavouriteRepository $favouriteRepository,
+                                private readonly BoostRepository $boostRepository,
     )
     {
     }
@@ -236,6 +239,17 @@ class ProductService
 
             return $this->productRepository->setProductUpdateDate($id);
         });
+    }
+
+    public function set_paid_adv($id, $paid_adv_expires_at)
+    {
+        $product = $this->productRepository->findOneById($id);
+        if (!$product) {
+            return false;
+        }
+        $expiryDate = Carbon::now()->addDays($paid_adv_expires_at)->toDateTime()->format('Y-m-d\TH:i:s.v\Z');
+        $this->boostRepository->setPaidAdvAttributes($product,$expiryDate);
+        return true;
     }
 
 }

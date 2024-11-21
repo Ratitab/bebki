@@ -90,7 +90,7 @@ class ProductRepository
         return $query->cursorPaginate(12);
     }
 
-    public function findOneById($id)
+        public function findOneById($id)
     {
         return $this->productModel->where('_id',$id)->first();
     }

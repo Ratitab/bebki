@@ -45,13 +45,14 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $productDTO = SingleProductDTO::fromRequest($request,$productId);
+        $productDTO = SingleProductDTO::fromRequest($request, $productId);
         $singleProduct = $this->productService->findOne($productDTO);
-        if(!is_null($singleProduct)){
+        if (!is_null($singleProduct)) {
             return $this->apiResponseSuccess($singleProduct);
         }
         return $this->apiResponseFail('product not found');
     }
+
     public function store(Request $request)
     {
 
@@ -75,7 +76,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags,$request->image_urls,$request->passport_urls);
+        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }
@@ -106,7 +107,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $updateProduct = $this->productService->update($product_id,$request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags,$request->image_urls,$request->passport_urls);
+        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls);
         if ($updateProduct) {
             return $this->apiResponseSuccess(['data' => $updateProduct]);
         }
@@ -136,11 +137,33 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $updateProductOrder = $this->productService->update_product_order($product_id,$request->created_by,$user);
+        $updateProductOrder = $this->productService->update_product_order($product_id, $request->created_by, $user);
         if ($updateProductOrder) {
             return $this->apiResponseSuccess(['data' => $updateProductOrder]);
         }
         return $this->apiResponseFail('Out Of Limits');
+    }
+
+    public function set_paid_adv(Request $request, $product_id)
+    {
+        $validator = Validator::make(
+            [
+                'paid_adv_expires_at' => $request->paid_adv_expires_at,
+            ],
+            [
+                'paid_adv_expires_at' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        //TODO: PAYMENT SYSTEM, FIRST PAY THEN CALLBACK HERE
+        $paid_adv = $this->productService->set_paid_adv($product_id, $request->paid_adv_expires_at);
+        if ($paid_adv) {
+            return $this->apiResponseSuccess(['data' =>$paid_adv]);
+        }
+        return $this->apiResponseFail('something went wrong');
     }
 
     public function make_favourite(Request $request)
@@ -157,7 +180,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        return $this->apiResponseSuccess($this->productService->makeFavourite(auth()->user(),$request->data_id));
+        return $this->apiResponseSuccess($this->productService->makeFavourite(auth()->user(), $request->data_id));
     }
 
     public function count_user_favourites(Request $request)
@@ -173,7 +196,7 @@ class ProductController extends Controller
     public function user_favourite_products(Request $request)
     {
         $userId = auth()->id();
-        return $this->apiResponseSuccess( ['data'=>$this->productService->userFavouriteProducts($userId)]);
+        return $this->apiResponseSuccess(['data' => $this->productService->userFavouriteProducts($userId)]);
     }
 
     public function upload_images(Request $request)
@@ -185,7 +208,7 @@ class ProductController extends Controller
             ],
             [
                 'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
-                'image_for' => ['required','in:individual,shop,pawnshop,store'],
+                'image_for' => ['required', 'in:individual,shop,pawnshop,store'],
             ]
         );
 
@@ -194,7 +217,7 @@ class ProductController extends Controller
         }
         $images = $request->file('images');
         $user = auth()->user();
-        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProductImages($images,$user,$request->image_for)]);
+        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProductImages($images, $user, $request->image_for)]);
     }
 
 }
