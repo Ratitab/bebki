@@ -85,10 +85,7 @@ class ProductRepository
         }
 
         // Sort by update_date in descending order by default
-        $query = $query->orderBy([
-            'paid_adv_expires_at' => 'desc',
-            'update_date' => 'desc'
-        ]);
+        $query = $query->orderBy('is_paid_adv', 'desc')->orderBy('update_date', 'desc');
 
         return $query->cursorPaginate(12);
     }

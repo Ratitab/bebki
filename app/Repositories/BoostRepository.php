@@ -17,6 +17,7 @@ class BoostRepository
     public function setPaidAdvAttributes($product, $paid_adv_expires_at)
     {
         $product->paid_adv_expires_at = $paid_adv_expires_at;
+        $product->is_paid_adv = 1;
         $product->save();
         return $product;
     }
