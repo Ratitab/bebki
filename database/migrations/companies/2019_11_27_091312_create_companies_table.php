@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->bigInteger('company_sku')->unique();
             $table->string('identification_number');
             $table->integer('is_active')->default('1');
             $table->integer('company_type_id')->nullable();

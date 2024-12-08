@@ -93,6 +93,7 @@ class UserRepository
     {
         $user = new $this->userModel;
         $user->id = Str::uuid();
+        $user->user_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
         $user->username = $username;
         $user->password = \Hash::make($password);
         $user->is_active = 1;
