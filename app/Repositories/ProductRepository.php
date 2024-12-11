@@ -27,17 +27,17 @@ class ProductRepository
 
         // Category filter
         if ($category) {
-            $query = $query->where('category', $category);
+            $query = $query->whereIn('category', $category);
         }
 
         // Gem filter
         if ($gem) {
-            $query = $query->where('gem', $gem);
+            $query = $query->whereIn('gem', $gem);
         }
 
         // Material filter
         if ($material) {
-            $query = $query->where('material', $material);
+            $query = $query->whereIn('material', $material);
         }
 
         // Price range filter
@@ -50,7 +50,7 @@ class ProductRepository
 
         // City filter
         if ($city) {
-            $query = $query->where('city', $city);
+            $query = $query->whereIn('city', $city);
         }
 
         // Search term (assuming you want to search in name and description)
@@ -72,11 +72,11 @@ class ProductRepository
         }
 
         if ($stamp) {
-            $query = $query->where('stamp', (string)$stamp);
+            $query = $query->whereIn('stamp', $stamp);
         }
 
         if ($weight) {
-            $query = $query->where('weight', (string)$weight);
+            $query = $query->whereIn('weight', (string)$weight);
         }
 
         if ($customization_available !== null) {
