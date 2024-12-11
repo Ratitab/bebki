@@ -42,10 +42,10 @@ class ProductRepository
 
         // Price range filter
         if ($min_price) {
-            $query = $query->where('price', '>=', $min_price);
+            $query = $query->where('price', '>=', (float)$min_price);
         }
         if ($max_price) {
-            $query = $query->where('price', '<=', $max_price);
+            $query = $query->where('price', '<=', (float)$max_price);
         }
 
         // City filter
@@ -177,7 +177,7 @@ class ProductRepository
         $product->description = $description;
         $product->customization = ['available' => !is_null($customization) ? $customization['available'] :false, 'details' => !is_null($customization)? $customization['details'] : ''];
         $product->city = $city;
-        $product->price = $price;
+        $product->price = (float)$price;
         if (!isset($product->views_count)) {
             $product->views_count = 0;
         }
