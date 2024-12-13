@@ -193,7 +193,7 @@ class ProductRepository
         $product->image_urls = $imageUrls;
         $product->passport_urls = $passportUrls;
         if (!isset($product->update_date)) {
-            $product->update_date = Carbon::now()->format('Y-m-d\TH:i:s.vP');
+            $product->update_date = Carbon::now()->toDateTime();
         }
 
         $product->save();
