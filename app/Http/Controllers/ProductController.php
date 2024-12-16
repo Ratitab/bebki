@@ -76,7 +76,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls);
+        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }
@@ -107,7 +107,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size,$request->gender, $request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls);
+        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size,$request->gender, $request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls);
         if ($updateProduct) {
             return $this->apiResponseSuccess(['data' => $updateProduct]);
         }

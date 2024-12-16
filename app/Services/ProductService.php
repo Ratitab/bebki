@@ -170,9 +170,9 @@ class ProductService
         return $this->favouriteRepository->userFavouriteProducts($userId);
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
     {
-        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls) {
+        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls) {
 
             $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
 
@@ -194,6 +194,7 @@ class ProductService
                 $gem,
                 $size,
                 $gender,
+                $phoneNumber,
                 $description,
                 $customization,
                 $city,
@@ -205,7 +206,7 @@ class ProductService
         });
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender,$phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
     {
         return $this->productRepository->update($id,
             $createdBy,
@@ -218,6 +219,7 @@ class ProductService
             $gem,
             $size,
             $gender,
+            $phoneNumber,
             $description,
             $customization,
             $city,

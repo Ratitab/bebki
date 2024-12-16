@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Traits\Resp;
+use Illuminate\Support\Facades\Mail;
 
 class AuthenticationService
 {
@@ -37,7 +38,20 @@ class AuthenticationService
 
     public function otpRegistration($username)
     {
-        return $this->otpCodeService->create($username, random_int(100000, 999999), 'registration');
+        $otp = random_int(100000, 999999);
+
+        // Create the OTP code in the service
+        $this->otpCodeService->create($username, $otp, 'registration');
+
+        // Email content
+        $emailContent = "Hello,\n\nYour OTP code for registration is: $otp\n\nIf you did not request this, please ignore this email.\n\nThank you!";
+
+        // Send OTP via email
+        Mail::raw($emailContent, function ($message) use ($username) {
+            $message->to($username) // Assuming $username is the email address
+            ->subject('Your OTP Code for Registration');
+        });
+
         return true;
     }
 

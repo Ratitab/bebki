@@ -99,7 +99,7 @@ class ProductRepository
     {
         return $this->productModel->where('_id',$id)->first();
     }
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender, $description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender, $phoneNumber,$description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
     {
         $product = new $this->productModel;
         return $this->setProductAttributes(
@@ -114,6 +114,7 @@ class ProductRepository
             $gem,
             $size,
             $gender,
+            $phoneNumber,
             $description,
             $customization,
             $city,
@@ -124,7 +125,7 @@ class ProductRepository
         );
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender, $description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender,$phoneNumber, $description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
     {
         $product = $this->findOneById($id);
         if (!$product) {
@@ -142,6 +143,7 @@ class ProductRepository
             $gem,
             $size,
             $gender,
+            $phoneNumber,
             $description,
             $customization,
             $city,
@@ -167,7 +169,7 @@ class ProductRepository
         return $product;
     }
 
-    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
+    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
     {
         if (!isset($product->product_sku)) {
             $product->product_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
@@ -182,6 +184,7 @@ class ProductRepository
         $product->gem = $gem;
         $product->size = $size;
         $product->gender = $gender;
+        $product->phone_number = $phoneNumber;
         $product->description = $description;
         $product->customization = ['available' => !is_null($customization) ? $customization['available'] :false, 'details' => !is_null($customization)? $customization['details'] : ''];
         $product->city = $city;
