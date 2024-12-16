@@ -57,13 +57,27 @@ class AuthenticationService
 
     public function otpUpdateEmailOrPhone($username)
     {
-        return $this->otpCodeService->create($username, random_int(100000, 999999), 'update_email_or_phone');
+        $otp = random_int(100000, 999999);
+        $this->otpCodeService->create($username, $otp, 'update_email_or_phone');
+        // Email content
+        $emailContent = "Hello,\n\nYour OTP code for updating email is: $otp\n\nIf you did not request this, please ignore this email.\n\nThank you!";
+
+        Mail::raw($emailContent, function ($message) use ($username) {
+            $message->to($username) // Assuming $username is the email address
+            ->subject('Your OTP Code for Registration');
+        });
         return true;
     }
 
     public function otpForgotPassword($username)
     {
-        return $this->otpCodeService->create($username, random_int(100000, 999999), 'forgot_password');
+        $otp = random_int(100000, 999999);
+        $this->otpCodeService->create($username, $otp, 'forgot_password');
+        $emailContent = "Hello,\n\nYour OTP code for forgetting pass is: $otp\n\nIf you did not request this, please ignore this email.\n\nThank you!";
+        Mail::raw($emailContent, function ($message) use ($username) {
+            $message->to($username) // Assuming $username is the email address
+            ->subject('Your OTP Code for Registration');
+        });
         return true;
     }
 

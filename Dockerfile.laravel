@@ -28,6 +28,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     pcntl \
     sockets
 
+# Install Redis extension
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
 # Install Swoole extension
 RUN pecl install swoole \
     && docker-php-ext-enable swoole
