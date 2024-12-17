@@ -86,13 +86,13 @@ class ProductService
             $entityType = $product->created_by['type'] ?? null;
 
             // Prepare creator information based on type
-            if ($entityType === 'company') {
+            if ($entityType === 'store' || $entityType ==='pawnshop') {
                 $company_data = $companies->get($entityId);
                 $product->creator = [
                     'name' => $company_data->getAttributes()['information']['name'] ?? null,
                     'logo' => $company_data->getAttributes()['information']['logo'] ?? null
                 ];
-            } elseif ($entityType === 'user') {
+            } elseif ($entityType === 'individual') {
                 $user_data = $users->get($entityId);
                 $product->creator = [
                     'first_name' => $user_data->getAttributes()['information']['first_name'] ?? null,
