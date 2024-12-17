@@ -180,6 +180,9 @@ class ProductRepository
         if (!isset($product->product_sku)) {
             $product->product_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
         }
+        if(!isset($product->is_paid_adv)){
+            $product->is_paid_adv = 0;
+        }
         $product->created_by = ['id' => $createdBy['id'], 'type' => $createdBy['type']];
         $product->representative = ['user_id' => $user->id, 'name' => $user->information['first_name'] . ' ' . $user->information['last_name']];
         $product->title = $title;
