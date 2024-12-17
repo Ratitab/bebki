@@ -13,7 +13,7 @@ class ProductRepository
     ) {
     }
 
-    public function findMany($type, $createdById, $category,$gem,$material,$gender,$min_price,$max_price,$city,$search,$tags,$stamp,$weight,$customization_available)
+    public function findMany($type, $createdById, $category,$gem,$material,$gender,$min_price,$max_price,$city,$search,$tags,$stamp,$weight,$customization_available,$isPaidAdv=null)
     {
         $query = $this->productModel;
 
@@ -88,6 +88,12 @@ class ProductRepository
             $query = $query->where('customization.available',
                 (bool)$customization_available);
         }
+
+        if($isPaidAdv == 1){
+            $query = $query->where('is_paid_adv', 1);
+        }
+
+
 
         // Sort by update_date in descending order by default
         $query = $query->orderBy('is_paid_adv', 'desc')->orderBy('update_date', 'desc');

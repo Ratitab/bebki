@@ -45,7 +45,8 @@ class ProductService
             tags: $searchDTO->tags,
             stamp: $searchDTO->stamp,
             weight: $searchDTO->weight,
-            customization_available: $searchDTO->customizationAvailable
+            customization_available: $searchDTO->customizationAvailable,
+            isPaidAdv: $searchDTO->isPaidAdv
         );
 
 // Step 2: Separate company and user IDs based on `created_by.type`

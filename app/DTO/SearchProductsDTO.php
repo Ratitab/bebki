@@ -24,6 +24,7 @@ class SearchProductsDTO
         public readonly ?array  $stamp = null,
         public readonly ?array  $weight = null,
         public readonly ?bool  $customizationAvailable = null,
+        public readonly ?int  $isPaidAdv = null,
         public readonly int     $perPage = 12,
         public readonly ?string $cursor = null,
     )
@@ -49,6 +50,7 @@ class SearchProductsDTO
             stamp: $request->input('stamp'),
             weight: $request->input('weight'),
             customizationAvailable: $request->input('customizationAvailable'),
+            isPaidAdv: $request->input('isPaidAdv'),
             perPage: $request->integer('per_page', 12),
             cursor: $request->input('cursor'),
         );
@@ -72,6 +74,7 @@ class SearchProductsDTO
             'stamp' => $this->stamp,
             'weight' => $this->weight,
             'customizationAvailable' => $this->customizationAvailable,
+            'isPaidAdv' => $this->isPaidAdv,
             'per_page' => $this->perPage,
             'cursor' => $this->cursor,
         ], fn($value) => !is_null($value));
