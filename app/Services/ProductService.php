@@ -247,11 +247,19 @@ class ProductService
         });
     }
 
-    public function set_paid_adv($id, $paid_adv_expires_at)
+    public function set_paid_adv($id, $paid_adv_expires_at,$createdBy,$user)
     {
         $product = $this->productRepository->findOneById($id);
         if (!$product) {
             return false;
+        }
+        $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
+
+        if (!$freeLimit) {
+            $limit = $this->limitRepository->useLimit($createdBy['id']);
+            if (!$limit) {
+                return false;
+            }
         }
         $expiryDate = Carbon::now()->addDays($paid_adv_expires_at)->toDateTime();
         $this->boostRepository->setPaidAdvAttributes($product,$expiryDate);

@@ -158,8 +158,8 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        //TODO: PAYMENT SYSTEM, FIRST PAY THEN CALLBACK HERE
-        $paid_adv = $this->productService->set_paid_adv($product_id, $request->paid_adv_expires_at);
+
+        $paid_adv = $this->productService->set_paid_adv($product_id, $request->paid_adv_expires_at,$request->created_by,auth()->user());
         if ($paid_adv) {
             return $this->apiResponseSuccess(['data' =>$paid_adv]);
         }

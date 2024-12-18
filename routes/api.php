@@ -28,7 +28,7 @@ Route::get('/cities', [CountryController::class, 'citiesFindByCountryId']);
 */
 Route::get('search-products', [ProductController::class, 'index']);
 Route::get('single-product/{productId}', [ProductController::class, 'show']);
-Route::post('set-paid-advertisement/{productId}', [ProductController::class, 'set_paid_adv']);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -85,6 +85,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/user/count-favourites', [ProductController::class, 'count_user_favourites']);
     Route::get('/user/favourites', [ProductController::class, 'user_favourite_products']);
 
+
+
+    Route::post('/set-paid-advertisement/{productId}', [ProductController::class, 'set_paid_adv']);
     /*
     |--------------------------------------------------------------------------
     | COMPANY
