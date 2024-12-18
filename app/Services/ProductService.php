@@ -253,15 +253,36 @@ class ProductService
         if (!$product) {
             return false;
         }
-        $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
+        $premiumDurations = [
+            ['days' => '1', 'label' => '24 Hours Boost', 'pearls' => 3],
+            ['days' => '5', 'label' => '5 Days Featured', 'pearls' => 8],
+            ['days' => '7', 'label' => '1 Week Premium', 'pearls' => 10],
+            ['days' => '10', 'label' => '10 Days Pro', 'pearls' => 13],
+            ['days' => '15', 'label' => '15 Days Plus', 'pearls' => 17],
+            ['days' => '20', 'label' => '20 Days Ultra', 'pearls' => 20],
+            ['days' => '30', 'label' => '1 Month Elite', 'pearls' => 25]
+        ];
+
+        $pearls = 3 * $paid_adv_expires_at; // Default calculation
+
+        foreach ($premiumDurations as $duration) {
+            if ((int)$duration['days'] === (int)$paid_adv_expires_at) {
+                $pearls = $duration['pearls'];
+                break;
+            }
+        }
+        $freeLimit = $this->freeLimitRepository->useLimit(createdBy:$createdBy, user:$user,pearls:$pearls);
 
         if (!$freeLimit) {
-            $limit = $this->limitRepository->useLimit($createdBy['id']);
+            $limit = $this->limitRepository->useLimit($createdBy['id'], $pearls);
             if (!$limit) {
                 return false;
             }
         }
         $expiryDate = Carbon::now()->addDays($paid_adv_expires_at)->toDateTime();
+        if ($product->is_paid_adv === 1 && $product->paid_adv_expires_at > Carbon::now()) {
+            $expiryDate = Carbon::parse($product->paid_adv_expires_at)->addDays($paid_adv_expires_at)->toDateTime();
+        }
         $this->boostRepository->setPaidAdvAttributes($product,$expiryDate);
         return true;
     }

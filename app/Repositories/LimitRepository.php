@@ -19,12 +19,23 @@ class LimitRepository
         return $this->limitModel->where('created_by._id', $createdById)->latest()->first();
     }
 
-    public function useLimit($createdById)
+    public function useLimit($createdById,$pearls=null)
     {
         $limit = $this->findById($createdById);
         if (!$limit) {
             return false;
         }
+
+        if ($pearls !== null) {
+            // Check if there are enough pearls
+            if ($limit->limit_count < $pearls) {
+                return false;
+            }
+            $limit->freeLimit_count -= $pearls;
+            $limit->save();
+            return true;
+        }
+
         if ($limit->limit_count <= 0) {
             return false;
         }

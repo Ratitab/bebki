@@ -17,13 +17,24 @@ class FreeLimitRepository
         return $this->freeLimitModel->where('created_by._id', $createdById)->first();
     }
 
-    public function useLimit($createdBy, $user, $freeLimit_count = 2, $freeLimit_for = 'user')
+    public function useLimit($createdBy, $user, $freeLimit_count = 2, $freeLimit_for = 'user',$pearls = null)
     {
         $freeLimit = $this->findById($createdBy['id']);
         if (!$freeLimit) {
             $this->create($createdBy, $user, $freeLimit_count, $freeLimit_for);
             return true;
         }
+
+        if ($pearls !== null) {
+            // Check if there are enough pearls
+            if ($freeLimit->freeLimit_count < $pearls) {
+                return false;
+            }
+            $freeLimit->freeLimit_count -= $pearls;
+            $freeLimit->save();
+            return true;
+        }
+
         if ($freeLimit->freeLimit_count <= 0) {
             return false;
         }
