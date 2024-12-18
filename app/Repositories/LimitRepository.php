@@ -31,7 +31,7 @@ class LimitRepository
             if ($limit->limit_count < $pearls) {
                 return false;
             }
-            $limit->freeLimit_count -= $pearls;
+            $limit->limit_count -= $pearls;
             $limit->save();
             return true;
         }
