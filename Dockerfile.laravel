@@ -1,5 +1,5 @@
 # Stage 1: Base image with PHP and Swoole
-FROM php:8.3-cli-alpine AS gogitidze
+FROM php:8.4-alpine AS gogitidze
 
 # Install system dependencies
 RUN apk add --no-cache \
