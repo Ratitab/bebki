@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\PaymentDTO;
+use App\Models\Payments\Payment;
 use App\Repositories\PaymentRepository;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
@@ -43,7 +44,7 @@ class StripePaymentService
         ]);
 
         $updateData = $paymentDTO->toArray();
-        $updateData['providerTransactionId'] = $paymentIntent->id;
+        $updateData['provider_transaction_id'] = $paymentIntent->id;
         $updateData['status'] = 'CREATED';
         $updatedData = PaymentDTO::fromArray($updateData);
         $this->paymentRepository->create($updatedData);
@@ -60,48 +61,40 @@ class StripePaymentService
      * @param string $paymentIntentId
      * @return bool
      */
-    public function updatePaymentStatus(string $paymentIntentId): bool
+    public function updatePaymentStatus(string $orderId,string $status): bool
     {
-        $payment = $this->paymentRepository->findByProviderTransactionId($paymentIntentId);
+        return \DB::transaction(function () use ($orderId,$status) {
+        $payment = $this->findByOrderId($orderId);
 
         if (!$payment) {
             return false;
         }
-
-        $payment->status = 'PAID';
-        return $this->paymentRepository->updateStatus($payment->id, 'PAID');
-    }
-
-    /**
-     * Refund a payment.
-     *
-     * @param string $paymentIntentId
-     * @param int|null $amount
-     * @return bool
-     */
-    public function refund(string $paymentIntentId, ?int $amount = null): bool
-    {
-        $this->initialize();
-
-        try {
-            $refund = Refund::create([
-                'payment_intent' => $paymentIntentId,
-                'amount' => $amount, // Optional: Refund a partial amount
-            ]);
-
-            if ($refund->status === 'succeeded') {
-                $payment = $this->paymentRepository->findByProviderTransactionId($paymentIntentId);
-                if ($payment) {
-                    $this->paymentRepository->updateStatus($payment->id, 'REFUNDED');
-                }
-
-                return true;
-            }
-        } catch (\Exception $e) {
-            // Log error
-            return false;
+        if ($status === 'PAID' && is_null($payment->lock_at)) {
+            $this->paymentRepository->updateStatus($payment, $status);
+            $this->paymentRepository->lockAt($payment);
+            return true;
         }
 
         return false;
+        });
     }
+
+    public function findByOrderId(string $orderId): ?Payment
+    {
+        return $this->paymentRepository->findByOrderId($orderId);
+    }
+
+    public function webhookResponse(string $orderId,$data): bool
+    {
+        return \DB::transaction(function () use ($orderId,$data) {
+            $payment = $this->findByOrderId($orderId);
+
+            if (!$payment) {
+                return false;
+            }
+            $this->paymentRepository->webhookResponse($payment, $data);
+            return true;
+        });
+    }
+
 }

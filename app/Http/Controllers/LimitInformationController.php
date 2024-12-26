@@ -106,40 +106,9 @@ class LimitInformationController extends Controller
         ];
         // Simulate activate_limits request with the same payload structure
         $activateRequest = new Request($payload);
-        $this->activate_limits($activateRequest);
+//        $this->activate_limits($activateRequest);
         return $this->apiResponseSuccess($packages);
     }
 
-    public function activate_limits(Request $request)
-    {
-        $rules = [
-            'createdBy' => ['required', 'array'],
-            'createdBy.id' => ['required'],
-            'createdBy.type' => ['required', 'in:individual,shop,pawnshop'],
-            'user' => ['required', 'array'],
-            'user.id' => ['required'],
-            'price' => ['required', 'numeric'],
-            'package' => ['required', 'string'],
-            'limit_count' => ['required', 'numeric'],
-            'limit_for' => ['required', 'in:individual,shop,pawnshop'],
-        ];
 
-        // Add ValidCompanyBelongsUser rule only for shop/pawnshop types
-        if (in_array($request->input('createdBy.type'), ['shop', 'pawnshop'])) {
-            $rules['createdBy.id'][] = new ValidCompanyBelongsUser($request->input('user.id'));
-        }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return $this->apiResponseFail($validator->messages());
-        }
-        return $this->apiResponseSuccess(['data' => $this->limitService->buyLimits($request->input('createdBy'),
-            (object)$request->input('user'),
-            $request->input('price'),
-            $request->input('package'),
-            $request->input('bought_limits'),
-            $request->input('limit_count'),
-            $request->input('limit_for'))]);
-    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\PaymentDTO;
 use App\Rules\ValidCompanyBelongsUser;
+use App\Services\LimitService;
 use App\Services\StripePaymentService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class PaymentController extends Controller
 {
 
     use Resp;
-    public function __construct(private readonly StripePaymentService $stripeService) {}
+    public function __construct(private readonly StripePaymentService $stripeService,private readonly LimitService $limitService) {}
 
 
     public function createStripePayment(Request $request): JsonResponse
@@ -74,8 +75,49 @@ class PaymentController extends Controller
     {
 
         $payload = $request->getContent();
-        $sigHeader = $request->header('Stripe-Signature');
-        $endpointSecret = config('services.stripe.webhook_secret');
-        return [$request->all(),$payload,$sigHeader,$endpointSecret];
+        if($payload['type'] === 'charge.succeeded' && $payload['data']['object']['paid'] === true){
+            $payment = $this->stripeService->updatePaymentStatus($payload['data']['object']['metadata']['order_id'],'PAID');
+            if($payment){
+                $payload = $this->stripeService->findByOrderId($payload['data']['object']['metadata']['order_id']);
+                $activateRequest = new Request($payload['payment_data']);
+                $this->activate_limits($activateRequest);
+            }
+        }
+        $this->stripeService->webhookResponse($payload['data']['object']['metadata']['order_id'],$payload);
+        return true;
+    }
+
+
+    public function activate_limits(Request $request)
+    {
+        $rules = [
+            'createdBy' => ['required', 'array'],
+            'createdBy.id' => ['required'],
+            'createdBy.type' => ['required', 'in:individual,shop,pawnshop'],
+            'user' => ['required', 'array'],
+            'user.id' => ['required'],
+            'price' => ['required', 'numeric'],
+            'package' => ['required', 'string'],
+            'limit_count' => ['required', 'numeric'],
+            'limit_for' => ['required', 'in:individual,shop,pawnshop'],
+        ];
+
+        // Add ValidCompanyBelongsUser rule only for shop/pawnshop types
+        if (in_array($request->input('createdBy.type'), ['shop', 'pawnshop'])) {
+            $rules['createdBy.id'][] = new ValidCompanyBelongsUser($request->input('user.id'));
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        return $this->apiResponseSuccess(['data' => $this->limitService->buyLimits($request->input('createdBy'),
+            (object)$request->input('user'),
+            $request->input('price'),
+            $request->input('package'),
+            $request->input('bought_limits'),
+            $request->input('limit_count'),
+            $request->input('limit_for'))]);
     }
 }

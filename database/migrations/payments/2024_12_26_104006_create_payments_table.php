@@ -42,6 +42,8 @@ return new class extends Migration
             $table->string('currency')->nullable();
             $table->float('exchange_rate')->nullable();
             $table->string('invoice_url')->nullable();
+            $table->json('webhook_response')->nullable();
+            $table->timestamp('lock_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

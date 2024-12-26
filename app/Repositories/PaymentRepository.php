@@ -76,15 +76,21 @@ class PaymentRepository
         return $this->paymentModel->where('user_id', $userId)->orderBy('created_at','desc')->get();
     }
 
-    public function updateStatus(string $id, string $status): bool
+    public function updateStatus(Payment $payment,$status): bool
     {
-        $payment = $this->paymentModel->find($id);
-
-        if (!$payment) {
-            return false;
-        }
-
         $payment->status = $status;
+        return $payment->save();
+    }
+
+    public function lockAt($payment): bool
+    {
+        $payment->lock_at = now();
+        return $payment->save();
+    }
+
+    public function webhookResponse(Payment $payment,$data): bool
+    {
+        $payment->webhook_response = json_encode($data);
         return $payment->save();
     }
 
