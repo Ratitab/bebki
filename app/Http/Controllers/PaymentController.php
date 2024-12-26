@@ -78,8 +78,8 @@ class PaymentController extends Controller
         if($payload['type'] === 'charge.succeeded' && $payload['data']['object']['paid'] === true){
             $payment = $this->stripeService->updatePaymentStatus($payload['data']['object']['metadata']['order_id'],'PAID');
             if($payment){
-                $payload = $this->stripeService->findByOrderId($payload['data']['object']['metadata']['order_id']);
-                $activateRequest = new Request(json_decode($payload['payment_data'],true));
+                $internalPayload = $this->stripeService->findByOrderId($payload['data']['object']['metadata']['order_id']);
+                $activateRequest = new Request(json_decode($internalPayload['payment_data'],true));
                 $this->activate_limits($activateRequest);
             }
         }
