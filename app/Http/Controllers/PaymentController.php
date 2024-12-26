@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\DTO\PaymentDTO;
+use App\Rules\ValidCompanyBelongsUser;
 use App\Services\StripePaymentService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
@@ -18,26 +20,34 @@ class PaymentController extends Controller
 
     public function createStripePayment(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'transaction_id' => 'nullable|string',
-            'order_id' => 'nullable|string',
-            'customer_email' => 'nullable|string|email|max:255',
-            'customer_name' => 'nullable|string|max:255',
-            'payment_provider' => 'nullable|string|max:255',
-            'provider_transaction_id' => 'nullable|string|max:255',
-            'status' => 'nullable|string|in:PENDING,CREATED,PAID,FAILED',
-            'status_description' => 'nullable|string',
-            'error_code' => 'nullable|string|max:255',
-            'error_message' => 'nullable|string',
-            'cancelled_at' => 'nullable|date',
-            'refunded_at' => 'nullable|date',
-            'notes' => 'nullable|string',
-            'payment_data' => 'nullable|array',
-            'total_amount' => 'required|numeric|min:0.01',
-            'currency' => 'required|string|size:3',
-            'exchange_rate' => 'nullable|numeric|min:0',
-            'invoice_url' => 'nullable|string|url',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'transaction_id' => 'nullable|string',
+                'order_id' => 'nullable|string',
+                'customer_email' => 'nullable|string|email|max:255',
+                'customer_name' => 'nullable|string|max:255',
+                'payment_provider' => 'nullable|string|max:255',
+                'provider_transaction_id' => 'nullable|string|max:255',
+                'status' => 'nullable|string|in:PENDING,CREATED,PAID,FAILED',
+                'status_description' => 'nullable|string',
+                'error_code' => 'nullable|string|max:255',
+                'error_message' => 'nullable|string',
+                'cancelled_at' => 'nullable|date',
+                'refunded_at' => 'nullable|date',
+                'notes' => 'nullable|string',
+                'payment_data' => 'nullable|array',
+                'total_amount' => 'required|numeric|min:0.01',
+                'currency' => 'required|string|size:3',
+                'exchange_rate' => 'nullable|numeric|min:0',
+                'invoice_url' => 'nullable|string|url',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        
         $user = auth()->user();
         // Create PaymentDTO from validated data
         $paymentDTO = new PaymentDTO(
