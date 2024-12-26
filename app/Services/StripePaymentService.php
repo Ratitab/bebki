@@ -36,15 +36,17 @@ class StripePaymentService
         $this->initialize();
 
         $paymentIntent = PaymentIntent::create([
-            'amount' => $paymentDTO->paymentData['amount'], // Amount in cents
-            'currency' => $paymentDTO->paymentData['currency'],
+            'amount' => $paymentDTO->totalAmount, // Amount in cents
+            'currency' => $paymentDTO->currency,
             'payment_method_types' => ['card'],
-            'metadata' => $paymentDTO->paymentData['metadata'] ?? [],
+            'metadata' =>  ['order_id' => $paymentDTO->orderId],
         ]);
 
-        $paymentDTO['providerTransactionId'] = $paymentIntent->id;
-        $paymentDTO['status'] = 'CREATED';
-        $this->paymentRepository->create($paymentDTO);
+        $updateData = $paymentDTO->toArray();
+        $updateData['providerTransactionId'] = $paymentIntent->id;
+        $updateData['status'] = 'CREATED';
+        $updatedData = PaymentDTO::fromArray($updateData);
+        $this->paymentRepository->create($updatedData);
 
         return [
             'clientSecret' => $paymentIntent->client_secret,

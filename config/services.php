@@ -35,10 +35,41 @@ return [
         ],
     ],
 
-    'stripe' =>[
+    'stripe' => [
         'public_key' => env('STRIPE_PUBLIC_KEY'),
         'secret_key' => env('STRIPE_SECRET_KEY'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET_KEY'),
-    ]
+    ],
+
+    'pearls' => [
+        'starter' => [
+            'package' => 'Starter',
+            'price' => 475,        // 50 posts × 9.5 GEL
+            'limit_count' => 50,
+            'price_per_post' => 9.5,
+            'savings' => 25,       // (10 - 9.5) × 50 = 25 GEL savings
+        ],
+        'basic' => [
+            'package' => 'Basic',
+            'price' => 900,        // 100 posts × 9 GEL
+            'limit_count' => 100,
+            'price_per_post' => 9,
+            'savings' => 100,      // Less attractive savings
+        ],
+        'pro' => [
+            'package' => 'Pro',
+            'price' => 2000,       // 250 posts × 8 GEL
+            'limit_count' => 250,
+            'price_per_post' => 8,
+            'savings' => 500,      // Medium savings
+        ],
+        'premium' => [
+            'package' => 'Premium',
+            'price' => 2800,       // 400 posts × 7 GEL (Best value)
+            'limit_count' => 400,
+            'price_per_post' => 7,
+            'savings' => 1200,     // Most attractive savings
+        ]
+    ],
 
 ];

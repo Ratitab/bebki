@@ -20,27 +20,17 @@ class PaymentController extends Controller
 
     public function createStripePayment(Request $request): JsonResponse
     {
+        $user = auth()->user();
         $validator = Validator::make(
-            $request->all(),
             [
-                'transaction_id' => 'nullable|string',
-                'order_id' => 'nullable|string',
-                'customer_email' => 'nullable|string|email|max:255',
-                'customer_name' => 'nullable|string|max:255',
-                'payment_provider' => 'nullable|string|max:255',
-                'provider_transaction_id' => 'nullable|string|max:255',
-                'status' => 'nullable|string|in:PENDING,CREATED,PAID,FAILED',
-                'status_description' => 'nullable|string',
-                'error_code' => 'nullable|string|max:255',
-                'error_message' => 'nullable|string',
-                'cancelled_at' => 'nullable|date',
-                'refunded_at' => 'nullable|date',
-                'notes' => 'nullable|string',
-                'payment_data' => 'nullable|array',
-                'total_amount' => 'required|numeric|min:0.01',
-                'currency' => 'required|string|size:3',
-                'exchange_rate' => 'nullable|numeric|min:0',
-                'invoice_url' => 'nullable|string|url',
+                'package' => $request->package,
+                'company_id' => $request->company_id,
+                'type' => $request->type,
+            ],
+            [
+                'package' => ['required', 'in:starter,basic,pro,premium'],
+                'company_id' => $request->company_id ? ['nullable', new ValidCompanyBelongsUser($user->id)] : ['nullable'],
+                'type' => ['required', 'in:individual,shop,pawnshop'],
             ]
         );
 
@@ -48,19 +38,26 @@ class PaymentController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
 
-        $user = auth()->user();
-        // Create PaymentDTO from validated data
-        $paymentDTO = new PaymentDTO(
-            userId: $user->id,
-            ipAddress: $request->ip(),
-            userAgent: $request->header('User-Agent'),
-            customerEmail: $user->username ?? null,
-            customerName: $user->username ?? null,
-            paymentProvider: 'stripe',
-            paymentData: $validated['payment_data'] ?? [],
-            totalAmount: $validated['total_amount'],
-            currency: 'GEL',
-        );
+        $packages = config('services.pearls');
+        $payload = [
+            'createdBy' => ['id' => $request->company_id ? $request->company_id : $user->id, 'type' => $request->type],
+            'user' => ['id' => $user->id, 'information' => ['first_name' => $user->information['first_name'], 'last_name' => $user->information['last_name']]],
+            'price' => $packages[$request->package]['price'],
+            'package' => $packages[$request->package]['package'],
+            'bought_limits' => $packages[$request->package]['limit_count'],
+            'limit_count' => $packages[$request->package]['limit_count'],
+            'limit_for' => $request->type
+        ];
+
+        $request->merge([
+            'user_id' => $user->id,
+            'payment_data'=>$payload,'currency'=>'GEL',
+            'total_amount'=>$payload['price'],
+            'order_id'=>str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT),
+            'payment_provider'=>'stripe'
+        ]);
+
+        $paymentDTO = PaymentDTO::fromRequest($request);
 
         $response = $this->stripeService->payment($paymentDTO);
 

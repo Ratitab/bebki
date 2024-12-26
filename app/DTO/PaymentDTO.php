@@ -30,6 +30,33 @@ class PaymentDTO
         public readonly ?string $invoiceUrl = null
     ) {}
 
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            userId: $data['user_id'],
+            transactionId: $data['transaction_id'] ?? null,
+            orderId: $data['order_id'] ?? null,
+            ipAddress: $data['ip_address'] ?? null,
+            userAgent: $data['user_agent'] ?? null,
+            customerEmail: $data['customer_email'] ?? null,
+            customerName: $data['customer_name'] ?? null,
+            paymentProvider: $data['payment_provider'] ?? null,
+            providerTransactionId: $data['provider_transaction_id'] ?? null,
+            status: $data['status'] ?? 'PENDING',
+            statusDescription: $data['status_description'] ?? null,
+            errorCode: $data['error_code'] ?? null,
+            errorMessage: $data['error_message'] ?? null,
+            cancelledAt: $data['cancelled_at'] ?? null,
+            refundedAt: $data['refunded_at'] ?? null,
+            notes: $data['notes'] ?? null,
+            paymentData: $data['payment_data'] ?? [],
+            totalAmount: $data['total_amount'],
+            currency: $data['currency'] ?? 'GEL',
+            exchangeRate: $data['exchange_rate'] ?? 0,
+            invoiceUrl: $data['invoice_url'] ?? null
+        );
+    }
     public static function fromRequest(Request $request): self
     {
         return new self(

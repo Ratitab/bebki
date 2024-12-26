@@ -40,10 +40,10 @@ class PaymentRepository
         $payment->refunded_at = $paymentDTO->refundedAt;
         $payment->notes = $paymentDTO->notes;
 
-        $payment->payment_data = $paymentDTO->paymentData;
+        $payment->payment_data = json_encode($paymentDTO->paymentData);
         $payment->total_amount = $paymentDTO->totalAmount;
-        $payment->currency = $paymentDTO->totalAmount;
-        $payment->exchange_rate = $paymentDTO->totalAmount;
+        $payment->currency = $paymentDTO->currency;
+        $payment->exchange_rate = $paymentDTO->exchangeRate;
         $payment->invoice_url = $paymentDTO->invoiceUrl;
 
         $payment->save();
