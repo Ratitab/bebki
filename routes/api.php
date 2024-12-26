@@ -48,6 +48,8 @@ Route::get('company-list', [CompanyController::class, 'findAll']);
 |
 */
 Route::post('/activate-limit-callback', [LimitInformationController::class, 'activate_limits']);
+Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
+
 /*
 |--------------------------------------------------------------------------
 | AUTHENTICATION

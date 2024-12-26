@@ -36,10 +36,10 @@ class StripePaymentService
         $this->initialize();
 
         $paymentIntent = PaymentIntent::create([
-            'amount' => $paymentDTO->totalAmount, // Amount in cents
+            'amount' => $paymentDTO->totalAmount,
             'currency' => $paymentDTO->currency,
             'payment_method_types' => ['card'],
-            'metadata' =>  ['order_id' => $paymentDTO->orderId],
+            'metadata' =>  ['order_id' => $paymentDTO->orderId,'customer_email' => $paymentDTO->customerEmail,'customer_name'=>$paymentDTO->customerName],
         ]);
 
         $updateData = $paymentDTO->toArray();

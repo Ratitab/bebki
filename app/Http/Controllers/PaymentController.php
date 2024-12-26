@@ -52,6 +52,8 @@ class PaymentController extends Controller
         $request->merge([
             'user_id' => $user->id,
             'payment_data'=>$payload,'currency'=>'GEL',
+            'customer_email'=>$user->username,
+            'customer_name' =>$payload['user']['information']['first_name'].' '.$payload['user']['information']['last_name'],
             'total_amount'=>$payload['price'],
             'order_id'=>str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT),
             'payment_provider'=>'stripe'
@@ -67,46 +69,13 @@ class PaymentController extends Controller
      * Handle Stripe webhook events.
      *
      * @param Request $request
-     * @return JsonResponse
      */
-    public function handleWebhook(Request $request): JsonResponse
+    public function handleWebhook(Request $request)
     {
+
         $payload = $request->getContent();
         $sigHeader = $request->header('Stripe-Signature');
         $endpointSecret = config('services.stripe.webhook_secret');
-
-        try {
-            $event = \Stripe\Webhook::constructEvent(
-                $payload,
-                $sigHeader,
-                $endpointSecret
-            );
-
-            // Handle the event type
-            switch ($event->type) {
-                case 'payment_intent.succeeded':
-                    $paymentIntent = $event->data->object;
-                    $this->stripeService->updatePaymentStatus($paymentIntent->id);
-                    break;
-
-                case 'payment_intent.payment_failed':
-                    $paymentIntent = $event->data->object;
-                    Log::error('Payment failed', ['payment_intent' => $paymentIntent]);
-                    break;
-
-                // Add more cases as needed for other events
-                default:
-                    Log::info('Unhandled event type', ['type' => $event->type]);
-            }
-
-            return response()->json(['status' => 'success']);
-
-        } catch (\UnexpectedValueException $e) {
-            // Invalid payload
-            return response()->json(['error' => 'Invalid payload'], 400);
-        } catch (\Stripe\Exception\SignatureVerificationException $e) {
-            // Invalid signature
-            return response()->json(['error' => 'Invalid signature'], 400);
-        }
+        return [$request->all(),$payload,$sigHeader,$endpointSecret];
     }
 }
