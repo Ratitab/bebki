@@ -79,7 +79,7 @@ class PaymentController extends Controller
             $payment = $this->stripeService->updatePaymentStatus($payload['data']['object']['metadata']['order_id'],'PAID');
             if($payment){
                 $payload = $this->stripeService->findByOrderId($payload['data']['object']['metadata']['order_id']);
-                $activateRequest = new Request(json_decode($payload['payment_data']));
+                $activateRequest = new Request(json_decode($payload['payment_data'],true));
                 $this->activate_limits($activateRequest);
             }
         }
