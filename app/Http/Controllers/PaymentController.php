@@ -47,7 +47,7 @@ class PaymentController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        
+
         $user = auth()->user();
         // Create PaymentDTO from validated data
         $paymentDTO = new PaymentDTO(
@@ -55,7 +55,7 @@ class PaymentController extends Controller
             ipAddress: $request->ip(),
             userAgent: $request->header('User-Agent'),
             customerEmail: $user->username ?? null,
-            customerName: $user?->information?->first_name.' '.$user?->information?->last_name ?? null,
+            customerName: $user->username ?? null,
             paymentProvider: 'stripe',
             paymentData: $validated['payment_data'] ?? [],
             totalAmount: $validated['total_amount'],
