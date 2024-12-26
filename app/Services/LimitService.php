@@ -67,6 +67,10 @@ class LimitService
     }
     public function buyLimits($createdBy, $user, $price, $package,$bought_limits, $limit_count, $limit_for)
     {
+        $first = $this->checkIfContainsLimits($createdBy);
+        if ($first) {
+            $limit_count += $first->limit_count;
+        }
         $expires_at = Carbon::now()->addDays(30)->toDateTime();
         return $this->limitRepository->create($createdBy, $user, $price, $package,$bought_limits, $limit_count, $limit_for, $expires_at);
     }
