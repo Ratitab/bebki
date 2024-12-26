@@ -5,6 +5,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LimitInformationController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -113,6 +114,11 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/update-product-order/{product_id}', [ProductController::class, 'update_product_order']);
         Route::post('/upload-images', [ProductController::class, 'upload_images']);
         Route::post('/make-favourite', [ProductController::class, 'make_favourite']);
+    });
+
+
+    Route::prefix('payment')->group(function () {
+        Route::post('/stripe/create',[PaymentController::class,'createStripePayment']);
     });
 
     Route::prefix('limits')->group(function () {
