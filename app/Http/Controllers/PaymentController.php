@@ -74,7 +74,7 @@ class PaymentController extends Controller
     public function handleWebhook(Request $request)
     {
 
-        $payload = json_decode($request->getContent());
+        $payload = json_decode($request->getContent(),true);
         if($payload['type'] === 'charge.succeeded' && $payload['data']['object']['paid'] === true){
             $payment = $this->stripeService->updatePaymentStatus($payload['data']['object']['metadata']['order_id'],'PAID');
             if($payment){
