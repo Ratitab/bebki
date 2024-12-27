@@ -73,7 +73,7 @@ class PaymentRepository
 
     public function findManyByUserId(string $userId)
     {
-        return $this->paymentModel->where('user_id', $userId)->orderBy('created_at','desc')->get();
+        return $this->paymentModel->select(['order_id','ip_address','user_agent','customer_email','customer_name','status','total_amount','currency','created_at','lock_at'])->where('user_id', $userId)->orderBy('created_at','desc')->get();
     }
 
     public function updateStatus(Payment $payment,$status): bool

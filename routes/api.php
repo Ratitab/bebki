@@ -121,6 +121,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::prefix('payment')->group(function () {
         Route::post('/stripe/create',[PaymentController::class,'createStripePayment']);
+        Route::get('/transactions',[PaymentController::class,'findManyByUserId']);
     });
 
     Route::prefix('limits')->group(function () {

@@ -84,6 +84,11 @@ class StripePaymentService
         return $this->paymentRepository->findByOrderId($orderId);
     }
 
+    public function findManyByUserId(string $userId): ?Payment
+    {
+        return $this->paymentRepository->findManyByUserId($userId);
+    }
+
     public function webhookResponse(string $orderId,$data): bool
     {
         return \DB::transaction(function () use ($orderId,$data) {

@@ -87,6 +87,10 @@ class PaymentController extends Controller
         return true;
     }
 
+    public function findManyByUserId()
+    {
+        return $this->apiResponseSuccess($this->stripeService->findManyByUserId(auth()->id()));
+    }
 
     public function activate_limits(Request $request)
     {
