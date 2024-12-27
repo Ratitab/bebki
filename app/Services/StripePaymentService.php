@@ -84,7 +84,7 @@ class StripePaymentService
         return $this->paymentRepository->findByOrderId($orderId);
     }
 
-    public function findManyByUserId(string $userId): ?Payment
+    public function findManyByUserId(string $userId)
     {
         return $this->paymentRepository->findManyByUserId($userId);
     }
