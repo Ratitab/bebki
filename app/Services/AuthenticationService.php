@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Traits\Resp;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 
 class AuthenticationService
