@@ -22,10 +22,8 @@ class AuthenticationService
             return false;
         }
 
-        // Get the auth user model that has Passport configured
         $authUser = auth()->loginUsingId($user->user_id);
 
-        // Check for existing valid token
         $existingToken = $authUser->tokens()
             ->where('name', 'Bearer')
             ->where('revoked', false)
@@ -33,10 +31,11 @@ class AuthenticationService
             ->first();
 
         if ($existingToken) {
-            return $existingToken->accessToken;
+            return Cache::remember('user_token_' . $user->user_id, now()->addDays(30), function () use ($authUser) {
+                return $authUser->createToken('Bearer')->accessToken;
+            });
         }
 
-        // Create new token only if no valid token exists
         return $authUser->createToken('Bearer')->accessToken;
     }
 
