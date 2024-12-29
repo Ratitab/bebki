@@ -47,7 +47,7 @@ Route::get('company-list', [CompanyController::class, 'findAll']);
 |
 |
 */
-Route::post('/activate-limit-callback', [LimitInformationController::class, 'activate_limits']);
+//Route::post('/activate-limit-callback', [LimitInformationController::class, 'activate_limits']);
 Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
 
 /*
@@ -124,9 +124,9 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/transactions',[PaymentController::class,'findManyByUserId']);
     });
 
-    Route::prefix('limits')->group(function () {
-        Route::post('/buy', [LimitInformationController::class, 'buy_limits']);
-    });
+//    Route::prefix('limits')->group(function () {
+//        Route::post('/buy', [LimitInformationController::class, 'buy_limits']);
+//    });
 
     Route::post('logout', [AuthenticationController::class, 'logout']);
 });

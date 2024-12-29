@@ -17,10 +17,26 @@ class AuthenticationService
     public function login($username, $password)
     {
         $user = $this->userInformationService->findUserId($username);
-        if ($user && \Hash::check($password, $user->password)) {
-            return auth()->loginUsingId($user->user_id)->createToken('Bearer')->accessToken;
+
+        if (!$user || !\Hash::check($password, $user->password)) {
+            return false;
         }
-        return false;
+
+        // Check for existing valid token
+        $existingToken = $user->tokens()
+            ->where('name', 'Bearer')
+            ->where('revoked', false)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if ($existingToken) {
+            return $existingToken->accessToken;
+        }
+
+        // Create new token only if no valid token exists
+        return auth()->loginUsingId($user->user_id)
+            ->createToken('Bearer')
+            ->accessToken;
     }
 
     public function registration($username, $password, $user_information)
