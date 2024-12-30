@@ -34,7 +34,7 @@ class ValidUserCompany implements ValidationRule
                 $fail('Permission Denied');
             }
         }
-        if(!in_array($type, ['individual', 'company'])) {
+        if(!in_array($type, ['individual', 'store','pawnshop'])) {
             $fail('Permission Denied');
         }
     }
