@@ -41,7 +41,7 @@ class ProductRepository
         }
 
         // Gender filter
-        if ($material) {
+        if ($gender) {
             $query = $query->whereIn('gender', $gender);
         }
 
