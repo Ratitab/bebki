@@ -29,10 +29,13 @@ class ValidUserCompany implements ValidationRule
                 $fail('Permission Denied');
             }
         }
-        if($type == 'user'){
+        if($type == 'individual'){
             if (!$userPostingAsSelf) {
                 $fail('Permission Denied');
             }
+        }
+        if($type !=='individual' || $type !== 'company'){
+            $fail('Permission Denied');
         }
     }
 }
