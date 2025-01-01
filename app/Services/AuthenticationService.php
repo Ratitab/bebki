@@ -150,6 +150,7 @@ class AuthenticationService
 
     public function logout()
     {
+        Cache::forget('user_token_' . auth()->user()->id);
         auth()->user()->tokens()->delete();
         return ['status' => 200, 'message' => 'Successfully logouted'];
     }
