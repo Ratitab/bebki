@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Users\ExclusiveUser;
 use App\Models\Users\UserInformation;
 use Illuminate\Support\Facades\DB;
 
@@ -10,9 +11,26 @@ class UserInformationRepository
 
     public function __construct(
         private readonly UserInformation $userInformationModel,
+        private readonly ExclusiveUser $exclusiveUserModel,
         private readonly UserInformationTypeRepository $userInformationTypeRepository,
     )
     {
+    }
+
+    public function addExclusiveUser($username)
+    {
+        $exclusiveUser = $this->exclusiveUserModel
+            ->where('email', strtolower(trim($username)))
+            ->exists();
+
+        if($exclusiveUser){
+            return false;
+        }
+        $exclusiveUser = new $this->exclusiveUserModel;
+        $exclusiveUser->email = strtolower(trim($username));
+        $exclusiveUser->pearls = 5;
+        $exclusiveUser->save();
+        return true;
     }
 
     public function checkIfUserExists($username)

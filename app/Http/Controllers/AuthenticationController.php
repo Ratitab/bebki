@@ -22,6 +22,27 @@ class AuthenticationController extends Controller
     {
     }
 
+
+    public function exclusive_users(Request $request)
+    {
+        $validator = Validator::make(
+            [
+                'username' => $request->username,
+            ],
+            [
+                'username' => 'required',
+                ]
+        );
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $login = $this->authenticationService->exclusive_users($request->username);
+        if ($login) {
+            return $this->apiResponseSuccess(['data' => $login]);
+        }
+        return $this->apiResponseFail('Something went wrong');
+    }
     public function login(Request $request)
     {
         $validator = Validator::make(
@@ -37,8 +58,8 @@ class AuthenticationController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-
-        $login = $this->authenticationService->login($request->username, $request->password);
+        $username = strtolower(trim($request->username));
+        $login = $this->authenticationService->login($username, $request->password);
         if ($login) {
             return $this->apiResponseSuccess(['data' => $login]);
         }
@@ -62,10 +83,10 @@ class AuthenticationController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-
-        $register = $this->authenticationService->registration($request->username, $request->password, $request->user_information);
+        $username = strtolower(trim($request->username));
+        $register = $this->authenticationService->registration($username, $request->password, $request->user_information);
         if ($register) {
-            $this->otpCodeService->makeUsed($request->username,$request->code,'registration',1);
+            $this->otpCodeService->makeUsed($username,$request->code,'registration',1);
             return $this->apiResponseSuccess(['data' => $register]);
         }
         return $this->apiResponseFail('User Already Exists');
@@ -84,8 +105,8 @@ class AuthenticationController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-
-        $otp = $this->authenticationService->otpRegistration($request->username);
+        $username = strtolower(trim($request->username));
+        $otp = $this->authenticationService->otpRegistration($username);
         if ($otp) {
             return $this->apiResponseSuccess(['data' => $otp]);
         }
@@ -105,8 +126,8 @@ class AuthenticationController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-
-        $otp = $this->authenticationService->otpUpdateEmailOrPhone($request->username);
+        $username = strtolower(trim($request->username));
+        $otp = $this->authenticationService->otpUpdateEmailOrPhone($username);
         if ($otp) {
             return $this->apiResponseSuccess(['data' => $otp]);
         }
@@ -127,10 +148,10 @@ class AuthenticationController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-
-        $register = $this->authenticationService->updateEmailOrPhone(auth()->user(), $request->username);
+        $username = strtolower(trim($request->username));
+        $register = $this->authenticationService->updateEmailOrPhone(auth()->user(), $username);
         if ($register) {
-            $this->otpCodeService->makeUsed($request->username,$request->code,'update_email_or_phone',1);
+            $this->otpCodeService->makeUsed($username,$request->code,'update_email_or_phone',1);
             return $this->apiResponseSuccess(['data' => $register]);
         }
         return $this->apiResponseFail('User Already Exists');
@@ -192,8 +213,8 @@ class AuthenticationController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-
-        $otp = $this->authenticationService->otpForgotPassword($request->username);
+        $username = strtolower(trim($request->username));
+        $otp = $this->authenticationService->otpForgotPassword($username);
         if ($otp) {
             return $this->apiResponseSuccess(['data' => $otp]);
         }
@@ -217,10 +238,10 @@ class AuthenticationController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-
-        $forgot_password = $this->authenticationService->forgotPassword($request->username,$request->password);
+        $username = strtolower(trim($request->username));
+        $forgot_password = $this->authenticationService->forgotPassword($username,$request->password);
         if ($forgot_password) {
-            $this->otpCodeService->makeUsed($request->username,$request->code,'forgot_password',1);
+            $this->otpCodeService->makeUsed($username,$request->code,'forgot_password',1);
             return $this->apiResponseSuccess(['data' => $forgot_password]);
         }
         return $this->apiResponseFail('User Already Exists');

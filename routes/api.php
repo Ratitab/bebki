@@ -39,6 +39,7 @@ Route::get('single-product/{productId}', [ProductController::class, 'show']);
 |
 */
 Route::get('company-list', [CompanyController::class, 'findAll']);
+Route::post('exclusive-user', [AuthenticationController::class, 'exclusive_users']);
 
 /*
 |--------------------------------------------------------------------------

@@ -15,6 +15,10 @@ class AuthenticationService
     {
     }
 
+    public function exclusive_users($username)
+    {
+        return $this->userInformationService->addExclusiveUser($username);
+    }
     public function login($username, $password)
     {
         $user = $this->userInformationService->findUserId($username);

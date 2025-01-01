@@ -30,6 +30,11 @@ class UserInformationService
         return $this->userInformationRepository->findUserId($username);
     }
 
+    public function addExclusiveUser($username)
+    {
+        return $this->userInformationRepository->addExclusiveUser($username);
+    }
+
     public function findByUserIdAndType($userId,$typeId)
     {
         return $this->userInformationRepository->findByUserIdAndType($userId,$typeId);
