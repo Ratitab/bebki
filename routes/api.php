@@ -6,6 +6,7 @@ use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LimitInformationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Middleware\TrackProductViews;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +29,7 @@ Route::get('/cities', [CountryController::class, 'citiesFindByCountryId']);
 |
 */
 Route::get('search-products', [ProductController::class, 'index']);
-Route::get('single-product/{productId}', [ProductController::class, 'show']);
+Route::get('single-product/{productId}', [ProductController::class, 'show'])->middleware([TrackProductViews::class]);
 
 
 /*

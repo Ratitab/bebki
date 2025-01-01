@@ -12,10 +12,8 @@ class CheckPaidAdvExpiration
         // Your model import here
         Product::where('paid_adv_expires_at', '<', Carbon::now()->toDateTime())
             ->update([
-                '$unset' => [
-                    'paid_adv_expires_at' => 1,
-                    'is_paid_adv' => 1
-                ]
+                'paid_adv_expires_at' => null,
+                'is_paid_adv' => 0
             ]);
     }
 }
