@@ -20,8 +20,8 @@ class CompanyInformationRepository
         $informationTypes = $this->companyInformationTypeRepository->getAllInformationTypes();
         $bulkInsertData = [];
         foreach ($informationTypes as $typeName => $typeId) {
-	   if (array_key_exists($typeName, $userInformation)) {
-		$bulkInsertData[] = [
+            if (isset($companyInformation[$typeName])) {
+                $bulkInsertData[] = [
                     'company_id' => $companyId,
                     'company_information_type_id' => $typeId,
                     'value' => $companyInformation[$typeName],
@@ -39,7 +39,7 @@ class CompanyInformationRepository
         $bulkUpdateData = [];
 
         foreach ($informationTypes as $typeName => $typeId) {
-            if (isset($companyInformation[$typeName])) {
+            if (array_key_exists($typeName, $companyInformation)) {
                 $bulkUpdateData[] = [
                     'company_id' => $companyId,
                     'company_information_type_id' => $typeId,
