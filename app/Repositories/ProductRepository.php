@@ -92,7 +92,7 @@ class ProductRepository
         if($isPaidAdv == 1){
             $query = $query->where('is_paid_adv', 1);
         }
-        if($isPaidAdv == 0){
+        if($isPaidAdv === 0){
             $query = $query->where('is_paid_adv', 0);
         }
 
