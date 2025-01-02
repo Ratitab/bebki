@@ -39,7 +39,7 @@ class CompanyInformationRepository
         $bulkUpdateData = [];
 
         foreach ($informationTypes as $typeName => $typeId) {
-            if (isset($companyInformation[$typeName])) {
+            if (isset($companyInformation[$typeName]) || $companyInformation[$typeName] == '') {
                 $bulkUpdateData[] = [
                     'company_id' => $companyId,
                     'company_information_type_id' => $typeId,
