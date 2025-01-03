@@ -127,9 +127,11 @@ class ProductService
         $entityType = $product->created_by['type'] ?? null;
 // Step 3: Fetch creator data based on type
         $creator = null;
-        if ($entityType === 'store' || $entityType === 'pawnshop') {
+        if ($entityType === 'store' || $entityType === 'pawnshop' || $entityType ==='stock_exchange') {
             $company = $this->companyRepository->findOneById($entityId);
             $creator = [
+                'id' => $entityId,
+                'type' => $entityType,
                 'name' => $company?->getAttributes()['information']['name'] ?? null,
                 'logo' => $company?->getAttributes()['information']['logo'] ?? null
             ];
