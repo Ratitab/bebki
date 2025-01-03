@@ -42,6 +42,13 @@ return [
     ],
 
     'pearls' => [
+        'single' => [
+            'package' => 'single',
+            'price' => 10,
+            'limit_count' => 1,
+            'price_per_post' => 10,
+            'savings' => 0,       // (10 - 9.5) × 50 = 25 GEL savings
+        ],
         'starter' => [
             'package' => 'Starter',
             'price' => 475,        // 50 posts × 9.5 GEL
@@ -62,13 +69,6 @@ return [
             'limit_count' => 250,
             'price_per_post' => 8,
             'savings' => 500,      // Medium savings
-        ],
-        'premium' => [
-            'package' => 'Premium',
-            'price' => 2800,       // 400 posts × 7 GEL (Best value)
-            'limit_count' => 400,
-            'price_per_post' => 7,
-            'savings' => 1200,     // Most attractive savings
         ]
     ],
 

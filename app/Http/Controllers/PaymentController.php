@@ -29,9 +29,9 @@ class PaymentController extends Controller
                 'type' => $request->type,
             ],
             [
-                'package' => ['required', 'in:starter,basic,pro,premium'],
+                'package' => ['required', 'in:single,starter,basic,pro'],
                 'company_id' => $request->company_id ? ['nullable', new ValidCompanyBelongsUser($user->id)] : ['nullable'],
-                'type' => ['required', 'in:individual,shop,pawnshop'],
+                'type' => ['required', 'in:individual,shop,pawnshop,stock_exchange'],
             ]
         );
 
