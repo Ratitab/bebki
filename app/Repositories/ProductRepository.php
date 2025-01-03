@@ -19,7 +19,11 @@ class ProductRepository
 
         // Base filters
         if ($type && is_array($type) && count($type) >= 1) {
-            $query = $query->whereIn('created_by.type', $type);
+            if(count($type) == 1 && ($type[0] !=='' || $type[0] !==null)){
+                $query = $query->whereIn('created_by.type', $type);
+            }else {
+                $query = $query->whereIn('created_by.type', $type);
+            }
         }
         if ($createdById) {
             $query = $query->where('created_by._id', $createdById);
