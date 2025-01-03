@@ -18,7 +18,7 @@ class ProductRepository
         $query = $this->productModel;
 
         // Base filters
-        if ($type && is_array($type) && count($type) > 1) {
+        if ($type && is_array($type) && count($type) >= 1) {
             $query = $query->whereIn('created_by.type', $type);
         }
         if ($createdById) {
