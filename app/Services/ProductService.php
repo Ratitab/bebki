@@ -50,7 +50,7 @@ class ProductService
         );
 
 // Step 2: Separate company and user IDs based on `created_by.type`
-        $companyIds = $products->whereIn('created_by.type', ['store', 'pawnshop'])
+        $companyIds = $products->whereIn('created_by.type', ['store', 'pawnshop','stock_exchange'])
             ->pluck('created_by.id')
             ->unique()
             ->values()
