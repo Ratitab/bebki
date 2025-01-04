@@ -34,6 +34,24 @@ class CompanyController extends Controller
         }
         return $this->apiResponseSuccess(['data' => $this->companyService->findAll($request->type_id)]);
     }
+
+    public function findSingle(Request $request,$company_id)
+    {
+        $validator = Validator::make(
+            [
+                'company_id' => $company_id,
+            ],
+            [
+                'company_id' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        return $this->apiResponseSuccess(['data' => $this->companyService->findOne($company_id)]);
+    }
+
     public function index(Request $request)
     {
         return $this->apiResponseSuccess(['data' => $this->companyService->findManyByUser(auth()->user())]);

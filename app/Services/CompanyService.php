@@ -21,6 +21,10 @@ class CompanyService
     {
         return $this->companyRepository->findAll($companyTypeId);
     }
+    public function findOne($companyId)
+    {
+        return $this->companyRepository->findOneById($companyId);
+    }
     public function findManyByUser($user)
     {
         return $this->companyUserRepository->findManyByUser($user->id);
