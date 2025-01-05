@@ -6,6 +6,7 @@ use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LimitInformationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SystemNotificationController;
 use App\Http\Middleware\TrackProductViews;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -91,6 +92,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/user/limits', [LimitInformationController::class, 'user_limits']);
     Route::get('/user/count-favourites', [ProductController::class, 'count_user_favourites']);
     Route::get('/user/favourites', [ProductController::class, 'user_favourite_products']);
+    Route::get('/user/notifications', [SystemNotificationController::class, 'findMany']);
 
 
 
