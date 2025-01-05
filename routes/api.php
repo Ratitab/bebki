@@ -64,7 +64,7 @@ Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
 */
 Route::post('/signup', [AuthenticationController::class, 'registration'])->middleware(TurnstileMiddleware::class);
 Route::post('/signin', [AuthenticationController::class, 'login'])->middleware(TurnstileMiddleware::class);
-Route::post('/otp-registration', [AuthenticationController::class, 'otp_registration']);
+Route::post('/otp-registration', [AuthenticationController::class, 'otp_registration'])->middleware(TurnstileMiddleware::class);
 Route::post('/otp-forgot-password', [AuthenticationController::class, 'otp_forgot_password']);
 Route::post('/forgot-password', [AuthenticationController::class, 'forgot_password'])->middleware(TurnstileMiddleware::class);
 
