@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.10",
         "league/flysystem-aws-s3-v3": "^3.29",
         "mongodb/laravel-mongodb": "^5.1",
+        "njoguamos/laravel-turnstile": "^3.1",
         "stripe/stripe-php": "^16.4"
     },
     "require-dev": {
