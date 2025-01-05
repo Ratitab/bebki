@@ -9,6 +9,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Middleware\TrackProductViews;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use NjoguAmos\Turnstile\Http\Middleware\TurnstileMiddleware;
 
 
 /*
@@ -60,11 +61,11 @@ Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
 |
 |
 */
-Route::post('/signup', [AuthenticationController::class, 'registration'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
-Route::post('/signin', [AuthenticationController::class, 'login'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
+Route::post('/signup', [AuthenticationController::class, 'registration'])->middleware(TurnstileMiddleware::class);
+Route::post('/signin', [AuthenticationController::class, 'login'])->middleware(TurnstileMiddleware::class);
 Route::post('/otp-registration', [AuthenticationController::class, 'otp_registration']);
 Route::post('/otp-forgot-password', [AuthenticationController::class, 'otp_forgot_password']);
-Route::post('/forgot-password', [AuthenticationController::class, 'forgot_password'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
+Route::post('/forgot-password', [AuthenticationController::class, 'forgot_password'])->middleware(TurnstileMiddleware::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -78,14 +79,14 @@ Route::middleware(['auth:api'])->group(function () {
         $user = auth()->user();
         return $user->append('information');
     });
-    Route::post('/update-email-or-phone', [AuthenticationController::class, 'update_email_or_phone'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
+    Route::post('/update-email-or-phone', [AuthenticationController::class, 'update_email_or_phone'])->middleware(TurnstileMiddleware::class);
     Route::post('/upload-profile-image', [AuthenticationController::class, 'upload_images']);
     Route::post('/otp-update-email-or-phone', [AuthenticationController::class, 'otp_update_email_or_phone']);
 
-    Route::put('/update-user-information', [AuthenticationController::class, 'update_user_information'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
+    Route::put('/update-user-information', [AuthenticationController::class, 'update_user_information'])->middleware(TurnstileMiddleware::class);
 
 
-    Route::post('/change-password', [AuthenticationController::class, 'change_password'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
+    Route::post('/change-password', [AuthenticationController::class, 'change_password'])->middleware(TurnstileMiddleware::class);
 
     Route::get('/user/limits', [LimitInformationController::class, 'user_limits']);
     Route::get('/user/count-favourites', [ProductController::class, 'count_user_favourites']);
@@ -104,18 +105,18 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('company')->group(function () {
         Route::get('/', [CompanyController::class, 'index']);
         Route::get('/{company_id}', [CompanyController::class, 'show']);
-        Route::post('/add', [CompanyController::class, 'store'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
+        Route::post('/add', [CompanyController::class, 'store'])->middleware(TurnstileMiddleware::class);
         Route::post('/upload-profile-image', [CompanyController::class, 'upload_images']);
-        Route::put('/update/{company_id}', [CompanyController::class, 'update'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
-        Route::delete('/delete/{company_id}', [CompanyController::class, 'delete'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
+        Route::put('/update/{company_id}', [CompanyController::class, 'update'])->middleware(TurnstileMiddleware::class);
+        Route::delete('/delete/{company_id}', [CompanyController::class, 'delete'])->middleware(TurnstileMiddleware::class);
 
         Route::get('/limits/{company_id}', [LimitInformationController::class, 'company_limits']);
     });
 
 
     Route::prefix('product')->group(function () {
-        Route::post('/add', [ProductController::class, 'store'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
-        Route::put('/update/{product_id}', [ProductController::class, 'update'])->middleware(\NjoguAmos\Turnstile\Turnstile::class);
+        Route::post('/add', [ProductController::class, 'store'])->middleware(TurnstileMiddleware::class);
+        Route::put('/update/{product_id}', [ProductController::class, 'update'])->middleware(TurnstileMiddleware::class);
         Route::put('/update-product-order/{product_id}', [ProductController::class, 'update_product_order']);
         Route::post('/upload-images', [ProductController::class, 'upload_images']);
         Route::post('/make-favourite', [ProductController::class, 'make_favourite']);
