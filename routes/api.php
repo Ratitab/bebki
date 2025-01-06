@@ -83,7 +83,7 @@ Route::middleware(['auth:api'])->group(function () {
     });
     Route::post('/update-email-or-phone', [AuthenticationController::class, 'update_email_or_phone'])->middleware(TurnstileMiddleware::class);
     Route::post('/upload-profile-image', [AuthenticationController::class, 'upload_images']);
-    Route::post('/otp-update-email-or-phone', [AuthenticationController::class, 'otp_update_email_or_phone']);
+    Route::post('/otp-update-email-or-phone', [AuthenticationController::class, 'otp_update_email_or_phone'])->middleware(TurnstileMiddleware::class);
 
     Route::put('/update-user-information', [AuthenticationController::class, 'update_user_information'])->middleware(TurnstileMiddleware::class);
 
