@@ -32,7 +32,7 @@ Route::get('/cities', [CountryController::class, 'citiesFindByCountryId']);
 */
 Route::get('search-products', [ProductController::class, 'index']);
 Route::get('single-product/{productId}', [ProductController::class, 'show'])->middleware([TrackProductViews::class]);
-Route::get('get-phone/{productId}', [ProductController::class, 'getPhone'])->middleware([TurnstileMiddleware::class]);
+Route::post('get-phone/{productId}', [ProductController::class, 'getPhone'])->middleware([TurnstileMiddleware::class]);
 
 
 /*
