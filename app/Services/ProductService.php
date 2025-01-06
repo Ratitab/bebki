@@ -107,12 +107,23 @@ class ProductService
             $product->is_favourite = $favouriteIds->contains($product->id);
             unset($product->created_by);
             unset($product->representative);
+            unset($product->phone_number);
             return $product;
         });
 
         return $products;
     }
 
+    public function getPhone(SingleProductDTO $productDTO)
+    {
+// Step 1: Fetch the product
+        $product = $this->productRepository->findOneById($productDTO->productId);
+
+        if (!$product) {
+            return null;
+        }
+        return $product->phone_number;
+    }
     public function findOne(SingleProductDTO $productDTO)
     {
 // Step 1: Fetch the product
@@ -153,6 +164,7 @@ class ProductService
 // Step 5: Transform the product
         unset($product->created_by);
         unset($product->representative);
+        unset($product->phone_number);
         $product->creator = $creator;
         $product->is_favourite = $isFavourite;
 

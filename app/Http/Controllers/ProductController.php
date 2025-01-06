@@ -53,6 +53,28 @@ class ProductController extends Controller
         return $this->apiResponseFail('product not found');
     }
 
+    public function getPhone(Request $request, string $productId)
+    {
+        $validator = Validator::make(
+            [
+                'productId' => $productId,
+            ],
+            [
+                'productId' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $productDTO = SingleProductDTO::fromRequest($request, $productId);
+        $singleProduct = $this->productService->getPhone($productDTO);
+        if (!is_null($singleProduct)) {
+            return $this->apiResponseSuccess($singleProduct);
+        }
+        return $this->apiResponseFail('product not found');
+    }
+
     public function store(Request $request)
     {
 
