@@ -43,7 +43,7 @@ class PaymentController extends Controller
         $packages = config('services.pearls');
         $boughtLimits = null;
         $pack = null;
-        if (preg_match('/^custom_(\d+)$/', 'custom_6', $matches)) {
+        if (preg_match('/^custom_(\d+)$/', $request->package, $matches)) {
             $boughtLimits = $matches[1];
             $price = (int)$matches[1] * $packages['custom']['price'];
             $pack = explode('_',$request->package)[0];
