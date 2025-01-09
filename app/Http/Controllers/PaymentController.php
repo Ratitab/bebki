@@ -54,7 +54,7 @@ class PaymentController extends Controller
         $payload = [
             'createdBy' => ['id' => $request->company_id ? $request->company_id : $user->id, 'type' => $request->type],
             'user' => ['id' => $user->id, 'information' => ['first_name' => $user->information['first_name'], 'last_name' => $user->information['last_name']]],
-            'price' => $price,
+            'price' => $price * 100,
             'package' => $packages[$pack ?? $request->package]['package'],
             'bought_limits' => $boughtLimits ?? $packages[$pack ?? $request->package]['limit_count'],
             'limit_count' => $boughtLimits ?? $packages[$pack ?? $request->package]['limit_count'],
