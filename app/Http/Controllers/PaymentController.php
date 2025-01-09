@@ -29,7 +29,7 @@ class PaymentController extends Controller
                 'type' => $request->type,
             ],
             [
-                'package' => ['required', 'in:single,starter,basic,pro'],
+                'package' => ['required', 'regex:/^(custom_\d+|small|medium|premium|pro)$/'],
                 'company_id' => $request->company_id ? ['nullable', new ValidCompanyBelongsUser($user->id)] : ['nullable'],
                 'type' => ['required', 'in:individual,shop,pawnshop,stock_exchange'],
             ]
@@ -39,14 +39,23 @@ class PaymentController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
 
+
         $packages = config('services.pearls');
+        $boughtLimits = null;
+        if (preg_match('/^custom_(\d+)$/', 'custom_6', $matches)) {
+            $boughtLimits = $matches[1];
+            $price = (int)$matches[1] * $packages['custom']['price'];
+        } else {
+            $price = $packages[$request->package]['price'];
+        }
+
         $payload = [
             'createdBy' => ['id' => $request->company_id ? $request->company_id : $user->id, 'type' => $request->type],
             'user' => ['id' => $user->id, 'information' => ['first_name' => $user->information['first_name'], 'last_name' => $user->information['last_name']]],
-            'price' => $packages[$request->package]['price'],
+            'price' => $price,
             'package' => $packages[$request->package]['package'],
-            'bought_limits' => $packages[$request->package]['limit_count'],
-            'limit_count' => $packages[$request->package]['limit_count'],
+            'bought_limits' => $boughtLimits ?? $packages[$request->package]['limit_count'],
+            'limit_count' => $boughtLimits ?? $packages[$request->package]['limit_count'],
             'limit_for' => $request->type
         ];
 

@@ -42,33 +42,40 @@ return [
     ],
 
     'pearls' => [
-        'single' => [
-            'package' => 'single',
+        'custom' => [
+            'package' => 'custom',
             'price' => 10,
             'limit_count' => 1,
             'price_per_post' => 10,
             'savings' => 0,       // (10 - 9.5) × 50 = 25 GEL savings
         ],
-        'starter' => [
-            'package' => 'Starter',
-            'price' => 475,        // 50 posts × 9.5 GEL
+        'small' => [
+            'package' => 'small',
+            'price' => 190,        // 50 posts × 9.5 GEL
+            'limit_count' => 20,
+            'price_per_post' => 9.5,
+            'savings' => 10,       // (10 - 9.5) × 50 = 25 GEL savings
+        ],
+        'medium' => [
+            'package' => 'medium',
+            'price' => 475,        // 100 posts × 9 GEL
             'limit_count' => 50,
             'price_per_post' => 9.5,
-            'savings' => 25,       // (10 - 9.5) × 50 = 25 GEL savings
+            'savings' => 25,      // Less attractive savings
         ],
-        'basic' => [
-            'package' => 'Basic',
-            'price' => 900,        // 100 posts × 9 GEL
+        'premium' => [
+            'package' => 'premium',
+            'price' => 950,       // 250 posts × 8 GEL
             'limit_count' => 100,
-            'price_per_post' => 9,
-            'savings' => 100,      // Less attractive savings
+            'price_per_post' => 9.5,
+            'savings' => 50,      // Medium savings
         ],
         'pro' => [
             'package' => 'Pro',
-            'price' => 2000,       // 250 posts × 8 GEL
-            'limit_count' => 250,
+            'price' => 1425,       // 250 posts × 8 GEL
+            'limit_count' => 150,
             'price_per_post' => 8,
-            'savings' => 500,      // Medium savings
+            'savings' => 75,      // Medium savings
         ]
     ],
 
