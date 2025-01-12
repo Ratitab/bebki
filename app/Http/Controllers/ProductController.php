@@ -242,4 +242,62 @@ class ProductController extends Controller
         return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProductImages($images, $user, $request->image_for)]);
     }
 
+    public function delete(Request $request,$product_id)
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make(
+            [
+                'product_id' => $product_id,
+                'created_by' => $request->created_by,
+                'created_by.id' => $request->input('created_by.id'),
+                'created_by.type' => $request->input('created_by.type'),
+            ],
+            [
+                'product_id' => ['required', new ValidUserOrCompanyProduct()],
+                'created_by' => ['required'],
+                'created_by.id' => ['required', new ValidUserCompany($user->id)],
+                'created_by.type' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $updateProduct = $this->productService->delete($product_id);
+        if ($updateProduct) {
+            return $this->apiResponseSuccess(['data' => $updateProduct]);
+        }
+        return $this->apiResponseFail('Something went wrong');
+    }
+
+    public function sold(Request $request,$product_id)
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make(
+            [
+                'product_id' => $product_id,
+                'created_by' => $request->created_by,
+                'created_by.id' => $request->input('created_by.id'),
+                'created_by.type' => $request->input('created_by.type'),
+            ],
+            [
+                'product_id' => ['required', new ValidUserOrCompanyProduct()],
+                'created_by' => ['required'],
+                'created_by.id' => ['required', new ValidUserCompany($user->id)],
+                'created_by.type' => ['required'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $updateProduct = $this->productService->sold($product_id);
+        if ($updateProduct) {
+            return $this->apiResponseSuccess(['data' => $updateProduct]);
+        }
+        return $this->apiResponseFail('Something went wrong');
+    }
+
 }

@@ -303,4 +303,14 @@ class ProductService
         return true;
     }
 
+    public function delete($productId)
+    {
+        return $this->productRepository->delete($productId);
+    }
+
+    public function sold($productId)
+    {
+        return $this->productRepository->sold($productId);
+    }
+
 }

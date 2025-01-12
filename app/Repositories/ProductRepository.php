@@ -206,6 +206,9 @@ class ProductRepository
         if (!isset($product->views_count)) {
             $product->views_count = 0;
         }
+        if (!isset($product->is_sold)) {
+            $product->is_sold = 0;
+        }
         $product->tags = $tags;
         $product->image_urls = $imageUrls;
         $product->passport_urls = $passportUrls;
@@ -220,5 +223,13 @@ class ProductRepository
     public function delete($id)
     {
         return $this->productModel->where('_id', $id)->delete();
+    }
+
+    public function sold($id)
+    {
+        $product =  $this->productModel->where('_id', $id)->first();
+        $product->is_sold = 1;
+        $product->save();
+        return $product;
     }
 }
