@@ -123,7 +123,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/update-product-order/{product_id}', [ProductController::class, 'update_product_order']);
         Route::post('/upload-images', [ProductController::class, 'upload_images']);
         Route::post('/make-favourite', [ProductController::class, 'make_favourite']);
-        Route::delete('/delete/{product_id}', [ProductController::class, 'delete']);
+        Route::post('/delete/{product_id}', [ProductController::class, 'delete']);
 
         Route::post('/sold/{product_id}', [ProductController::class, 'sold']);
     });
