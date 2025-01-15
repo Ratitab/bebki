@@ -13,7 +13,8 @@ class CompanyService
     public function __construct(private readonly CompanyRepository         $companyRepository,
                                 private readonly CompanyUserRepository     $companyUserRepository,
                                 private readonly AddressService            $addressService,
-                                private readonly CompanyInformationService $companyInformationService)
+                                private readonly CompanyInformationService $companyInformationService,
+                                private readonly LimitService $limitService )
     {
     }
 
@@ -28,6 +29,38 @@ class CompanyService
     public function findManyByUser($user)
     {
         return $this->companyUserRepository->findManyByUser($user->id);
+    }
+
+    public function findManyByUserWithLimits($user)
+    {
+        $companies = $this->companyUserRepository->findManyByUser($user->id);
+        if (empty($companies)) {
+            return [];
+        }
+        $companyIds = array_column($companies, 'company_id');
+        // Initialize result array
+        $result = [];
+        //combine here, it must fetch all company, then companies limits and combine
+        $limitsData = $this->limitService->multipleCompanyLimits($companyIds);
+        // Create a mapped result array to ensure correct matching
+        $result = [];
+        foreach ($companies as $company) {
+            $companyId = $company['company_id'];
+
+            // Create a new company array with all original data
+            $mappedCompany = $company;
+
+            // Add limits data by explicit company ID matching
+            $mappedCompany['limits'] = [
+                'free_limits' => $limitsData['free_limits'][$companyId] ?? 3,
+                'package_limits' => $limitsData['package_limits'][$companyId] ?? null,
+                'package' => $limitsData['packages'][$companyId] ?? null
+            ];
+
+            $result[] = $mappedCompany;
+        }
+
+        return $result;
     }
 
     public function findOneByUser($user,$company_id)

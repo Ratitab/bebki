@@ -107,13 +107,17 @@ Route::middleware(['auth:api'])->group(function () {
     */
     Route::prefix('company')->group(function () {
         Route::get('/', [CompanyController::class, 'index']);
-        Route::get('/{company_id}', [CompanyController::class, 'show']);
+
         Route::post('/add', [CompanyController::class, 'store'])->middleware(TurnstileMiddleware::class);
         Route::post('/upload-profile-image', [CompanyController::class, 'upload_images']);
         Route::put('/update/{company_id}', [CompanyController::class, 'update'])->middleware(TurnstileMiddleware::class);
         Route::delete('/delete/{company_id}', [CompanyController::class, 'delete'])->middleware(TurnstileMiddleware::class);
 
         Route::get('/limits/{company_id}', [LimitInformationController::class, 'company_limits']);
+
+        Route::get('/all-limits', [CompanyController::class, 'company_limits']);
+
+        Route::get('/{company_id}', [CompanyController::class, 'show']);
     });
 
 

@@ -61,6 +61,44 @@ class LimitService
         }
         return $result;
     }
+
+    public function multipleCompanyLimits($companyIds)
+    {
+        $result = [
+            'free_limits' => [],
+            'package_limits' => [],
+            'packages' => [],
+        ];
+
+        // Fetch all free limits at once
+        $freeLimits = $this->freeLimitRepository->findMultipleById($companyIds)
+            ->keyBy('created_by.id');
+
+        // Fetch all package limits at once
+        $packageLimits = $this->limitRepository->findMultipleById($companyIds)
+            ->keyBy('created_by.id');
+
+        foreach ($companyIds as $companyId) {
+            // Set free limits
+            if (!isset($freeLimits[$companyId])) {
+                $result['free_limits'][$companyId] = 3;
+            } else {
+                $result['free_limits'][$companyId] = $freeLimits[$companyId]->freeLimit_count;
+            }
+
+            // Set package limits
+            if (isset($packageLimits[$companyId])) {
+                $result['package_limits'][$companyId] = $packageLimits[$companyId]->limit_count;
+                $result['packages'][$companyId] = $packageLimits[$companyId];
+            } else {
+                $result['package_limits'][$companyId] = null;
+                $result['packages'][$companyId] = null;
+            }
+        }
+
+        return $result;
+    }
+
     public function checkIfContainsLimits($createdById)
     {
         return $this->limitRepository->findById($createdById);

@@ -17,6 +17,11 @@ class FreeLimitRepository
         return $this->freeLimitModel->where('created_by._id', $createdById)->first();
     }
 
+    public function findMultipleById($createdById)
+    {
+        return $this->freeLimitModel->whereIn('created_by._id', $createdById)->get();
+    }
+
     public function useLimit($createdBy, $user, $freeLimit_count = 2, $freeLimit_for = 'user',$pearls = null)
     {
         $freeLimit = $this->findById($createdBy['id']);

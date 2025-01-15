@@ -19,6 +19,11 @@ class LimitRepository
         return $this->limitModel->where('created_by._id', $createdById)->latest()->first();
     }
 
+    public function findMultipleById($createdById)
+    {
+        return $this->limitModel->whereIn('created_by._id', $createdById)->get();
+    }
+
     public function useLimit($createdById,$pearls=null)
     {
         $limit = $this->findById($createdById);

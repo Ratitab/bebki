@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Rules\ValidUniqueCompanyIdentification;
 use App\Services\CompanyService;
 use App\Services\UploadService;
-use App\Services\UserService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -131,6 +130,12 @@ class CompanyController extends Controller
         return $this->apiResponseFail('Company Already Exists');
     }
 
+        public function company_limits(Request $request)
+    {
+        $user = auth()->user();
+//
+        return $this->apiResponseSuccess(['data' => $this->companyService->findManyByUserWithLimits($user)]);
+    }
     public function delete(Request $request, $company_id)
     {
 
