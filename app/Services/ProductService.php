@@ -187,7 +187,7 @@ class ProductService
             }
 
             // Ensure slug is unique by appending ID if needed
-            $finalSlug = $slug.'-'.$product->sku;
+            $finalSlug = $slug.'-'.$product->product_sku;
             $product->slug = $finalSlug;
             $product->save();
             return $finalSlug;
