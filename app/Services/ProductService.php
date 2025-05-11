@@ -117,7 +117,7 @@ class ProductService
     public function getPhone(SingleProductDTO $productDTO)
     {
 // Step 1: Fetch the product
-        $product = $this->productRepository->findOneById($productDTO->productId);
+        $product = $this->productRepository->findOneByIdOrSlug($productDTO->productId);
 
         if (!$product) {
             return null;
