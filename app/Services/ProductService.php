@@ -124,15 +124,87 @@ class ProductService
         }
         return $product->phone_number;
     }
+
+
+    private function transliterateGeorgian($text) {
+        $georgian = [
+            'ა' => 'a', 'ბ' => 'b', 'გ' => 'g', 'დ' => 'd', 'ე' => 'e',
+            'ვ' => 'v', 'ზ' => 'z', 'თ' => 't', 'ი' => 'i', 'კ' => 'k',
+            'ლ' => 'l', 'მ' => 'm', 'ნ' => 'n', 'ო' => 'o', 'პ' => 'p',
+            'ჟ' => 'zh', 'რ' => 'r', 'ს' => 's', 'ტ' => 't', 'უ' => 'u',
+            'ფ' => 'f', 'ქ' => 'q', 'ღ' => 'gh', 'ყ' => 'y', 'შ' => 'sh',
+            'ჩ' => 'ch', 'ც' => 'ts', 'ძ' => 'dz', 'წ' => 'ts', 'ჭ' => 'ch',
+            'ხ' => 'kh', 'ჯ' => 'j', 'ჰ' => 'h'
+        ];
+
+        return strtr($text, $georgian);
+    }
+    private function slugDetection($product)
+    {
+
+
+            $title = $product->title ?? '';
+
+            // Check if title contains Georgian characters
+            if (preg_match('/[\x{10A0}-\x{10FF}]/u', $title)) {
+                // Add "iyideba" prefix for Georgian titles
+                $slug = 'iyideba-';
+
+                // Transliterate Georgian to English
+                $transliteratedTitle = $this->transliterateGeorgian($title);
+                $slug .= $transliteratedTitle;
+            } else {
+                // For non-Georgian titles, just use the title
+                $slug = $title;
+            }
+
+            // Convert to lowercase and replace spaces with dashes
+            $slug = mb_strtolower($slug);
+            $slug = preg_replace('/\s+/', '-', $slug);
+
+            // Remove any non-alphanumeric characters except dashes
+            $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+
+            // Remove consecutive dashes
+            $slug = preg_replace('/-+/', '-', $slug);
+
+            // Trim dashes from beginning and end
+            $slug = trim($slug, '-');
+
+            // Add weight and price if available
+            $additionalInfo = [];
+
+            if (!empty($product->weight)) {
+                $additionalInfo[] = 'wona-' . $product->weight . 'g';
+            }
+
+            if (!empty($product->price)) {
+                $additionalInfo[] = 'fasi-' . $product->price . 'lari';
+            }
+
+            if (!empty($additionalInfo)) {
+                $slug .= '-' . implode('-', $additionalInfo);
+            }
+
+            // Ensure slug is unique by appending ID if needed
+            $finalSlug = $slug.'-'.$product->sku;
+            $product->slug = $finalSlug;
+            $product->save();
+            return $finalSlug;
+
+    }
     public function findOne(SingleProductDTO $productDTO)
     {
 // Step 1: Fetch the product
-        $product = $this->productRepository->findOneById($productDTO->productId);
+        $product = $this->productRepository->findOneByIdOrSlug($productDTO->productId);
 
         if (!$product) {
             return null;
         }
 
+        if (empty($product?->slug) || is_null($product?->slug)) {
+            $this->slugDetection($product);
+        }
 // Step 2: Get entity ID and type from created_by
         $entityId = $product->created_by['id'] ?? null;
         $entityType = $product->created_by['type'] ?? null;

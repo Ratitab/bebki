@@ -10,10 +10,11 @@ class ProductRepository
 {
     public function __construct(
         private readonly Product $productModel,
-    ) {
+    )
+    {
     }
 
-    public function findMany($type, $createdById, $category,$gem,$material,$gender,$min_price,$max_price,$city,$search,$tags,$stamp,$weight,$customization_available,$isPaidAdv=null)
+    public function findMany($type, $createdById, $category, $gem, $material, $gender, $min_price, $max_price, $city, $search, $tags, $stamp, $weight, $customization_available, $isPaidAdv = null)
     {
         $query = $this->productModel;
 
@@ -63,7 +64,7 @@ class ProductRepository
         // Search term (assuming you want to search in name and description)
         if ($search) {
             $searchTerm = $search;
-            $query = $query->where(function($q) use ($searchTerm) {
+            $query = $query->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
                     ->orWhere('description', 'like', "%{$searchTerm}%");
             });
@@ -91,13 +92,12 @@ class ProductRepository
                 (bool)$customization_available);
         }
 
-        if($isPaidAdv == 1){
+        if ($isPaidAdv == 1) {
             $query = $query->where('is_paid_adv', 1);
         }
-        if($isPaidAdv === 0){
+        if ($isPaidAdv === 0) {
             $query = $query->where('is_paid_adv', 0);
         }
-
 
 
         // Sort by update_date in descending order by default
@@ -106,11 +106,34 @@ class ProductRepository
         return $query->paginate(12);
     }
 
-        public function findOneById($id)
+    public function findOneById($id)
     {
-        return $this->productModel->where('_id',$id)->first();
+        return $this->productModel->where('_id', $id)->first();
     }
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender, $phoneNumber,$description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
+
+    public function findOneBySlug($slug)
+    {
+        return $this->productModel->where('slug', $slug)->first();
+    }
+
+
+    public function findOneByIdOrSlug($identifier)
+    {
+        // Determine if it's a MongoDB ID or slug
+        if ($this->isValidMongoId($identifier)) {
+            return $this->findOneById($identifier);
+        } else {
+            return $this->findOneBySlug($identifier);
+        }
+    }
+
+    private function isValidMongoId($id)
+    {
+        // MongoDB ObjectId validation
+        return is_string($id) && preg_match('/^[0-9a-fA-F]{24}$/', $id);
+    }
+
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
     {
         $product = new $this->productModel;
         return $this->setProductAttributes(
@@ -136,7 +159,7 @@ class ProductRepository
         );
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender,$phoneNumber, $description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
     {
         $product = $this->findOneById($id);
         if (!$product) {
@@ -180,12 +203,12 @@ class ProductRepository
         return $product;
     }
 
-    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags,$imageUrls,$passportUrls)
+    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
     {
         if (!isset($product->product_sku)) {
             $product->product_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
         }
-        if(!isset($product->is_paid_adv)){
+        if (!isset($product->is_paid_adv)) {
             $product->is_paid_adv = 0;
         }
         $product->created_by = ['id' => $createdBy['id'], 'type' => $createdBy['type']];
@@ -200,7 +223,7 @@ class ProductRepository
         $product->gender = $gender;
         $product->phone_number = $phoneNumber;
         $product->description = $description;
-        $product->customization = ['available' => !is_null($customization) ? $customization['available'] :false, 'details' => !is_null($customization)? $customization['details'] : ''];
+        $product->customization = ['available' => !is_null($customization) ? $customization['available'] : false, 'details' => !is_null($customization) ? $customization['details'] : ''];
         $product->city = $city;
         $product->price = (float)$price;
         if (!isset($product->views_count)) {
@@ -227,7 +250,7 @@ class ProductRepository
 
     public function sold($id)
     {
-        $product =  $this->productModel->where('_id', $id)->first();
+        $product = $this->productModel->where('_id', $id)->first();
         $product->is_sold = 1;
         $product->save();
         return $product;
