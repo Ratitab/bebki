@@ -44,9 +44,9 @@ return [
     'pearls' => [
         'custom' => [
             'package' => 'custom',
-            'price' => 10,
+            'price' => 15,
             'limit_count' => 1,
-            'price_per_post' => 10,
+            'price_per_post' => 15,
             'savings' => 0,       // (10 - 9.5) × 50 = 25 GEL savings
         ],
         'small' => [

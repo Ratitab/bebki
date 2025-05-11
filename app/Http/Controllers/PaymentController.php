@@ -45,7 +45,7 @@ class PaymentController extends Controller
         $pack = null;
         if (preg_match('/^custom_(\d+)$/', $request->package, $matches)) {
             $boughtLimits = $matches[1];
-            $price = (int)$matches[1] * $packages['custom']['price'];
+            $price = (int)$matches[1] * ($matches[1] > 10 ? 10 : 15);
             $pack = explode('_',$request->package)[0];
         } else {
             $price = $packages[$request->package]['price'];
