@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('otp_codes', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('identifier');
+            $table->string('phone')->nullable();
             $table->string('code');
             $table->boolean('is_used')->default(0);
             $table->string('type')->nullable();

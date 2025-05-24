@@ -106,7 +106,8 @@ class AuthenticationController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
         $username = strtolower(trim($request->username));
-        $otp = $this->authenticationService->otpRegistration($username);
+        $phone = trim($request?->information?->phone);
+        $otp = $this->authenticationService->otpRegistration($username,$phone);
         if ($otp) {
             return $this->apiResponseSuccess(['data' => $otp]);
         }

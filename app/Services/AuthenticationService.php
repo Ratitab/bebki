@@ -57,12 +57,12 @@ class AuthenticationService
         return $user;
     }
 
-    public function otpRegistration($username)
+    public function otpRegistration($username,$phone)
     {
         $otp = random_int(100000, 999999);
 
         // Create the OTP code in the service
-        $this->otpCodeService->create($username, $otp, 'registration');
+        $this->otpCodeService->create($username,$phone, $otp, 'registration');
 
         // Email content
         $emailContent = "Hello,\n\nYour OTP code for registration is: $otp\n\nIf you did not request this, please ignore this email.\n\nThank you!";

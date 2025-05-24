@@ -11,9 +11,9 @@ class OtpCodeService
     {
     }
 
-    public function create($identifier,$code,$type)
+    public function create($identifier,$phone,$code,$type)
     {
-        return $this->otpCodeRepository->create($identifier,$code,$type);
+        return $this->otpCodeRepository->create($identifier,$phone,$code,$type);
     }
 
     public function makeUsed($identifier, $code,$type,$is_used)
