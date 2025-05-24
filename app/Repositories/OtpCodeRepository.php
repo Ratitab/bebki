@@ -14,7 +14,7 @@ class OtpCodeRepository
     ) {
     }
 
-    public function create($identifier,$phone, $code,$type)
+    public function create($identifier,$code,$type,$phone=null)
     {
         $otp = new $this->otpCodeModel;
         $otp->id = Str::uuid();
