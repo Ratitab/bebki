@@ -236,7 +236,10 @@ class ProductService
 // Step 5: Transform the product
         unset($product->created_by);
         unset($product->representative);
-        unset($product->phone_number);
+//        unset($product->phone_number);
+        if (isset($product->phone_number)) {
+            $product->phone_number = substr_replace($product->phone_number, '***', -3);
+        }
         $product->creator = $creator;
         $product->is_favourite = $isFavourite;
 
