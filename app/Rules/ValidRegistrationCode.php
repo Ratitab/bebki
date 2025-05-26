@@ -21,7 +21,7 @@ class ValidRegistrationCode implements ValidationRule
             ->where('identifier', $this->identifier)
             ->where('type', 'registration')
             ->where('is_used', false)
-            ->where('created_at', '>', Carbon::now()->subMinutes(5))
+            ->where('created_at', '>', Carbon::now('UTC')->subMinutes(5))
             ->exists();
 
         if (!$validCode) {

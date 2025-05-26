@@ -77,7 +77,7 @@ class AuthenticationController extends Controller
             [
                 'username' => ['required',new ValidUniqueUser],
                 'password' => 'required',
-                'code' => ['required', new ValidRegistrationCode($request->username)],
+                'code' => ['required', new ValidRegistrationCode(strtolower(trim($request->username)))],
             ]
         );
         if ($validator->fails()) {
