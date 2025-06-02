@@ -249,7 +249,7 @@ class ProductService
     public function makeFavourite($user, $dataId)
     {
         $data = $this->productRepository->findOneById($dataId);
-        return $this->favouriteRepository->createOrDelete($user->id, $dataId, $data, 'product');
+        return $this->favouriteRepository->createOrDelete($user->id, $data['id'], $data, 'product');
     }
 
     public function countUserFavourites($userId)
