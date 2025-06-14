@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\PawnshopProductController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LimitInformationController;
 use App\Http\Controllers\PaymentController;
@@ -33,7 +34,7 @@ Route::get('/cities', [CountryController::class, 'citiesFindByCountryId']);
 Route::get('search-products', [ProductController::class, 'index']);
 Route::get('single-product/{productId}', [ProductController::class, 'show'])->middleware([TrackProductViews::class]);
 Route::post('get-phone/{productId}', [ProductController::class, 'getPhone'])->middleware([TurnstileMiddleware::class]);
-
+Route::post('/upload-for-pawnshop', [PawnshopProductController::class, 'store']);
 
 /*
 |--------------------------------------------------------------------------
@@ -131,6 +132,12 @@ Route::middleware(['auth:api'])->group(function () {
 
         Route::post('/sold/{product_id}', [ProductController::class, 'sold']);
     });
+
+    Route::prefix('pawnshop-products')->middleware('auth:api')->group(function () {
+        Route::get('/', [PawnshopProductController::class, 'find_many_by_pawnshop_id']);
+        Route::post('/change-status', [PawnshopProductController::class, 'change_status']);
+    });
+
 
 
     Route::prefix('payment')->group(function () {
