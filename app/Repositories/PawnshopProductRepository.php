@@ -90,10 +90,6 @@ class PawnshopProductRepository
         $product->description = $description;
         $product->image_urls = $imageUrls;
         $product->review = $review;
-        if (!isset($product->update_date)) {
-            $product->update_date = Carbon::now()->toDateTime();
-        }
-
         $product->save();
         return $product;
     }

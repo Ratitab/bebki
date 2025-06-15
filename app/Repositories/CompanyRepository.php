@@ -14,6 +14,7 @@ class CompanyRepository
     public function __construct(
         private readonly Company $companyModel,
         private readonly CompanyInformation $companyInformationModel,
+        private readonly AddressRepository $addressRepository,
     ) {
     }
 
@@ -107,15 +108,15 @@ class CompanyRepository
                 'company_information_types.name'
             )
             ->get();
-
+        $companyAddress = $this->addressRepository->findAddressByCompanyId($companyId);
         // Step 3: Transform information into associative array
         $informationCollection = [];
         foreach ($companyInformation as $info) {
             $informationCollection[$info->name] = $info->value;
         }
-
         // Step 4: Set the information attribute
         $company->setAttribute('information', $informationCollection);
+        $company->setAttribute('addresses', $companyAddress);
 
         return $company;
     }

@@ -12,6 +12,11 @@ class AddressRepository
         private readonly Address $addressModel,
     ) {
     }
+
+    public function findAddressByCompanyId($company_id)
+    {
+        return $this->addressModel->where('company_id',$company_id)->first();
+    }
     public function createOrUpdate($company_id, $address,$city,$state,$lat,$long,$email,$phone,$postal_code,$is_same_time,$start_time,$end_time,$address_id = null)
     {
 
