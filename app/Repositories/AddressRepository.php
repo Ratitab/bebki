@@ -15,7 +15,17 @@ class AddressRepository
 
     public function findAddressByCompanyId($company_id)
     {
-        return $this->addressModel->where('company_id',$company_id)->first();
+        return $this->addressModel
+            ->leftJoin('cities', function ($join) {
+                $join->on('addresses.city', '=', \DB::raw('CAST(cities.id AS VARCHAR)'));
+            })
+            ->where('addresses.company_id', $company_id)
+            ->whereNull('addresses.deleted_at')
+            ->select(
+                'addresses.*',
+                'cities.name as city'
+            )
+            ->first();
     }
     public function createOrUpdate($company_id, $address,$city,$state,$lat,$long,$email,$phone,$postal_code,$is_same_time,$start_time,$end_time,$address_id = null)
     {
