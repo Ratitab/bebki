@@ -69,7 +69,14 @@ Route::post('/signin', [AuthenticationController::class, 'login'])->middleware(T
 Route::post('/otp-registration', [AuthenticationController::class, 'otp_registration'])->middleware(TurnstileMiddleware::class);
 Route::post('/otp-forgot-password', [AuthenticationController::class, 'otp_forgot_password'])->middleware(TurnstileMiddleware::class);
 Route::post('/forgot-password', [AuthenticationController::class, 'forgot_password'])->middleware(TurnstileMiddleware::class);
-
+/*
+|--------------------------------------------------------------------------
+| UPLOAD IMAGE FOR PAWNSHOP
+|--------------------------------------------------------------------------
+|
+|
+*/
+Route::post('/upload-pawnshop-images', [ProductController::class, 'upload_images']);
 /*
 |--------------------------------------------------------------------------
 | AUTHORIZED ENDPOINTS

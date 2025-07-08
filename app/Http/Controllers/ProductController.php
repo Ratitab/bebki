@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -238,7 +239,7 @@ class ProductController extends Controller
             return $this->apiResponseFail($validator->messages());
         }
         $images = $request->file('images');
-        $user = auth()->user();
+        $user = auth()->user() ?? (object)['id' => (string) Str::uuid()];
         return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProductImages($images, $user, $request->image_for)]);
     }
 
