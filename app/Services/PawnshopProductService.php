@@ -45,11 +45,15 @@ class PawnshopProductService
             $companyEmail = $this->companyInformationService->findOneByCompanyAndTypeId($company_id,2)['value'];
             if($companyEmail) {
                 $emailContent = "ჯიგოლდზე თქვენ შესამოწმებლად დაგიმატეს ახალი პროდუქტი, შეგიძლია ნახო აქ: https://gegold.ge/dashboard-company/".$company_id;
-                // Send OTP via email
-                Mail::raw($emailContent, function ($message) use ($companyEmail,$title) {
-                    $message->to($companyEmail)
-                    ->subject('GEGOLD - ახალი პროდუქტი'.$title);
-                });
+                try {
+                    Mail::raw($emailContent, function ($message) use ($companyEmail,$title) {
+                        $message->to($companyEmail)
+                        ->subject('GEGOLD - ახალი პროდუქტი'.$title);
+                    });
+                } catch (\Throwable $e) {
+                    \Log::error('Failed to send email: ' . $e->getMessage());
+                    // Don't throw - let product creation continue
+                }
             }
             return $product;
         }
