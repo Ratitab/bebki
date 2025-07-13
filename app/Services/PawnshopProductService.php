@@ -44,7 +44,7 @@ class PawnshopProductService
             // Email content
             $companyEmail = $this->companyInformationService->findOneByCompanyAndTypeId($company_id,2)['value'];
             if($companyEmail) {
-                $emailContent = "ჯიგოლდზე თქვენ შესამოწმებლად დაგიმატეს ახალი პროდუქტი, შეგიძლია ნახო აქ: https://gegold.ge/dashboard-company/".$company_id;
+                $emailContent = "თქვენ მიიღეთ ახალი შეთავაზება. გთხოვთ გადახვიდეთ პირად კაბინეტში და ნახოთ შეტყობინება. \n https://gegold.ge/dashboard-company/".$company_id;
                 try {
                     Mail::raw($emailContent, function ($message) use ($companyEmail,$title) {
                         $message->to($companyEmail)
