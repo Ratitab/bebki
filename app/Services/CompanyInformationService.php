@@ -12,6 +12,10 @@ class CompanyInformationService
     {
     }
 
+    public function findOneByCompanyAndTypeId($company_id,$company_information)
+    {
+        return $this->companyInformationRepository->findOneByCompanyAndTypeId($company_id,$company_information);
+    }
     public function create($company_id,$company_information)
     {
         return $this->companyInformationRepository->createCompanyInformation($company_id,$company_information);

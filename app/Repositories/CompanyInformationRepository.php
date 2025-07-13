@@ -15,6 +15,11 @@ class CompanyInformationRepository
     {
     }
 
+    public function findOneByCompanyAndTypeId($companyId,$informationTypeId)
+    {
+        return $this->companyInformationModel->where('company_id', $companyId)
+            ->where('company_information_type_id', $informationTypeId)->first();
+    }
     public function createCompanyInformation($companyId, $companyInformation)
     {
         $informationTypes = $this->companyInformationTypeRepository->getAllInformationTypes();
