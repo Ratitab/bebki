@@ -235,10 +235,19 @@ class ProductService
         }
 // Step 5: Transform the product
         unset($product->created_by);
+        $representative = $product->representative['user_id'];
         unset($product->representative);
 //        unset($product->phone_number);
+        $hide_phone = true;
         if (isset($product->phone_number)) {
-            $product->phone_number = substr_replace($product->phone_number, '***', -3);
+            if($productDTO->isAuthenticated()){
+                if($productDTO->toArray()['user_id'] == $representative){
+                    $hide_phone = false;
+                }
+            }
+            if($hide_phone){
+                $product->phone_number = substr_replace($product->phone_number, '***', -3);
+            }
         }
         $product->creator = $creator;
         $product->is_favourite = $isFavourite;

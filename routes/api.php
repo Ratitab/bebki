@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\GoogleMerchantController;
 use App\Http\Controllers\PawnshopProductController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LimitInformationController;
@@ -14,6 +15,14 @@ use Illuminate\Support\Facades\Route;
 use NjoguAmos\Turnstile\Http\Middleware\TurnstileMiddleware;
 
 
+/*
+|--------------------------------------------------------------------------
+| GOOGLE MERCHANT
+|--------------------------------------------------------------------------
+|
+|
+*/
+Route::get('/google-merchant-feed.xml', [GoogleMerchantController::class, 'feed']);
 /*
 |--------------------------------------------------------------------------
 | COUNTRY
