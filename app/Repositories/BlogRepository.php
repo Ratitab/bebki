@@ -20,7 +20,9 @@ class BlogRepository
             $searchTerm = $search;
             $query = $query->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
-                    ->orWhere('description', 'like', "%{$searchTerm}%");
+                    ->orWhere('small_description', 'like', "%{$searchTerm}%")
+                    ->orWhere('slug', 'like', "%{$searchTerm}%")
+                    ->orWhere('category', 'like', "%{$searchTerm}%");
             });
         }
 
