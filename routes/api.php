@@ -94,10 +94,9 @@ Route::post('/upload-pawnshop-images', [ProductController::class, 'upload_images
 |
 */
 Route::middleware(['auth:api'])->group(function () {
-    Route::get('/auth/check', function(Request $request){
-        $user = auth()->user();
-        return $user->append('information');
-    });
+
+    Route::get('/auth/check', [AuthenticationController::class, 'check_user']);
+
     Route::post('/update-email-or-phone', [AuthenticationController::class, 'update_email_or_phone'])->middleware(TurnstileMiddleware::class);
     Route::post('/upload-profile-image', [AuthenticationController::class, 'upload_images']);
     Route::post('/otp-update-email-or-phone', [AuthenticationController::class, 'otp_update_email_or_phone'])->middleware(TurnstileMiddleware::class);

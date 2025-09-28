@@ -9,6 +9,7 @@ use App\Rules\ValidUpdateEmailOrPhoneCode;
 use App\Rules\ValidUser;
 use App\Services\AuthenticationService;
 use App\Services\OtpCodeService;
+use App\Services\PlatformFeatureService;
 use App\Services\UploadService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
@@ -18,7 +19,9 @@ class AuthenticationController extends Controller
 {
     use Resp;
 
-    public function __construct(private readonly AuthenticationService $authenticationService, private readonly OtpCodeService   $otpCodeService, private readonly UploadService $uploadService)
+    public function __construct(private readonly AuthenticationService $authenticationService, private readonly OtpCodeService   $otpCodeService,
+                                private readonly UploadService $uploadService,
+                                private readonly PlatformFeatureService $platformFeatureService)
     {
     }
 
@@ -266,6 +269,16 @@ class AuthenticationController extends Controller
         $images = $request->file('images');
         $user = auth()->user();
         return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProductImages($images,$user,$request->image_for)]);
+    }
+
+    public function check_user()
+    {
+        $user = auth()->user();
+        $user->setAttribute(
+            'platform_features',
+            $this->platformFeatureService->findByUserId($user->id)
+        );
+        return $user->append('information');
     }
 
     public function logout(Request $request)
