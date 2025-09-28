@@ -29,17 +29,17 @@ class AuthenticationService
 
         $authUser = auth()->loginUsingId($user->user_id);
 
-        $existingToken = $authUser->tokens()
-            ->where('name', 'Bearer')
-            ->where('revoked', false)
-            ->where('expires_at', '>', now())
-            ->first();
-
-        if ($existingToken) {
-            return Cache::remember('user_token_' . $user->user_id, now()->addDays(30), function () use ($authUser) {
-                return $authUser->createToken('Bearer')->accessToken;
-            });
-        }
+//        $existingToken = $authUser->tokens()
+//            ->where('name', 'Bearer')
+//            ->where('revoked', false)
+//            ->where('expires_at', '>', now())
+//            ->first();
+//
+//        if ($existingToken) {
+//            return Cache::remember('user_token_' . $user->user_id, now()->addDays(30), function () use ($authUser) {
+//                return $authUser->createToken('Bearer')->accessToken;
+//            });
+//        }
 
         return $authUser->createToken('Bearer')->accessToken;
     }
