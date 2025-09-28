@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\GoogleMerchantController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\LimitInformationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SystemNotificationController;
 use App\Http\Middleware\TrackProductViews;
+use App\Http\Middleware\TrackBlogViews;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use NjoguAmos\Turnstile\Http\Middleware\TurnstileMiddleware;
@@ -44,6 +46,16 @@ Route::get('search-products', [ProductController::class, 'index']);
 Route::get('single-product/{productId}', [ProductController::class, 'show'])->middleware([TrackProductViews::class]);
 Route::post('get-phone/{productId}', [ProductController::class, 'getPhone'])->middleware([TurnstileMiddleware::class]);
 Route::post('/upload-for-pawnshop', [PawnshopProductController::class, 'store']);
+
+/*
+|--------------------------------------------------------------------------
+| BLOGS
+|--------------------------------------------------------------------------
+|
+|
+*/
+Route::get('/blogs', [BlogController::class, 'index']);
+Route::get('/single-blog/{slug}', [BlogController::class, 'show'])->middleware([TrackBlogViews::class]);
 
 /*
 |--------------------------------------------------------------------------
@@ -158,6 +170,15 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('payment')->group(function () {
         Route::post('/stripe/create',[PaymentController::class,'createStripePayment']);
         Route::get('/transactions',[PaymentController::class,'findManyByUserId']);
+    });
+
+    Route::prefix('blog')->group(function () {
+        Route::get('/', [BlogController::class, 'index']);
+        Route::get('/{slug}', [BlogController::class, 'show']);
+        Route::post('/add', [BlogController::class, 'store']);
+        Route::put('/update/{id}', [BlogController::class, 'update']);
+        Route::delete('/delete/{id}', [BlogController::class, 'delete']);
+        Route::post('/upload-images', [BlogController::class, 'upload_images']);
     });
 
 //    Route::prefix('limits')->group(function () {
