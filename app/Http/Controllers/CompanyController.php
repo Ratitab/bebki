@@ -81,6 +81,47 @@ class CompanyController extends Controller
         $user = auth()->user();
         return $this->apiResponseSuccess(['data' => $this->uploadService->uploadProfileOrCompanyImage($images,$user,$request->image_for)]);
     }
+
+    public function upload_cover_image(Request $request) {
+        $validator = Validator::make(
+            [
+                'images' => $request->file('images'),
+                'image_for' => $request->image_for,
+            ],
+            [
+                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'image_for' => ['required','in:individual,store,pawnshop,stock_exchange'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $images = $request->file('images');
+        $user = auth()->user();
+        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadCompanyCoverImages($images,$user,$request->image_for)]);
+    }
+
+    public function upload_portfolio_images(Request $request) {
+        $validator = Validator::make(
+            [
+                'images' => $request->file('images'),
+                'image_for' => $request->image_for,
+            ],
+            [
+                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'image_for' => ['required','in:individual,store,pawnshop,stock_exchange'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $images = $request->file('images');
+        $user = auth()->user();
+        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadPortolioImages($images,$user,$request->image_for)]);
+    }
+
     public function store(Request $request)
     {
 

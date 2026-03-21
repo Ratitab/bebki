@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Users\ExclusiveUser;
+use App\Models\Users\User;
 use App\Models\Users\UserInformation;
 use Illuminate\Support\Facades\DB;
 
@@ -12,6 +13,7 @@ class UserInformationRepository
     public function __construct(
         private readonly UserInformation $userInformationModel,
         private readonly ExclusiveUser $exclusiveUserModel,
+        private readonly User $userModel,
         private readonly UserInformationTypeRepository $userInformationTypeRepository,
     )
     {
@@ -87,16 +89,22 @@ class UserInformationRepository
     }
 
 
-
     public function findUserId($username)
     {
+        // First try to find the user by username in the users table
+        $user = $this->userModel->where('username', $username)
+            ->select('id as user_id', 'password')
+            ->first();
+
+        if ($user) {
+            return $user;
+        }
+
+        // If not found in users table, try to find in user_information table
         return $this->userInformationModel
             ->whereIn('user_information_type_id', [5, 6])
-            ->where(function($query) use ($username) {
-                $query->where('value', $username)
-                    ->orWhere('users.username', $username);
-            })
-            ->leftJoin('users', 'user_information.user_id', '=', 'users.id')
+            ->where('value', $username)
+            ->join('users', 'user_information.user_id', '=', 'users.id')
             ->select('user_information.user_id', 'users.password')
             ->first();
     }

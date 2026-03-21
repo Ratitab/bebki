@@ -1,0 +1,64 @@
+services:
+    app:
+        build:
+            context: ..
+            dockerfile: docker/Dockerfile
+        container_name: bebki_app
+        ports:
+            - "8585:8585"
+        depends_on:
+            - mongo
+            - redis
+            - postgres
+        networks:
+            - bebki_net
+        env_file:
+            - ../.env  # Load .env from project root
+
+    mongo:
+        image: mongo
+        container_name: mongo
+        restart: unless-stopped
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongo_data:/data/db
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: doadmin
+            MONGO_INITDB_ROOT_PASSWORD: e9PJ501d362Ox7Ly
+        networks:
+            - bebki_net
+
+    redis:
+        image: redis:latest
+        container_name: redis
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis_data:/data
+        networks:
+            - bebki_net
+    postgres:
+        image: postgres:latest
+        container_name: postgres_bebki
+        restart: unless-stopped
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_bebki_data:/var/lib/postgresql
+        environment:
+            POSTGRES_DB: bebki
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: Z9Pr501F362Ox7yX
+        networks:
+            - bebki_net
+
+volumes:
+    mongo_data:
+    redis_data:
+    postgres_bebki_data:
+
+networks:
+    bebki_net:
+        driver: bridge

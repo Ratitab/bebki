@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Constants\ShopStatus;
 use App\Traits\Resp;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -52,6 +53,7 @@ class AuthenticationService
         } elseif (preg_match('/^\+?[0-9]{7,15}$/', $username)) {
             $user_information['phone'] = $username;
         }
+        $user_information['shop_status'] = ShopStatus::USER;
         $this->userInformationService->create($user->id, $user_information);
         $user['access_token'] = $user->createToken('Bearer')->accessToken;
         return $user;
@@ -149,6 +151,11 @@ class AuthenticationService
     {
         $this->userService->changeForgotPassword($username, $password);
         return 1;
+    }
+
+    public function passwordAssign($email, $password)
+    {
+        return $this->userService->changeForgotPassword($email, $password);
     }
 
 

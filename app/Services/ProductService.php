@@ -88,18 +88,22 @@ class ProductService
             // Prepare creator information based on type
             if ($entityType === 'store' || $entityType ==='pawnshop' || $entityType ==='stock_exchange') {
                 $company_data = $companies->get($entityId);
-                $product->creator = [
-                    'id' => $entityId,
-                    'type' => $entityType,
-                    'name' => $company_data->getAttributes()['information']['name'] ?? null,
-                    'logo' => $company_data->getAttributes()['information']['logo'] ?? null
-                ];
+                $product->creator = $company_data
+                    ? [
+                        'id' => $entityId,
+                        'type' => $entityType,
+                        'name' => $company_data->getAttributes()['information']['name'] ?? null,
+                        'logo' => $company_data->getAttributes()['information']['logo'] ?? null
+                    ]
+                    : null;
             } elseif ($entityType === 'individual') {
                 $user_data = $users->get($entityId);
-                $product->creator = [
-                    'first_name' => $user_data->getAttributes()['information']['first_name'] ?? null,
-                    'last_name' => $user_data->getAttributes()['information']['last_name'] ?? null
-                ];
+                $product->creator = $user_data
+                    ? [
+                        'first_name' => $user_data->getAttributes()['information']['first_name'] ?? null,
+                        'last_name' => $user_data->getAttributes()['information']['last_name'] ?? null
+                    ]
+                    : null;
             } else {
                 $product->creator = null;
             }
@@ -278,14 +282,14 @@ class ProductService
     {
         return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls) {
 
-            $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
+            // $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
 
-            if (!$freeLimit) {
-                $limit = $this->limitRepository->useLimit($createdBy['id']);
-                if (!$limit) {
-                    return false;
-                }
-            }
+            // if (!$freeLimit) {
+            //     $limit = $this->limitRepository->useLimit($createdBy['id']);
+            //     if (!$limit) {
+            //         return false;
+            //     }
+            // }
 
             return $this->productRepository->create(
                 $createdBy,

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\GoogleMerchantController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\PawnshopProductController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LimitInformationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SidebarRouteController;
 use App\Http\Controllers\SystemNotificationController;
 use App\Http\Middleware\TrackProductViews;
 use App\Http\Middleware\TrackBlogViews;
@@ -43,8 +45,8 @@ Route::get('/cities', [CountryController::class, 'citiesFindByCountryId']);
 |
 */
 Route::get('search-products', [ProductController::class, 'index']);
-Route::get('single-product/{productId}', [ProductController::class, 'show'])->middleware([TrackProductViews::class]);
-Route::post('get-phone/{productId}', [ProductController::class, 'getPhone'])->middleware([TurnstileMiddleware::class]);
+Route::get('single-product/{productId}', [ProductController::class, 'show']); //->middleware([TrackProductViews::class]);
+Route::post('get-phone/{productId}', [ProductController::class, 'getPhone']); // ->middleware([TurnstileMiddleware::class]);
 Route::post('/upload-for-pawnshop', [PawnshopProductController::class, 'store']);
 
 /*
@@ -56,6 +58,7 @@ Route::post('/upload-for-pawnshop', [PawnshopProductController::class, 'store'])
 */
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/single-blog/{slug}', [BlogController::class, 'show'])->middleware([TrackBlogViews::class]);
+Route::get('/announcements', [AnnouncementsController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +70,13 @@ Route::get('/single-blog/{slug}', [BlogController::class, 'show'])->middleware([
 Route::get('company-list', [CompanyController::class, 'findAll']);
 Route::get('company-list/{company_id}', [CompanyController::class, 'findSingle']);
 Route::post('exclusive-user', [AuthenticationController::class, 'exclusive_users']);
+
+/*
+|--------------------------------------------------------------------------
+| NAVIGATION / SIDEBAR ROUTES (public, source of truth in MongoDB)
+|--------------------------------------------------------------------------
+*/
+Route::get('sidebar-routes', [SidebarRouteController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
@@ -85,11 +95,13 @@ Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
 |
 |
 */
-Route::post('/signup', [AuthenticationController::class, 'registration'])->middleware(TurnstileMiddleware::class);
-Route::post('/signin', [AuthenticationController::class, 'login'])->middleware(TurnstileMiddleware::class);
+Route::post('/signup', [AuthenticationController::class, 'registration']);//->middleware(TurnstileMiddleware::class);
+Route::post('/signin', [AuthenticationController::class, 'login']);//->middleware(TurnstileMiddleware::class);
 Route::post('/otp-registration', [AuthenticationController::class, 'otp_registration'])->middleware(TurnstileMiddleware::class);
 Route::post('/otp-forgot-password', [AuthenticationController::class, 'otp_forgot_password'])->middleware(TurnstileMiddleware::class);
 Route::post('/forgot-password', [AuthenticationController::class, 'forgot_password'])->middleware(TurnstileMiddleware::class);
+Route::post('/register-shop', [AuthenticationController::class, 'register_shop']); //->middleware(TurnstileMiddleware::class);
+Route::post('/password-assign/{token}', [AuthenticationController::class, 'password_assign']);
 /*
 |--------------------------------------------------------------------------
 | UPLOAD IMAGE FOR PAWNSHOP
@@ -136,8 +148,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('company')->group(function () {
         Route::get('/', [CompanyController::class, 'index']);
 
-        Route::post('/add', [CompanyController::class, 'store'])->middleware(TurnstileMiddleware::class);
+        Route::post('/add', [CompanyController::class, 'store']);//->middleware(TurnstileMiddleware::class);
         Route::post('/upload-profile-image', [CompanyController::class, 'upload_images']);
+        Route::post('/upload-cover-image', [CompanyController::class, 'upload_cover_image']);
+        Route::post('/upload-portfolio-images', [CompanyController::class, 'upload_portfolio_images']);
         Route::put('/update/{company_id}', [CompanyController::class, 'update'])->middleware(TurnstileMiddleware::class);
         Route::delete('/delete/{company_id}', [CompanyController::class, 'delete'])->middleware(TurnstileMiddleware::class);
 
@@ -170,6 +184,13 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('payment')->group(function () {
         Route::post('/stripe/create',[PaymentController::class,'createStripePayment']);
         Route::get('/transactions',[PaymentController::class,'findManyByUserId']);
+    });
+
+    Route::prefix('announcement')->group(function () {
+        Route::get('/', [AnnouncementsController::class, 'index']);
+        Route::post('/add', [AnnouncementsController::class, 'store']);
+        Route::delete('/delete/{id}', [AnnouncementsController::class, 'delete']);
+        Route::post('/upload-images', [AnnouncementsController::class, 'upload_images']);
     });
 
     Route::prefix('blog')->group(function () {
