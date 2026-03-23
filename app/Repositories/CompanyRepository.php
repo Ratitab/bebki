@@ -120,12 +120,11 @@ class CompanyRepository
 
         return $company;
     }
-    public function create($identification_number, $company_type_id)
+    public function create($company_type_id)
     {
         $company = new $this->companyModel;
         $company->id = Str::uuid();
         $company->company_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
-        $company->identification_number = $identification_number;
         $company->company_type_id = $company_type_id;
         $company->is_active = 1;
         $company->save();

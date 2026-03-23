@@ -74,8 +74,11 @@ RUN chown -R nobody:nobody /var/www/html/storage /var/www/html/bootstrap/cache
 # Expose Octane port
 EXPOSE 8585
 
+# Copy and set entrypoint
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Switch to non-root user
 USER nobody
 
-# Start Octane with Swoole
-CMD ["php", "artisan", "octane:start", "--host=0.0.0.0", "--port=8585"]
+ENTRYPOINT ["/entrypoint.sh"]

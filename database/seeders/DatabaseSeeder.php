@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
 //        ]);
         $this->call(UserInformationTypeSeeder::class);
         $this->call(CompanyInformationTypeSeeder::class);
+        $this->call(CategorySeeder::class);
         $this->call(SupplierUnit::class);
         $this->call(TaxRate::class);
         $this->call(CountriesSeeder::class);

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Constants\ShopStatus;
 use App\Repositories\AddressRepository;
 use App\Repositories\CompanyRepository;
 use App\Repositories\CompanyUserRepository;
@@ -14,7 +15,8 @@ class CompanyService
                                 private readonly CompanyUserRepository     $companyUserRepository,
                                 private readonly AddressService            $addressService,
                                 private readonly CompanyInformationService $companyInformationService,
-                                private readonly LimitService $limitService )
+                                private readonly LimitService              $limitService,
+                                private readonly UserInformationService    $userInformationService)
     {
     }
 
@@ -68,20 +70,26 @@ class CompanyService
         return $this->companyUserRepository->findOneByUser($user->id,$company_id);
     }
 
-    public function create($user, $identification_number, $company_type_id, $company_information, $company_address)
+    public function create($user, $company_type_id, $company_information, $company_address)
     {
-       
-        return \DB::transaction(function () use ($user, $identification_number, $company_type_id, $company_information, $company_address) {
-            $company = $this->companyRepository->create($identification_number, $company_type_id);
+        return \DB::transaction(function () use ($user, $company_type_id, $company_information, $company_address) {
+            $company = $this->companyRepository->create($company_type_id);
+
+            // Ensure payout fields always have a row so they appear in the API response
+            $company_information = array_merge([
+                'IBAN'       => '',
+                'company_id' => '',
+            ], $company_information);
+
             $this->companyInformationService->create($company->id, $company_information);
             foreach ($company_address as $companyAddress) {
                 $this->addressService->createOrUpdate($company->id, $companyAddress['address'], $companyAddress['city'], $companyAddress['state'], $companyAddress['lat'],
                     $companyAddress['long'], $companyAddress['email'],
                     $companyAddress['phone'],
                     $companyAddress['postal_code'], $companyAddress['is_same_time'], $companyAddress['start_time'], $companyAddress['end_time'], null);
-
             }
             $this->companyUserRepository->create($company->id, $user->id);
+            $this->userInformationService->updateShopStatus($user->id, ShopStatus::PENDING);
             return $company;
         });
     }

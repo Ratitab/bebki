@@ -109,6 +109,21 @@ class UserInformationRepository
             ->first();
     }
 
+    public function updateShopStatus(string $userId, string $status): void
+    {
+        $informationTypes = $this->userInformationTypeRepository->getAllInformationTypes();
+        $typeId = $informationTypes['shop_status'] ?? null;
+
+        if (!$typeId) {
+            return;
+        }
+
+        $this->userInformationModel
+            ->where('user_id', $userId)
+            ->where('user_information_type_id', $typeId)
+            ->update(['value' => $status]);
+    }
+
     public function findByUserIdAndType($userId,$typeId)
     {
         return $this->userInformationModel->where('user_id', $userId)

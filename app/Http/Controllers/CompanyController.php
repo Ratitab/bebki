@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Rules\ValidUniqueCompanyIdentification;
 use App\Services\CompanyService;
 use App\Services\UploadService;
 use App\Traits\Resp;
@@ -127,20 +126,16 @@ class CompanyController extends Controller
 
         $validator = Validator::make(
             [
-                'identification_number' => $request->identification_number,
-                'company_type_id' => $request->company_type_id,
                 'company_information' => $request->company_information,
             ],
             [
-                'identification_number' => ['required', new ValidUniqueCompanyIdentification()],
-                'company_type_id' => ['required'],
                 'company_information' => ['required'],
             ]
         );
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $company = $this->companyService->create(auth()->user(), $request->identification_number, $request->company_type_id, $request->company_information, $request->addresses);
+        $company = $this->companyService->create(auth()->user(), $request->company_type_id, $request->company_information, $request->addresses);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }

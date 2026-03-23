@@ -35,6 +35,11 @@ class UserInformationService
         return $this->userInformationRepository->addExclusiveUser($username);
     }
 
+    public function updateShopStatus(string $userId, string $status): void
+    {
+        $this->userInformationRepository->updateShopStatus($userId, $status);
+    }
+
     public function findByUserIdAndType($userId,$typeId)
     {
         return $this->userInformationRepository->findByUserIdAndType($userId,$typeId);

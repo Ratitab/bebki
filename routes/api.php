@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\GoogleMerchantController;
 use App\Http\Controllers\PawnshopProductController;
@@ -36,6 +38,13 @@ Route::get('/google-merchant-feed.xml', [GoogleMerchantController::class, 'feed'
 */
 Route::get('/countries', [CountryController::class, 'index']);
 Route::get('/cities', [CountryController::class, 'citiesFindByCountryId']);
+
+/*
+|--------------------------------------------------------------------------
+| CATEGORIES
+|--------------------------------------------------------------------------
+*/
+Route::get('/categories', [CategoryController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
@@ -207,4 +216,14 @@ Route::middleware(['auth:api'])->group(function () {
 //    });
 
     Route::post('logout', [AuthenticationController::class, 'logout']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['admin.token'])->prefix('admin')->group(function () {
+    Route::get('/companies', [AdminController::class, 'companies']);
+    Route::post('/company/{company_id}/status', [AdminController::class, 'updateStatus']);
 });
