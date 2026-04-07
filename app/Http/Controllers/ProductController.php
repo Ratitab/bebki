@@ -7,9 +7,11 @@ use App\DTO\SingleProductDTO;
 use App\Rules\ValidUniqueCompanyIdentification;
 use App\Rules\ValidUserCompany;
 use App\Rules\ValidUserOrCompanyProduct;
+use App\Constants\ShopStatus;
 use App\Services\CompanyService;
 use App\Services\ProductService;
 use App\Services\UploadService;
+use App\Services\UserInformationService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,8 +23,11 @@ class ProductController extends Controller
 {
     use Resp;
 
-    public function __construct(private readonly ProductService $productService, private readonly UploadService $uploadService)
-    {
+    public function __construct(
+        private readonly ProductService $productService,
+        private readonly UploadService $uploadService,
+        private readonly UserInformationService $userInformationService,
+    ) {
     }
 
 
@@ -99,7 +104,13 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls);
+
+        $shopStatus = $this->userInformationService->getShopStatus($user->id);
+        if ($shopStatus !== ShopStatus::VERIFIED) {
+            return $this->apiResponseFail('Your shop must be verified before you can add products.');
+        }
+
+        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }
@@ -130,7 +141,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size,$request->gender, $request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls);
+        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size,$request->gender, $request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants);
         if ($updateProduct) {
             return $this->apiResponseSuccess(['data' => $updateProduct]);
         }
@@ -301,4 +312,17 @@ class ProductController extends Controller
         return $this->apiResponseFail('Something went wrong');
     }
 
+    /**
+     * GET /products/homepage
+     * Returns popular (most viewed), new (most recent), featured (most favorited) products.
+     */
+    public function homepage()
+    {
+        $feed = $this->productService->homepageFeed();
+        return $this->apiResponseSuccess([
+            'popular'  => array_values($feed['popular']->toArray()),
+            'new'      => array_values($feed['new']->toArray()),
+            'featured' => array_values($feed['featured']->toArray()),
+        ]);
+    }
 }

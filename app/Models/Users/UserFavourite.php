@@ -10,6 +10,8 @@ class UserFavourite extends Model
 {
     use HasFactory, SoftDeletes;
 
-//    protected $keyType = 'string';
-//    public $incrementing = false;
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'user_id', 'product_id'];
 }

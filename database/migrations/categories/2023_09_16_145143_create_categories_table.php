@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->integer('type_id')->nullable();
+            $table->integer('parent_id')->default(0);
             $table->string('icon')->nullable();
             $table->integer('order_id')->default(1);
             $table->timestamps();

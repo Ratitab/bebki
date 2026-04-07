@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\AnnouncementsController;
@@ -54,6 +55,7 @@ Route::get('/categories', [CategoryController::class, 'index']);
 |
 */
 Route::get('search-products', [ProductController::class, 'index']);
+Route::get('products/homepage', [ProductController::class, 'homepage']);
 Route::get('single-product/{productId}', [ProductController::class, 'show']); //->middleware([TrackProductViews::class]);
 Route::post('get-phone/{productId}', [ProductController::class, 'getPhone']); // ->middleware([TurnstileMiddleware::class]);
 Route::post('/upload-for-pawnshop', [PawnshopProductController::class, 'store']);
@@ -140,6 +142,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/change-password', [AuthenticationController::class, 'change_password'])->middleware(TurnstileMiddleware::class);
 
     Route::get('/user/limits', [LimitInformationController::class, 'user_limits']);
+
+    Route::prefix('orders')->group(function () {
+        Route::post('/', [OrderController::class, 'store']);
+        Route::get('/', [OrderController::class, 'index']);
+    });
     Route::get('/user/count-favourites', [ProductController::class, 'count_user_favourites']);
     Route::get('/user/favourites', [ProductController::class, 'user_favourite_products']);
     Route::get('/user/notifications', [SystemNotificationController::class, 'findMany']);
@@ -171,6 +178,16 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/{company_id}', [CompanyController::class, 'show']);
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORIES
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
+    Route::prefix('categories')->group(function () {
+        Route::post('/request', [CategoryController::class, 'request']);
+    });
 
     Route::prefix('product')->group(function () {
         Route::post('/add', [ProductController::class, 'store'])->middleware(TurnstileMiddleware::class);
@@ -226,4 +243,11 @@ Route::middleware(['auth:api'])->group(function () {
 Route::middleware(['admin.token'])->prefix('admin')->group(function () {
     Route::get('/companies', [AdminController::class, 'companies']);
     Route::post('/company/{company_id}/status', [AdminController::class, 'updateStatus']);
+
+    Route::get('/orders', [AdminController::class, 'orders']);
+    Route::post('/orders/{order_id}/status', [AdminController::class, 'updateOrderStatus']);
+
+    Route::get('/categories/requested', [AdminController::class, 'requestedCategories']);
+    Route::post('/categories/{id}/approve', [AdminController::class, 'approveCategory']);
+    Route::delete('/categories/{id}/dismiss', [AdminController::class, 'dismissCategory']);
 });

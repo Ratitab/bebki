@@ -103,7 +103,21 @@ class FavouriteRepository
     {
         $favourite = $this->favouriteModel->where('user_id', $userId)->where('data_id', $dataId)->first();
         if ($favourite) {
+            // Decrement favorite_count on the product (floor at 0)
+            $product = Product::where('_id', $dataId)->first();
+            if ($product) {
+                $current = (int) ($product->favorite_count ?? 0);
+                $product->favorite_count = max(0, $current - 1);
+                $product->save();
+            }
             return $favourite->forceDelete();
+        }
+
+        // Increment favorite_count on the product
+        $product = Product::where('_id', $dataId)->first();
+        if ($product) {
+            $product->favorite_count = (int) ($product->favorite_count ?? 0) + 1;
+            $product->save();
         }
         $favourite = new $this->favouriteModel;
 

@@ -61,12 +61,13 @@ class ProductRepository
             $query = $query->whereIn('city', $city);
         }
 
-        // Search term (assuming you want to search in name and description)
+        // Search term — matches title, description, or any tag
         if ($search) {
             $searchTerm = $search;
             $query = $query->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
-                    ->orWhere('description', 'like', "%{$searchTerm}%");
+                    ->orWhere('description', 'like', "%{$searchTerm}%")
+                    ->orWhere('tags', 'like', "%{$searchTerm}%");
             });
         }
 
@@ -133,58 +134,26 @@ class ProductRepository
         return is_string($id) && preg_match('/^[0-9a-fA-F]{24}$/', $id);
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null)
     {
         $product = new $this->productModel;
         return $this->setProductAttributes(
-            $product,
-            $createdBy,
-            $user,
-            $title,
-            $category,
-            $material,
-            $stamp,
-            $weight,
-            $gem,
-            $size,
-            $gender,
-            $phoneNumber,
-            $description,
-            $customization,
-            $city,
-            $price,
-            $tags,
-            $imageUrls,
-            $passportUrls
+            $product, $createdBy, $user, $title, $category, $material, $stamp, $weight,
+            $gem, $size, $gender, $phoneNumber, $description, $customization, $city,
+            $price, $tags, $imageUrls, $passportUrls, $variants
         );
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null)
     {
         $product = $this->findOneById($id);
         if (!$product) {
             return null;
         }
         return $this->setProductAttributes(
-            $product,
-            $createdBy,
-            $user,
-            $title,
-            $category,
-            $material,
-            $stamp,
-            $weight,
-            $gem,
-            $size,
-            $gender,
-            $phoneNumber,
-            $description,
-            $customization,
-            $city,
-            $price,
-            $tags,
-            $imageUrls,
-            $passportUrls
+            $product, $createdBy, $user, $title, $category, $material, $stamp, $weight,
+            $gem, $size, $gender, $phoneNumber, $description, $customization, $city,
+            $price, $tags, $imageUrls, $passportUrls, $variants
         );
     }
 
@@ -203,7 +172,7 @@ class ProductRepository
         return $product;
     }
 
-    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
+    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null)
     {
         if (!isset($product->product_sku)) {
             $product->product_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
@@ -229,18 +198,56 @@ class ProductRepository
         if (!isset($product->views_count)) {
             $product->views_count = 0;
         }
+        if (!isset($product->favorite_count)) {
+            $product->favorite_count = 0;
+        }
         if (!isset($product->is_sold)) {
             $product->is_sold = 0;
         }
         $product->tags = $tags;
         $product->image_urls = $imageUrls;
         $product->passport_urls = $passportUrls;
+        $product->variants = is_array($variants) ? $variants : [];
         if (!isset($product->update_date)) {
             $product->update_date = Carbon::now()->toDateTime();
         }
 
         $product->save();
         return $product;
+    }
+
+    public function homepageFeed(): array
+    {
+        $fields = ['_id', 'title', 'price', 'image_urls', 'category', 'material', 'city',
+                   'views_count', 'favorite_count', 'created_by', 'representative', 'tags', 'variants'];
+
+        $popular = $this->productModel
+            ->orderBy('views_count', 'desc')
+            ->orderBy('update_date', 'desc')
+            ->limit(12)
+            ->get($fields);
+
+        $new = $this->productModel
+            ->orderBy('update_date', 'desc')
+            ->limit(12)
+            ->get($fields);
+
+        // Use raw MongoDB aggregation so null favorite_count is treated as 0
+        $featuredRaw = $this->productModel->raw(function ($collection) use ($fields) {
+            $project = array_fill_keys($fields, 1);
+            $project['favorite_count'] = ['$ifNull' => ['$favorite_count', 0]];
+            return $collection->aggregate([
+                ['$project' => $project],
+                ['$sort'    => ['favorite_count' => -1, 'views_count' => -1]],
+                ['$limit'   => 12],
+            ]);
+        });
+
+        return [
+            'popular'  => $popular,
+            'new'      => $new,
+            'featured' => $featuredRaw,
+        ];
     }
 
     public function delete($id)

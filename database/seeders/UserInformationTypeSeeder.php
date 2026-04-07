@@ -22,6 +22,9 @@ class UserInformationTypeSeeder extends Seeder
             ['name' => 'email',       'is_required' => false],
             ['name' => 'phone',       'is_required' => false],
             ['name' => 'shop_status', 'is_required' => false],
+            ['name' => 'address',     'is_required' => false],
+            ['name' => 'city',        'is_required' => false],
+            ['name' => 'country',     'is_required' => false],
         ];
 
         foreach ($types as $type) {

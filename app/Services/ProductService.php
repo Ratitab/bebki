@@ -278,63 +278,24 @@ class ProductService
         return $this->favouriteRepository->userFavouriteProducts($userId);
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null)
     {
-        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls) {
-
-            // $freeLimit = $this->freeLimitRepository->useLimit($createdBy, $user);
-
-            // if (!$freeLimit) {
-            //     $limit = $this->limitRepository->useLimit($createdBy['id']);
-            //     if (!$limit) {
-            //         return false;
-            //     }
-            // }
+        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants) {
 
             return $this->productRepository->create(
-                $createdBy,
-                $user,
-                $title,
-                $category,
-                $material,
-                $stamp,
-                $weight,
-                $gem,
-                $size,
-                $gender,
-                $phoneNumber,
-                $description,
-                $customization,
-                $city,
-                $price,
-                $tags,
-                $imageUrls,
-                $passportUrls
+                $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem,
+                $size, $gender, $phoneNumber, $description, $customization, $city, $price,
+                $tags, $imageUrls, $passportUrls, $variants
             );
         });
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender,$phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender,$phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null)
     {
         return $this->productRepository->update($id,
-            $createdBy,
-            $user,
-            $title,
-            $category,
-            $material,
-            $stamp,
-            $weight,
-            $gem,
-            $size,
-            $gender,
-            $phoneNumber,
-            $description,
-            $customization,
-            $city,
-            $price,
-            $tags,
-            $imageUrls,
-            $passportUrls
+            $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem,
+            $size, $gender, $phoneNumber, $description, $customization, $city, $price,
+            $tags, $imageUrls, $passportUrls, $variants
         );
     }
 
@@ -402,6 +363,11 @@ class ProductService
     public function sold($productId)
     {
         return $this->productRepository->sold($productId);
+    }
+
+    public function homepageFeed(): array
+    {
+        return $this->productRepository->homepageFeed();
     }
 
 }

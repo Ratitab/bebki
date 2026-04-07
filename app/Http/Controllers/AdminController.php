@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ShopStatus;
+use App\Services\CategoryService;
 use App\Services\UserInformationService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
@@ -13,8 +14,10 @@ class AdminController extends Controller
 {
     use Resp;
 
-    public function __construct(private readonly UserInformationService $userInformationService)
-    {
+    public function __construct(
+        private readonly UserInformationService $userInformationService,
+        private readonly CategoryService $categoryService,
+    ) {
     }
 
     /**
@@ -102,5 +105,85 @@ class AdminController extends Controller
         }
 
         return $this->apiResponseSuccess(['company_id' => $companyId, 'shop_status' => $request->status]);
+    }
+
+    /**
+     * GET /admin/orders
+     * Returns all orders for the admin panel.
+     */
+    public function orders()
+    {
+        $orders = DB::table('orders')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return $this->apiResponseSuccess(['data' => $orders]);
+    }
+
+    /**
+     * POST /admin/orders/{order_id}/status
+     */
+    public function updateOrderStatus(Request $request, string $orderId)
+    {
+        $valid = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+        if (!in_array($request->status, $valid, true)) {
+            return $this->apiResponseFail('Invalid status.');
+        }
+        $updated = DB::table('orders')->where('id', $orderId)->update([
+            'status'     => $request->status,
+            'updated_at' => now(),
+        ]);
+        if (!$updated) {
+            return $this->apiResponseFail('Order not found.');
+        }
+        return $this->apiResponseSuccess(['id' => $orderId, 'status' => $request->status]);
+    }
+
+    /**
+     * GET /admin/categories/requested
+     * Returns all categories with type_id = 2 (user-requested, pending approval).
+     */
+    public function requestedCategories()
+    {
+        return $this->apiResponseSuccess(['data' => $this->categoryService->getRequested()]);
+    }
+
+    /**
+     * POST /admin/categories/{id}/approve
+     * Body: { "type_id": 0|1, "parent_id": <optional int> }
+     */
+    public function approveCategory(Request $request, int $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'type_id'   => 'required|in:0,1',
+            'parent_id' => 'nullable|integer|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $ok = $this->categoryService->approveCategory(
+            $id,
+            (int) $request->type_id,
+            (int) ($request->parent_id ?? 0)
+        );
+
+        if (!$ok) {
+            return $this->apiResponseFail('Category not found or already approved.');
+        }
+
+        return $this->apiResponseSuccess(['id' => $id, 'type_id' => $request->type_id]);
+    }
+
+    /**
+     * DELETE /admin/categories/{id}/dismiss
+     * Soft-deletes a requested category without approving it.
+     */
+    public function dismissCategory(int $id)
+    {
+        \App\Models\Category::where('id', $id)->where('type_id', 2)->delete();
+
+        return $this->apiResponseSuccess(['id' => $id]);
     }
 }
