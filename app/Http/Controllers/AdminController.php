@@ -113,11 +113,71 @@ class AdminController extends Controller
      */
     public function orders()
     {
-        $orders = DB::table('orders')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $orders = DB::table('orders')->orderBy('created_at', 'desc')->get();
 
-        return $this->apiResponseSuccess(['data' => $orders]);
+        // Collect all product_ids from all orders for MongoDB lookup
+        $allProductIds = [];
+        foreach ($orders as $order) {
+            $items = json_decode($order->items ?? '[]', true);
+            foreach ($items as $item) {
+                if (!empty($item['product_id'])) {
+                    $allProductIds[] = $item['product_id'];
+                }
+            }
+        }
+
+        // Look up company_id per product in MongoDB
+        $productCompanyMap = [];
+        if (!empty($allProductIds)) {
+            \App\Models\Products\Product::whereIn('_id', array_unique($allProductIds))
+                ->get(['_id', 'created_by'])
+                ->each(function ($product) use (&$productCompanyMap) {
+                    $pid       = (string) $product->id;
+                    $companyId = $product->created_by['id'] ?? null;
+                    if ($companyId) {
+                        $productCompanyMap[$pid] = (string) $companyId;
+                    }
+                });
+        }
+
+        // Look up pickup addresses for the found companies
+        $pickupAddressMap = [];
+        $allCompanyIds    = array_unique(array_values($productCompanyMap));
+        if (!empty($allCompanyIds)) {
+            DB::table('company_information')
+                ->join('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
+                ->whereIn('company_information.company_id', $allCompanyIds)
+                ->where('company_information_types.name', 'pickup_address')
+                ->whereNull('company_information.deleted_at')
+                ->select('company_information.company_id', 'company_information.value')
+                ->get()
+                ->each(function ($row) use (&$pickupAddressMap) {
+                    $pickupAddressMap[$row->company_id] = $row->value;
+                });
+        }
+
+        $result = $orders->map(function ($order) use ($productCompanyMap, $pickupAddressMap) {
+            $items           = json_decode($order->items ?? '[]', true);
+            $order->items    = $items;
+            $order->shipping = json_decode($order->shipping ?? '{}', true);
+
+            // One pickup address entry per unique artisan in this order
+            $seen           = [];
+            $artisanPickups = [];
+            foreach ($items as $item) {
+                $pid       = $item['product_id'] ?? '';
+                $companyId = $productCompanyMap[$pid] ?? null;
+                if ($companyId && !isset($seen[$companyId]) && isset($pickupAddressMap[$companyId])) {
+                    $artisanPickups[] = $pickupAddressMap[$companyId];
+                    $seen[$companyId] = true;
+                }
+            }
+            $order->artisan_pickup_addresses = $artisanPickups;
+
+            return $order;
+        });
+
+        return $this->apiResponseSuccess(['data' => $result]);
     }
 
     /**
@@ -125,7 +185,7 @@ class AdminController extends Controller
      */
     public function updateOrderStatus(Request $request, string $orderId)
     {
-        $valid = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+        $valid = ['pending', 'ready_to_ship', 'shipped', 'delivered', 'cancelled'];
         if (!in_array($request->status, $valid, true)) {
             return $this->apiResponseFail('Invalid status.');
         }

@@ -20,6 +20,7 @@ class CompanyInformationTypeSeeder extends Seeder
             'phone_numbers',
             'is_vat_payer',
             'client_text',
+            'feedback_images',
             'social_network',
             'product_images',
             'sell_type',
@@ -33,6 +34,8 @@ class CompanyInformationTypeSeeder extends Seeder
             'experience',
             'IBAN',
             'company_id',
+            'pickup_address',
+            'billing_address',
         ];
 
         foreach ($fields as $name) {

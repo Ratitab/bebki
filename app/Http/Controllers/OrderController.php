@@ -48,4 +48,30 @@ class OrderController extends Controller
         $orders = $this->orderService->getByUser(auth()->id());
         return $this->apiResponseSuccess(['data' => $orders]);
     }
+
+    public function artisanOrders(Request $request)
+    {
+        $companyId = $request->query('company_id');
+        if (!$companyId) {
+            return $this->apiResponseFail('company_id is required.');
+        }
+        $orders = $this->orderService->getByCompany($companyId);
+        return $this->apiResponseSuccess(['data' => $orders]);
+    }
+
+    public function artisanUpdateStatus(Request $request, string $orderId)
+    {
+        $companyId = $request->input('company_id');
+        if (!$companyId) {
+            return $this->apiResponseFail('company_id is required.');
+        }
+
+        $updated = $this->orderService->artisanUpdateStatus($orderId, $companyId);
+
+        if (!$updated) {
+            return $this->apiResponseFail('Cannot update this order. It may already be processed or not belong to your shop.');
+        }
+
+        return $this->apiResponseSuccess(['id' => $orderId, 'status' => OrderStatus::READY_TO_SHIP]);
+    }
 }

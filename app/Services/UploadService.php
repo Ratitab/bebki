@@ -147,6 +147,26 @@ class UploadService
         return $imageUrls;
     }
 
+    public function uploadFeedbackImages($images, $user, $image_for)
+    {
+        $imageUrls = [];
+        if (is_array($images)) {
+            foreach ($images as $image) {
+                try {
+                    $imagePath = Storage::disk('spaces')->put($user->id . '/' . $image_for . '/feedback-images', $image, 'public');
+                    $originalUrl = Storage::disk('spaces')->url($imagePath);
+                    $cdnImageUrl = str_replace('https://fra1.digitaloceanspaces.com', 'https://cdn.gegold.ge', $originalUrl);
+                    $imageUrls[] = $cdnImageUrl;
+                } catch (\Exception $e) {
+                    \Log::error('Feedback image upload failed: ' . $e->getMessage());
+                }
+            }
+        } else {
+            \Log::warning('Provided images data is not an array.');
+        }
+        return $imageUrls;
+    }
+
     public function uploadAnnouncementImages($images,$user)
     {
         $imageUrls = [];

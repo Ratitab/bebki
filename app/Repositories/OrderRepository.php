@@ -36,4 +36,20 @@ class OrderRepository
     {
         return $this->orderModel->find($id);
     }
+
+    public function findByProductIds(array $productIds): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->orderModel
+            ->where(function ($query) use ($productIds) {
+                foreach ($productIds as $pid) {
+                    // PostgreSQL: cast json → jsonb and use containment operator
+                    $query->orWhereRaw(
+                        'items::jsonb @> ?::jsonb',
+                        [json_encode([['product_id' => $pid]])]
+                    );
+                }
+            })
+            ->orderByDesc('created_at')
+            ->get();
+    }
 }

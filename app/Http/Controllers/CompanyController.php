@@ -121,6 +121,26 @@ class CompanyController extends Controller
         return $this->apiResponseSuccess(['data' => $this->uploadService->uploadPortolioImages($images,$user,$request->image_for)]);
     }
 
+    public function upload_feedback_images(Request $request) {
+        $validator = Validator::make(
+            [
+                'images' => $request->file('images'),
+                'image_for' => $request->image_for,
+            ],
+            [
+                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                'image_for' => ['required', 'in:individual,store,pawnshop,stock_exchange'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+        $images = $request->file('images');
+        $user = auth()->user();
+        return $this->apiResponseSuccess(['data' => $this->uploadService->uploadFeedbackImages($images, $user, $request->image_for)]);
+    }
+
     public function store(Request $request)
     {
 

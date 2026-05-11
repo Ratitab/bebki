@@ -146,6 +146,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('orders')->group(function () {
         Route::post('/', [OrderController::class, 'store']);
         Route::get('/', [OrderController::class, 'index']);
+        Route::get('/artisan', [OrderController::class, 'artisanOrders']);
+        Route::post('/{order_id}/artisan-status', [OrderController::class, 'artisanUpdateStatus']);
     });
     Route::get('/user/count-favourites', [ProductController::class, 'count_user_favourites']);
     Route::get('/user/favourites', [ProductController::class, 'user_favourite_products']);
@@ -168,6 +170,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/upload-profile-image', [CompanyController::class, 'upload_images']);
         Route::post('/upload-cover-image', [CompanyController::class, 'upload_cover_image']);
         Route::post('/upload-portfolio-images', [CompanyController::class, 'upload_portfolio_images']);
+        Route::post('/upload-feedback-images', [CompanyController::class, 'upload_feedback_images']);
         Route::put('/update/{company_id}', [CompanyController::class, 'update'])->middleware(TurnstileMiddleware::class);
         Route::delete('/delete/{company_id}', [CompanyController::class, 'delete'])->middleware(TurnstileMiddleware::class);
 
