@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Constants\ShopStatus;
+use App\Mail\DynamicEmail;
+use App\Models\Users\PasswordResetToken;
 use App\Traits\Resp;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AuthenticationService
 {
@@ -56,6 +59,18 @@ class AuthenticationService
         $user_information['shop_status'] = ShopStatus::USER;
         $this->userInformationService->create($user->id, $user_information);
         $user['access_token'] = $user->createToken('Bearer')->accessToken;
+
+        if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
+            Mail::to($username)->send(new DynamicEmail(
+                'emails.welcome',
+                [
+                    'email'       => $username,
+                    'browse_link' => rtrim(config('app.frontend_url'), '/') . '/browse',
+                ],
+                'მოგესალმებით Bebki.ge-ზე!'
+            ));
+        }
+
         return $user;
     }
 
@@ -66,14 +81,11 @@ class AuthenticationService
         // Create the OTP code in the service
         $this->otpCodeService->create($username,$otp, 'registration',$phone);
 
-        // Email content
-        $emailContent = "Hello,\n\nYour OTP code for registration is: $otp\n\nIf you did not request this, please ignore this email.\n\nThank you!";
-
-        // Send OTP via email
-        Mail::raw($emailContent, function ($message) use ($username) {
-            $message->to($username) // Assuming $username is the email address
-            ->subject('Your OTP Code for Registration');
-        });
+        Mail::to($username)->send(new DynamicEmail(
+            'emails.otp',
+            ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
+            'დაადასტურეთ თქვენი ანგარიში — ბებკი'
+        ));
 
         return true;
     }
@@ -82,13 +94,11 @@ class AuthenticationService
     {
         $otp = random_int(100000, 999999);
         $this->otpCodeService->create($username, $otp, 'update_email_or_phone');
-        // Email content
-        $emailContent = "Hello,\n\nYour OTP code for updating email is: $otp\n\nIf you did not request this, please ignore this email.\n\nThank you!";
-
-        Mail::raw($emailContent, function ($message) use ($username) {
-            $message->to($username) // Assuming $username is the email address
-            ->subject('Your OTP Code for Registration');
-        });
+        Mail::to($username)->send(new DynamicEmail(
+            'emails.otp',
+            ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
+            'დაადასტურეთ თქვენი ანგარიში — ბებკი'
+        ));
         return true;
     }
 
@@ -96,11 +106,60 @@ class AuthenticationService
     {
         $otp = random_int(100000, 999999);
         $this->otpCodeService->create($username, $otp, 'forgot_password');
-        $emailContent = "Hello,\n\nYour OTP code for forgetting pass is: $otp\n\nIf you did not request this, please ignore this email.\n\nThank you!";
-        Mail::raw($emailContent, function ($message) use ($username) {
-            $message->to($username) // Assuming $username is the email address
-            ->subject('Your OTP Code for Registration');
-        });
+        Mail::to($username)->send(new DynamicEmail(
+            'emails.otp',
+            ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
+            'დაადასტურეთ თქვენი ანგარიში — ბებკი'
+        ));
+        return true;
+    }
+
+    public function requestPasswordReset(string $email): bool
+    {
+        $user = $this->userInformationService->findUserId($email);
+        if (!$user) {
+            return true; // silent — don't reveal whether email exists
+        }
+
+        PasswordResetToken::where('email', $email)->delete();
+
+        $token = Str::random(64);
+        PasswordResetToken::create([
+            'email'      => $email,
+            'token'      => $token,
+            'expires_at' => now()->addHour(),
+        ]);
+
+        $resetLink = rtrim(config('app.frontend_url'), '/') . '/reset-password?token=' . $token;
+
+        Mail::to($email)->send(new DynamicEmail(
+            'emails.password-reset',
+            ['reset_link' => $resetLink, 'email' => $email],
+            'პაროლის აღდგენა — ბებკი'
+        ));
+
+        return true;
+    }
+
+    public function validateResetToken(string $token): ?string
+    {
+        $record = PasswordResetToken::where('token', $token)->first();
+        if (!$record || $record->isExpired()) {
+            return null;
+        }
+        return $record->email;
+    }
+
+    public function resetPasswordWithToken(string $token, string $password): bool
+    {
+        $record = PasswordResetToken::where('token', $token)->first();
+        if (!$record || $record->isExpired()) {
+            return false;
+        }
+
+        $this->userService->changeForgotPassword($record->email, $password);
+        $record->delete();
+
         return true;
     }
 

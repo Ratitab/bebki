@@ -291,6 +291,48 @@ class AuthenticationController extends Controller
     }
 
 
+    public function request_password_reset(Request $request)
+    {
+        $validator = Validator::make(['username' => $request->username], [
+            'username' => ['required'],
+        ]);
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $this->authenticationService->requestPasswordReset(
+            strtolower(trim($request->username))
+        );
+
+        return $this->apiResponseSuccess(['data' => true]);
+    }
+
+    public function validate_reset_token($token)
+    {
+        $email = $this->authenticationService->validateResetToken($token);
+        if (!$email) {
+            return $this->apiResponseFail('Invalid or expired token');
+        }
+        return $this->apiResponseSuccess(['data' => ['email' => $email]]);
+    }
+
+    public function reset_password_with_token(Request $request)
+    {
+        $validator = Validator::make(
+            ['token' => $request->token, 'password' => $request->password, 'password_confirmation' => $request->password_confirmation],
+            ['token' => 'required', 'password' => 'required|min:6|confirmed']
+        );
+        if ($validator->fails()) {
+            return $this->apiResponseFail($validator->messages());
+        }
+
+        $success = $this->authenticationService->resetPasswordWithToken($request->token, $request->password);
+        if (!$success) {
+            return $this->apiResponseFail('Invalid or expired token');
+        }
+        return $this->apiResponseSuccess(['data' => true]);
+    }
+
     public function otp_forgot_password(Request $request)
     {
         $validator = Validator::make(

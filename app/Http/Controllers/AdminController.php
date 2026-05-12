@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\OrderStatus;
 use App\Constants\ShopStatus;
+use App\Mail\DynamicEmail;
 use App\Services\CategoryService;
 use App\Services\UserInformationService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
@@ -97,11 +100,31 @@ class AdminController extends Controller
 
         $this->userInformationService->updateShopStatus($userId, $request->status);
 
-        // If approving, stamp verified_at on the company
+        $artisanEmail = DB::table('users')->where('id', $userId)->value('username');
+        $frontendUrl  = rtrim(config('app.frontend_url'), '/');
+
         if ($request->status === ShopStatus::VERIFIED) {
             DB::table('companies')
                 ->where('id', $companyId)
                 ->update(['verified_at' => now()]);
+
+            if ($artisanEmail && filter_var($artisanEmail, FILTER_VALIDATE_EMAIL)) {
+                Mail::to($artisanEmail)->send(new DynamicEmail(
+                    'emails.artisan-verified',
+                    ['email' => $artisanEmail, 'dashboard_link' => $frontendUrl . '/my-shop'],
+                    'ოსტატის ანგარიში დამტკიცებულია — ბებკი'
+                ));
+            }
+        }
+
+        if ($request->status === ShopStatus::REJECTED) {
+            if ($artisanEmail && filter_var($artisanEmail, FILTER_VALIDATE_EMAIL)) {
+                Mail::to($artisanEmail)->send(new DynamicEmail(
+                    'emails.artisan-rejected',
+                    ['email' => $artisanEmail, 'account_link' => $frontendUrl . '/account-details'],
+                    'ოსტატის ანგარიში უარყოფილია — ბებკი'
+                ));
+            }
         }
 
         return $this->apiResponseSuccess(['company_id' => $companyId, 'shop_status' => $request->status]);
@@ -189,13 +212,54 @@ class AdminController extends Controller
         if (!in_array($request->status, $valid, true)) {
             return $this->apiResponseFail('Invalid status.');
         }
-        $updated = DB::table('orders')->where('id', $orderId)->update([
+        $order = DB::table('orders')->where('id', $orderId)->first();
+        if (!$order) {
+            return $this->apiResponseFail('Order not found.');
+        }
+
+        DB::table('orders')->where('id', $orderId)->update([
             'status'     => $request->status,
             'updated_at' => now(),
         ]);
-        if (!$updated) {
-            return $this->apiResponseFail('Order not found.');
+
+        $notifyStatuses = [OrderStatus::SHIPPED, OrderStatus::DELIVERED];
+        if (in_array($request->status, $notifyStatuses, true)) {
+            $shipping = is_array($order->shipping)
+                ? $order->shipping
+                : json_decode($order->shipping ?? '{}', true);
+
+            $buyerEmail  = $shipping['email'] ?? null;
+            $frontendUrl = rtrim(config('app.frontend_url'), '/');
+
+            if ($buyerEmail && filter_var($buyerEmail, FILTER_VALIDATE_EMAIL)) {
+                $shortId = strtoupper(substr($orderId, 0, 8));
+
+                if ($request->status === OrderStatus::SHIPPED) {
+                    Mail::to($buyerEmail)->send(new DynamicEmail(
+                        'emails.order-shipped',
+                        [
+                            'email'       => $buyerEmail,
+                            'order_id'    => $shortId,
+                            'orders_link' => $frontendUrl . '/my-orders',
+                        ],
+                        'შეკვეთა გაიგზავნა — ბებკი'
+                    ));
+                }
+
+                if ($request->status === OrderStatus::DELIVERED) {
+                    Mail::to($buyerEmail)->send(new DynamicEmail(
+                        'emails.order-delivered',
+                        [
+                            'email'        => $buyerEmail,
+                            'order_id'     => $shortId,
+                            'support_link' => 'mailto:info@bebki.ge',
+                        ],
+                        'შეკვეთა დასრულებულია — ბებკი'
+                    ));
+                }
+            }
         }
+
         return $this->apiResponseSuccess(['id' => $orderId, 'status' => $request->status]);
     }
 

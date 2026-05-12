@@ -59,7 +59,7 @@ FROM gogitidze AS application
 WORKDIR /var/www/html
 
 # Copy application files
-COPY ../ /var/www/html
+COPY . /var/www/html
 
 # Allow Composer to run as root
 ENV COMPOSER_ALLOW_SUPERUSER=1

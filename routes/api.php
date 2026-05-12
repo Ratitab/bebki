@@ -113,6 +113,9 @@ Route::post('/otp-forgot-password', [AuthenticationController::class, 'otp_forgo
 Route::post('/forgot-password', [AuthenticationController::class, 'forgot_password'])->middleware(TurnstileMiddleware::class);
 Route::post('/register-shop', [AuthenticationController::class, 'register_shop']); //->middleware(TurnstileMiddleware::class);
 Route::post('/password-assign/{token}', [AuthenticationController::class, 'password_assign']);
+Route::post('/request-password-reset', [AuthenticationController::class, 'request_password_reset']);
+Route::get('/validate-reset-token/{token}', [AuthenticationController::class, 'validate_reset_token']);
+Route::post('/reset-password', [AuthenticationController::class, 'reset_password_with_token']);
 /*
 |--------------------------------------------------------------------------
 | UPLOAD IMAGE FOR PAWNSHOP
@@ -244,6 +247,7 @@ Route::middleware(['auth:api'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['admin.token'])->prefix('admin')->group(function () {
+    Route::get('/ping', fn() => response()->json(['success' => true]));
     Route::get('/companies', [AdminController::class, 'companies']);
     Route::post('/company/{company_id}/status', [AdminController::class, 'updateStatus']);
 
