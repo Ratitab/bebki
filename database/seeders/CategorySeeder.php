@@ -19,7 +19,7 @@ class CategorySeeder extends Seeder
             ['id' => 3,  'title' => 'decoration',  'type_id' => 1, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 4,  'title' => 'tableware',   'type_id' => 1, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 5,  'title' => 'kids',        'type_id' => 1, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
-            ['id' => 6,  'title' => 'jewellary',   'type_id' => 1, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
+            ['id' => 6,  'title' => 'jewellery',   'type_id' => 1, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 7,  'title' => 'other',       'type_id' => 1, 'order_id' => 2, 'parent_id' => 0, 'icon' => '1'],
 
             // ── Materials (type_id = 0) ───────────────────────────────────
