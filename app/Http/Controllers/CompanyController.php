@@ -192,6 +192,18 @@ class CompanyController extends Controller
 //
         return $this->apiResponseSuccess(['data' => $this->companyService->findManyByUserWithLimits($user)]);
     }
+    public function toggleOutOfOrder(Request $request, $company_id)
+    {
+        $user = auth()->user();
+        $owned = $this->companyService->findManyByUser($user);
+        $owns = collect($owned)->contains(fn($c) => ($c['company_id'] ?? null) === $company_id);
+        if (!$owns) {
+            return $this->apiResponseFail('Unauthorized', 403);
+        }
+        $isNowOutOfOrder = $this->companyService->toggleOutOfOrder($company_id);
+        return $this->apiResponseSuccess(['is_out_of_order' => $isNowOutOfOrder]);
+    }
+
     public function delete(Request $request, $company_id)
     {
 

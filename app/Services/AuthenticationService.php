@@ -60,17 +60,6 @@ class AuthenticationService
         $this->userInformationService->create($user->id, $user_information);
         $user['access_token'] = $user->createToken('Bearer')->accessToken;
 
-        if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
-            Mail::to($username)->send(new DynamicEmail(
-                'emails.welcome',
-                [
-                    'email'       => $username,
-                    'browse_link' => rtrim(config('app.frontend_url'), '/') . '/browse',
-                ],
-                'მოგესალმებით Bebki.ge-ზე!'
-            ));
-        }
-
         return $user;
     }
 

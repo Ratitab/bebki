@@ -131,6 +131,20 @@ class CompanyRepository
         return $company;
     }
 
+    public function findOutOfOrderIds(): array
+    {
+        return $this->companyModel
+            ->where('is_out_of_order', 1)
+            ->whereNull('deleted_at')
+            ->pluck('id')
+            ->toArray();
+    }
+
+    public function setOutOfOrder(string $companyId, bool $value): void
+    {
+        $this->companyModel->where('id', $companyId)->update(['is_out_of_order' => $value ? 1 : 0]);
+    }
+
     public function delete($id)
     {
         return $this->companyModel->where('id', $id)->delete();

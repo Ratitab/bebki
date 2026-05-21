@@ -99,6 +99,15 @@ class CompanyService
         return $this->companyInformationService->update($company_id, $companyInformation);
     }
 
+    public function toggleOutOfOrder(string $companyId): bool
+    {
+        $company = $this->companyRepository->findOneById($companyId);
+        if (!$company) return false;
+        $newValue = !$company->is_out_of_order;
+        $this->companyRepository->setOutOfOrder($companyId, $newValue);
+        return $newValue;
+    }
+
     public function delete($company_id)
     {
         $this->companyUserRepository->deleteByCompanyId($company_id);

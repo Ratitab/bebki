@@ -22,6 +22,7 @@ class CompanyUserRepository
                 'companies.identification_number',
                 'companies.company_type_id',
                 'companies.verified_at',
+                'companies.is_out_of_order',
                 'company_users.user_id',
                 'company_information.value',
                 'company_information_types.name as info_type'
@@ -54,6 +55,7 @@ class CompanyUserRepository
                     'identification_number' => $company->identification_number,
                     'company_type_id' => $company->company_type_id,
                     'verified_at' => $company->verified_at,
+                    'is_out_of_order' => $company->is_out_of_order,
                     'information' => [],
                 ];
                 $addressIds = [];  // Hash map for unique addresses in the current company

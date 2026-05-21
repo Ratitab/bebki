@@ -14,9 +14,13 @@ class ProductRepository
     {
     }
 
-    public function findMany($type, $createdById, $category, $gem, $material, $gender, $min_price, $max_price, $city, $search, $tags, $stamp, $weight, $customization_available, $isPaidAdv = null)
+    public function findMany($type, $createdById, $category, $gem, $material, $gender, $min_price, $max_price, $city, $search, $tags, $stamp, $weight, $customization_available, $isPaidAdv = null, $excludeCompanyIds = [])
     {
-        $query = $this->productModel;
+        $query = $this->productModel->where('is_sold', 0);
+
+        if (!empty($excludeCompanyIds)) {
+            $query = $query->whereNotIn('created_by.id', $excludeCompanyIds);
+        }
 
         // Base filters
         if ($type && is_array($type) && count($type) >= 1) {
@@ -216,27 +220,35 @@ class ProductRepository
         return $product;
     }
 
-    public function homepageFeed(): array
+    public function homepageFeed(array $excludeCompanyIds = []): array
     {
         $fields = ['_id', 'title', 'price', 'image_urls', 'category', 'material', 'city',
                    'views_count', 'favorite_count', 'created_by', 'representative', 'tags', 'variants'];
 
-        $popular = $this->productModel
+        $baseQuery = fn() => $this->productModel->where('is_sold', 0)
+            ->when(!empty($excludeCompanyIds), fn($q) => $q->whereNotIn('created_by.id', $excludeCompanyIds));
+
+        $popular = $baseQuery()
             ->orderBy('views_count', 'desc')
             ->orderBy('update_date', 'desc')
             ->limit(12)
             ->get($fields);
 
-        $new = $this->productModel
+        $new = $baseQuery()
             ->orderBy('update_date', 'desc')
             ->limit(12)
             ->get($fields);
 
         // Use raw MongoDB aggregation so null favorite_count is treated as 0
-        $featuredRaw = $this->productModel->raw(function ($collection) use ($fields) {
+        $featuredRaw = $this->productModel->raw(function ($collection) use ($fields, $excludeCompanyIds) {
             $project = array_fill_keys($fields, 1);
             $project['favorite_count'] = ['$ifNull' => ['$favorite_count', 0]];
+            $match = ['is_sold' => 0];
+            if (!empty($excludeCompanyIds)) {
+                $match['created_by.id'] = ['$nin' => $excludeCompanyIds];
+            }
             return $collection->aggregate([
+                ['$match'   => $match],
                 ['$project' => $project],
                 ['$sort'    => ['favorite_count' => -1, 'views_count' => -1]],
                 ['$limit'   => 12],

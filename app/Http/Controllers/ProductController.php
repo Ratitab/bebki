@@ -110,6 +110,25 @@ class ProductController extends Controller
             return $this->apiResponseFail('Your shop must be verified before you can add products.');
         }
 
+        $companyId = $request->input('created_by.id');
+
+        $infoRows = \DB::table('company_information')
+            ->join('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
+            ->where('company_information.company_id', $companyId)
+            ->whereIn('company_information_types.name', ['pickup_address', 'company_id'])
+            ->whereNull('company_information.deleted_at')
+            ->where('company_information.value', '!=', '')
+            ->pluck('company_information_types.name')
+            ->toArray();
+
+        if (!in_array('pickup_address', $infoRows)) {
+            return $this->apiResponseFail('Please set your shop pickup address before adding products.');
+        }
+
+        if (!in_array('company_id', $infoRows)) {
+            return $this->apiResponseFail('Please set your shop identification code (ID) before adding products.');
+        }
+
         $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);

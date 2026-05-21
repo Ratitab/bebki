@@ -175,6 +175,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/upload-portfolio-images', [CompanyController::class, 'upload_portfolio_images']);
         Route::post('/upload-feedback-images', [CompanyController::class, 'upload_feedback_images']);
         Route::put('/update/{company_id}', [CompanyController::class, 'update'])->middleware(TurnstileMiddleware::class);
+        Route::patch('/out-of-order/{company_id}', [CompanyController::class, 'toggleOutOfOrder']);
         Route::delete('/delete/{company_id}', [CompanyController::class, 'delete'])->middleware(TurnstileMiddleware::class);
 
         Route::get('/limits/{company_id}', [LimitInformationController::class, 'company_limits']);

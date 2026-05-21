@@ -36,6 +36,7 @@ class CompanyInformationTypeSeeder extends Seeder
             'company_id',
             'pickup_address',
             'billing_address',
+            'postal_code',
         ];
 
         foreach ($fields as $name) {

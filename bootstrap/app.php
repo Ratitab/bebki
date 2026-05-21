@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // ConvertEmptyStringsToNull is designed for HTML form posts — API clients
+        // that send JSON distinguish "" (no value) from null intentionally.
+        $middleware->remove(\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class);
+
         $middleware->alias([
             'admin.token' => \App\Http\Middleware\AdminTokenMiddleware::class,
         ]);

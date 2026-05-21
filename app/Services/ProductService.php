@@ -31,6 +31,12 @@ class ProductService
 
     public function findMany(SearchProductsDTO $searchDTO)
     {
+        // Only exclude out-of-order shops when browsing general listings,
+        // not when viewing a specific shop (owner or buyer navigating directly).
+        $excludeIds = empty($searchDTO->createdById)
+            ? $this->companyRepository->findOutOfOrderIds()
+            : [];
+
         $products = $this->productRepository->findMany(
             type: $searchDTO->type,
             createdById: $searchDTO->createdById,
@@ -46,7 +52,8 @@ class ProductService
             stamp: $searchDTO->stamp,
             weight: $searchDTO->weight,
             customization_available: $searchDTO->customizationAvailable,
-            isPaidAdv: $searchDTO->isPaidAdv
+            isPaidAdv: $searchDTO->isPaidAdv,
+            excludeCompanyIds: $excludeIds
         );
 
 // Step 2: Separate company and user IDs based on `created_by.type`
@@ -220,7 +227,8 @@ class ProductService
                 'id' => $entityId,
                 'type' => $entityType,
                 'name' => $company?->getAttributes()['information']['name'] ?? null,
-                'logo' => $company?->getAttributes()['information']['logo'] ?? null
+                'logo' => $company?->getAttributes()['information']['logo'] ?? null,
+                'is_out_of_order' => (bool) ($company?->is_out_of_order ?? false),
             ];
         } elseif ($entityType === 'individual') {
             $user = $this->userRepository->findOneById($entityId);
@@ -367,7 +375,8 @@ class ProductService
 
     public function homepageFeed(): array
     {
-        return $this->productRepository->homepageFeed();
+        $excludeIds = $this->companyRepository->findOutOfOrderIds();
+        return $this->productRepository->homepageFeed($excludeIds);
     }
 
 }
