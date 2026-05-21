@@ -15,11 +15,16 @@ class OrderService
 
     public function place(string $userId, array $items, array $shipping, float $total): array
     {
-        // Store only product_id + qty per item
-        $cleanItems = array_map(fn($i) => [
-            'product_id' => $i['product_id'],
-            'qty'        => (int) ($i['qty'] ?? 1),
-        ], $items);
+        $cleanItems = array_map(function ($i) {
+            $item = [
+                'product_id' => $i['product_id'],
+                'qty'        => (int) ($i['qty'] ?? 1),
+            ];
+            if (!empty($i['title']))   $item['title']   = $i['title'];
+            if (!empty($i['image']))   $item['image']   = $i['image'];
+            if (!empty($i['variant'])) $item['variant'] = $i['variant'];
+            return $item;
+        }, $items);
 
         $order = $this->orderRepository->create($userId, $cleanItems, $shipping, $total);
 
