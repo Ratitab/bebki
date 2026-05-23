@@ -6,6 +6,7 @@ use App\Models\Companies\Company;
 use App\Models\Companies\CompanyInformation;
 use App\Models\Companies\CompanyUser;
 use App\Models\Users\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CompanyRepository
@@ -114,9 +115,20 @@ class CompanyRepository
         foreach ($companyInformation as $info) {
             $informationCollection[$info->name] = $info->value;
         }
-        // Step 4: Set the information attribute
+        // Step 4: Fetch shop_status from user_information via company_users
+        $shopStatus = DB::table('company_users')
+            ->join('user_information', function ($join) {
+                $join->on('company_users.user_id', '=', 'user_information.user_id')
+                    ->where('user_information.user_information_type_id', 6)
+                    ->whereNull('user_information.deleted_at');
+            })
+            ->where('company_users.company_id', $companyId)
+            ->value('user_information.value');
+
+        // Step 5: Set the attributes
         $company->setAttribute('information', $informationCollection);
         $company->setAttribute('addresses', $companyAddress);
+        $company->setAttribute('shop_status', $shopStatus ?? 'pending');
 
         return $company;
     }

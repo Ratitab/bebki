@@ -30,16 +30,6 @@ class CategorySeeder extends Seeder
             ['id' => 12, 'title' => 'concrete',   'type_id' => 0, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 13, 'title' => 'metalwork',  'type_id' => 0, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 14, 'title' => 'other',      'type_id' => 0, 'order_id' => 2, 'parent_id' => 0, 'icon' => '1'],
-
-            // ── Subcategories of apparel (parent_id = 1) ─────────────────
-            ['id' => 15, 'title' => 'shoes',  'type_id' => 1, 'order_id' => 1, 'parent_id' => 1, 'icon' => null],
-            ['id' => 16, 'title' => 'Coat',   'type_id' => 1, 'order_id' => 1, 'parent_id' => 1, 'icon' => null],
-            ['id' => 18, 'title' => 'kids',   'type_id' => 1, 'order_id' => 1, 'parent_id' => 1, 'icon' => null],
-            ['id' => 19, 'title' => 'rings',  'type_id' => 1, 'order_id' => 1, 'parent_id' => 1, 'icon' => null],
-            ['id' => 25, 'title' => 'Sports', 'type_id' => 1, 'order_id' => 1, 'parent_id' => 1, 'icon' => null],
-
-            // ── Subcategories of textiles (parent_id = 9) ────────────────
-            ['id' => 17, 'title' => 'cotton', 'type_id' => 0, 'order_id' => 1, 'parent_id' => 9, 'icon' => null],
         ];
 
         foreach ($categories as $cat) {
