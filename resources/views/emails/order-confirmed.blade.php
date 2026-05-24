@@ -24,13 +24,11 @@
                 <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                     <tr>
                         <td style="vertical-align:middle;padding-right:10px;">
-                            <div style="width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;line-height:32px;text-align:center;">
-                                <span style="font-size:15px;color:#ffffff;">✦</span>
-                            </div>
+                            
                         </td>
                         <td style="vertical-align:middle;">
                             <div style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:2px;line-height:1.2;">BEBKI</div>
-                            <div style="font-size:11px;color:rgba(255,255,255,0.60);letter-spacing:0.3px;">ხელნაკეთი ნივთების მარკეტპლეისი</div>
+                            
                         </td>
                     </tr>
                 </table>
@@ -118,12 +116,7 @@
         {{-- ── FOOTER ── --}}
         <tr>
             <td style="padding:24px 40px 32px 40px;background:#faf9f7;">
-                <p style="margin:0 0 6px 0;font-size:13px;color:#999999;line-height:1.6;">
-                    ეს ელ-ფოსტა გაეგზავნა მისამართზე:
-                    <a href="mailto:{{ $content['email'] ?? '' }}" style="color:#842c36;text-decoration:none;">
-                        {{ $content['email'] ?? '' }}
-                    </a>
-                </p>
+                
                 <p style="margin:0;font-size:12px;color:#bbbbbb;line-height:1.5;">
                     © {{ date('Y') }} შპს ბებკი &nbsp;·&nbsp; თბილისი, საქართველო &nbsp;·&nbsp;
                     <a href="mailto:info@bebki.ge" style="color:#842c36;text-decoration:none;">info@bebki.ge</a>
