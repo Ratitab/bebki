@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Products\Product;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ProductRepository
@@ -138,17 +139,17 @@ class ProductRepository
         return is_string($id) && preg_match('/^[0-9a-fA-F]{24}$/', $id);
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null)
     {
         $product = new $this->productModel;
         return $this->setProductAttributes(
             $product, $createdBy, $user, $title, $category, $material, $stamp, $weight,
             $gem, $size, $gender, $phoneNumber, $description, $customization, $city,
-            $price, $tags, $imageUrls, $passportUrls, $variants
+            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity
         );
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null)
     {
         $product = $this->findOneById($id);
         if (!$product) {
@@ -157,7 +158,7 @@ class ProductRepository
         return $this->setProductAttributes(
             $product, $createdBy, $user, $title, $category, $material, $stamp, $weight,
             $gem, $size, $gender, $phoneNumber, $description, $customization, $city,
-            $price, $tags, $imageUrls, $passportUrls, $variants
+            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity
         );
     }
 
@@ -176,7 +177,7 @@ class ProductRepository
         return $product;
     }
 
-    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null)
+    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null)
     {
         if (!isset($product->product_sku)) {
             $product->product_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
@@ -185,7 +186,17 @@ class ProductRepository
             $product->is_paid_adv = 0;
         }
         $product->created_by = ['id' => $createdBy['id'], 'type' => $createdBy['type']];
-        $product->representative = ['user_id' => $user->id, 'name' => $user->information['first_name'] . ' ' . $user->information['last_name']];
+        $shopName = DB::table('company_information')
+            ->join('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
+            ->where('company_information.company_id', $createdBy['id'])
+            ->where('company_information_types.name', 'name')
+            ->whereNull('company_information.deleted_at')
+            ->value('company_information.value');
+        $product->representative = [
+            'user_id'   => $user->id,
+            'name'      => $user->information['first_name'] . ' ' . $user->information['last_name'],
+            'shop_name' => $shopName ?? '',
+        ];
         $product->title = $title;
         $product->category = $category;
         $product->material = $material;
@@ -212,6 +223,13 @@ class ProductRepository
         $product->image_urls = $imageUrls;
         $product->passport_urls = $passportUrls;
         $product->variants = is_array($variants) ? $variants : [];
+        if (!is_null($quantity)) {
+            $product->quantity = (int)$quantity;
+            $product->lead_time = null;
+        } elseif (!is_null($leadTime) && $leadTime !== '') {
+            $product->lead_time = $leadTime;
+            $product->quantity = null;
+        }
         if (!isset($product->update_date)) {
             $product->update_date = Carbon::now()->toDateTime();
         }

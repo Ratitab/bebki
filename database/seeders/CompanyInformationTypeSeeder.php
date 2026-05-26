@@ -37,6 +37,17 @@ class CompanyInformationTypeSeeder extends Seeder
             'pickup_address',
             'billing_address',
             'postal_code',
+            'address',
+            'building',
+            'entrance',
+            'floor',
+            'apartment',
+            'country',
+            'billing_building',
+            'billing_entrance',
+            'billing_floor',
+            'billing_apartment',
+            'billing_country',
         ];
 
         foreach ($fields as $name) {

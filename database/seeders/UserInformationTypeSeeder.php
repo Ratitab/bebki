@@ -16,23 +16,27 @@ class UserInformationTypeSeeder extends Seeder
         $now = Carbon::now();
 
         $types = [
-            ['name' => 'first_name',  'is_required' => false],
-            ['name' => 'last_name',   'is_required' => false],
-            ['name' => 'gender',      'is_required' => false],
-            ['name' => 'email',       'is_required' => false],
-            ['name' => 'phone',       'is_required' => false],
-            ['name' => 'shop_status', 'is_required' => false],
-            ['name' => 'address',     'is_required' => false],
-            ['name' => 'city',        'is_required' => false],
-            ['name' => 'country',     'is_required' => false],
+            'first_name',
+            'last_name',
+            'gender',
+            'email',
+            'phone',
+            'shop_status',
+            'address',
+            'building',
+            'entrance',
+            'floor',
+            'apartment',
+            'city',
+            'country',
         ];
 
-        foreach ($types as $type) {
-            DB::table('user_information_types')->insert([
-                'name' => $type['name'],
-                'is_required' => $type['is_required'],
-                'created_at' => $now,
-                'updated_at' => $now,
+        foreach ($types as $name) {
+            DB::table('user_information_types')->insertOrIgnore([
+                'name'        => $name,
+                'is_required' => false,
+                'created_at'  => $now,
+                'updated_at'  => $now,
             ]);
         }
     }
