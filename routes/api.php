@@ -98,6 +98,7 @@ Route::get('sidebar-routes', [SidebarRouteController::class, 'index']);
 */
 //Route::post('/activate-limit-callback', [LimitInformationController::class, 'activate_limits']);
 Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
+Route::post('/payment/flitt/callback', [PaymentController::class, 'flittCallback']);
 
 /*
 |--------------------------------------------------------------------------
@@ -147,6 +148,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/user/limits', [LimitInformationController::class, 'user_limits']);
 
     Route::prefix('orders')->group(function () {
+        Route::post('/initiate', [OrderController::class, 'initiate']);
         Route::post('/', [OrderController::class, 'store']);
         Route::get('/', [OrderController::class, 'index']);
         Route::get('/artisan', [OrderController::class, 'artisanOrders']);
@@ -240,6 +242,7 @@ Route::middleware(['auth:api'])->group(function () {
 //    });
 
     Route::post('logout', [AuthenticationController::class, 'logout']);
+    Route::delete('/account', [AuthenticationController::class, 'delete_account']);
 });
 
 /*

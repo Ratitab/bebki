@@ -415,4 +415,10 @@ class AuthenticationController extends Controller
         $logout = $this->authenticationService->logout();
         return $this->apiResponseSuccess(['data' => $logout['message']]);
     }
+
+    public function delete_account(Request $request)
+    {
+        $this->authenticationService->deleteAccount(auth()->user());
+        return $this->apiResponseSuccess(['data' => true]);
+    }
 }

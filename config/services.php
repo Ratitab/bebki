@@ -41,6 +41,12 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET_KEY'),
     ],
 
+    'flitt' => [
+        'merchant_id' => env('FLITT_MERCHANT_ID'),
+        'secret_key'  => env('FLITT_SECRET_KEY'),
+        'api_url'     => env('FLITT_API_URL', 'https://pay.flitt.io'),
+    ],
+
     'pearls' => [
         'custom' => [
             'package' => 'custom',

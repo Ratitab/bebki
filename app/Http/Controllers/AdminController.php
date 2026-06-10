@@ -163,36 +163,70 @@ class AdminController extends Controller
                 });
         }
 
-        // Look up pickup addresses for the found companies
-        $pickupAddressMap = [];
-        $allCompanyIds    = array_unique(array_values($productCompanyMap));
+        // Look up structured address + phone for the found companies
+        $addressDataMap = [];
+        $allCompanyIds  = array_unique(array_values($productCompanyMap));
         if (!empty($allCompanyIds)) {
+            // Address fields
             DB::table('company_information')
                 ->join('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
                 ->whereIn('company_information.company_id', $allCompanyIds)
-                ->where('company_information_types.name', 'pickup_address')
+                ->whereIn('company_information_types.name', ['city', 'address', 'building', 'entrance', 'floor', 'apartment', 'phone_numbers', 'IBAN', 'pickup_address'])
                 ->whereNull('company_information.deleted_at')
-                ->select('company_information.company_id', 'company_information.value')
+                ->select('company_information.company_id', 'company_information_types.name as field', 'company_information.value')
                 ->get()
-                ->each(function ($row) use (&$pickupAddressMap) {
-                    $pickupAddressMap[$row->company_id] = $row->value;
+                ->each(function ($row) use (&$addressDataMap) {
+                    $addressDataMap[$row->company_id][$row->field] = $row->value;
                 });
+
+            // Fallback: user phone for companies that have no phone_numbers in company_information
+            $missingPhone = array_filter($allCompanyIds, fn($cid) => empty($addressDataMap[$cid]['phone_numbers']));
+            if (!empty($missingPhone)) {
+                DB::table('company_users')
+                    ->join('user_information', 'company_users.user_id', '=', 'user_information.user_id')
+                    ->join('user_information_types', 'user_information.user_information_type_id', '=', 'user_information_types.id')
+                    ->whereIn('company_users.company_id', array_values($missingPhone))
+                    ->where('user_information_types.name', 'phone')
+                    ->whereNull('user_information.deleted_at')
+                    ->select('company_users.company_id', 'user_information.value as phone')
+                    ->get()
+                    ->each(function ($row) use (&$addressDataMap) {
+                        $addressDataMap[$row->company_id]['phone_numbers'] = $row->phone;
+                    });
+            }
         }
 
-        $result = $orders->map(function ($order) use ($productCompanyMap, $pickupAddressMap) {
+        $result = $orders->map(function ($order) use ($productCompanyMap, $addressDataMap) {
             $items           = json_decode($order->items ?? '[]', true);
             $order->items    = $items;
             $order->shipping = json_decode($order->shipping ?? '{}', true);
 
-            // One pickup address entry per unique artisan in this order
+            // One pickup entry per unique artisan in this order
             $seen           = [];
             $artisanPickups = [];
             foreach ($items as $item) {
                 $pid       = $item['product_id'] ?? '';
                 $companyId = $productCompanyMap[$pid] ?? null;
-                if ($companyId && !isset($seen[$companyId]) && isset($pickupAddressMap[$companyId])) {
-                    $artisanPickups[] = $pickupAddressMap[$companyId];
-                    $seen[$companyId] = true;
+                if ($companyId && !isset($seen[$companyId]) && isset($addressDataMap[$companyId])) {
+                    $data  = $addressDataMap[$companyId];
+                    $streetLine = !empty($data['address'])
+                        ? implode(', ', array_filter([$data['city'] ?? '', $data['address']]))
+                        : implode(', ', array_filter([$data['city'] ?? '', $data['pickup_address'] ?? '']));
+                    $buildingParts = array_filter([
+                        !empty($data['building'])  ? 'Building '  . $data['building']  : '',
+                        !empty($data['entrance'])  ? 'Entrance '  . $data['entrance']  : '',
+                        !empty($data['floor'])     ? 'Floor '     . $data['floor']     : '',
+                        !empty($data['apartment']) ? 'Apt. '      . $data['apartment'] : '',
+                    ]);
+                    $addr = $streetLine . (!empty($buildingParts) ? "\n" . implode(', ', $buildingParts) : '');
+                    if ($addr) {
+                        $artisanPickups[] = [
+                            'address' => $addr,
+                            'phone'   => $data['phone_numbers'] ?? null,
+                            'iban'    => $data['IBAN'] ?? null,
+                        ];
+                        $seen[$companyId] = true;
+                    }
                 }
             }
             $order->artisan_pickup_addresses = $artisanPickups;

@@ -146,4 +146,53 @@ class UserInformationRepository
             ->first();
     }
 
+    /**
+     * Insert address fields the user is missing — never overwrites existing values.
+     * Account page is the source of truth for updates; this only fills in blanks.
+     */
+    public function fillMissingAddressInfo(string $userId, array $fields): void
+    {
+        $informationTypes = $this->userInformationTypeRepository->getAllInformationTypes();
+
+        // Resolve only the type IDs that exist and have non-empty values in $fields
+        $candidates = [];
+        foreach ($fields as $key => $value) {
+            $typeId = $informationTypes[$key] ?? null;
+            if ($typeId && $value !== null && $value !== '') {
+                $candidates[$typeId] = $value;
+            }
+        }
+
+        if (empty($candidates)) {
+            return;
+        }
+
+        // Find which of those type IDs the user already has (soft-deleted records are excluded automatically)
+        $existingTypeIds = $this->userInformationModel
+            ->where('user_id', $userId)
+            ->whereIn('user_information_type_id', array_keys($candidates))
+            ->pluck('user_information_type_id')
+            ->toArray();
+
+        $now      = now();
+        $toInsert = [];
+        foreach ($candidates as $typeId => $value) {
+            if (in_array($typeId, $existingTypeIds)) {
+                continue; // already has this field — account page is source of truth
+            }
+            $toInsert[] = [
+                'user_id'                  => $userId,
+                'user_information_type_id' => $typeId,
+                'value'                    => $value,
+                'verified_at'              => null,
+                'created_at'               => $now,
+                'updated_at'               => $now,
+            ];
+        }
+
+        if (!empty($toInsert)) {
+            $this->userInformationModel->insert($toInsert);
+        }
+    }
+
 }

@@ -115,6 +115,20 @@ class CompanyRepository
         foreach ($companyInformation as $info) {
             $informationCollection[$info->name] = $info->value;
         }
+        // Step 3b: Fallback — if no company phone, use the linked user's phone
+        if (empty($informationCollection['phone_numbers'])) {
+            $userPhone = DB::table('company_users')
+                ->join('user_information', 'company_users.user_id', '=', 'user_information.user_id')
+                ->join('user_information_types', 'user_information.user_information_type_id', '=', 'user_information_types.id')
+                ->where('company_users.company_id', $companyId)
+                ->where('user_information_types.name', 'phone')
+                ->whereNull('user_information.deleted_at')
+                ->value('user_information.value');
+            if ($userPhone) {
+                $informationCollection['phone_numbers'] = $userPhone;
+            }
+        }
+
         // Step 4: Fetch shop_status from user_information via company_users
         $shopStatus = DB::table('company_users')
             ->join('user_information', function ($join) {

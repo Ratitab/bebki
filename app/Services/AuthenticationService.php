@@ -214,4 +214,12 @@ class AuthenticationService
         return ['status' => 200, 'message' => 'Successfully logouted'];
     }
 
+    public function deleteAccount($user): bool
+    {
+        Cache::forget('user_token_' . $user->id);
+        $user->tokens()->delete();
+        $user->delete();
+        return true;
+    }
+
 }

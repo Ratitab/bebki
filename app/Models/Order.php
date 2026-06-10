@@ -17,6 +17,8 @@ class Order extends Model
         'user_id',
         'order_number',
         'status',
+        'payment_status',
+        'flitt_payment_id',
         'items',
         'shipping',
         'total',

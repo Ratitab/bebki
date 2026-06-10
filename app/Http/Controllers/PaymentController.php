@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\PaymentStatus;
 use App\DTO\PaymentDTO;
 use App\Rules\ValidCompanyBelongsUser;
+use App\Services\FlittService;
 use App\Services\LimitService;
+use App\Services\OrderService;
 use App\Services\StripePaymentService;
 use App\Traits\Resp;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,8 +20,58 @@ class PaymentController extends Controller
 {
 
     use Resp;
-    public function __construct(private readonly StripePaymentService $stripeService,private readonly LimitService $limitService) {}
 
+    public function __construct(
+        private readonly StripePaymentService $stripeService,
+        private readonly LimitService $limitService,
+        private readonly FlittService $flittService,
+        private readonly OrderService $orderService
+    ) {}
+
+
+    public function flittCallback(Request $request): JsonResponse
+    {
+        $payload = $request->all();
+
+        if (!$this->flittService->verifyCallback($payload)) {
+            Log::warning('Flitt callback: invalid signature', ['order_id' => $payload['order_id'] ?? null]);
+            return response()->json(['status' => 'invalid_signature'], 400);
+        }
+
+        $orderId       = $payload['order_id'] ?? null;
+        $flittStatus   = $payload['order_status'] ?? '';
+        $flittPayId    = (string) ($payload['payment_id'] ?? '');
+
+        if (!$orderId) {
+            return response()->json(['status' => 'missing_order_id'], 400);
+        }
+
+        $order = DB::table('orders')->where('id', $orderId)->first();
+        if (!$order) {
+            Log::error('Flitt callback: order not found', ['order_id' => $orderId]);
+            return response()->json(['status' => 'order_not_found'], 200);
+        }
+
+        $statusMap = [
+            'approved'   => PaymentStatus::PAID,
+            'declined'   => PaymentStatus::FAILED,
+            'expired'    => PaymentStatus::EXPIRED,
+            'reversed'   => PaymentStatus::REVERSED,
+            'blocked'    => PaymentStatus::BLOCKED,
+        ];
+
+        $newStatus = $statusMap[$flittStatus] ?? PaymentStatus::FAILED;
+        $this->orderService->updatePaymentStatus($orderId, $newStatus, $flittPayId);
+
+        if ($newStatus === PaymentStatus::PAID) {
+            $items    = json_decode($order->items ?? '[]', true);
+            $shipping = json_decode($order->shipping ?? '{}', true);
+            $this->orderService->sendConfirmationEmails($orderId, $items, $shipping, (float) $order->total);
+            $this->orderService->createArtisanStatuses($orderId, $items);
+        }
+
+        return response()->json(['status' => 'ok'], 200);
+    }
 
     public function createStripePayment(Request $request): JsonResponse
     {

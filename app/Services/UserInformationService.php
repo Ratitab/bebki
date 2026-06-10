@@ -50,5 +50,9 @@ class UserInformationService
         return $this->userInformationRepository->findByUserIdAndType($userId,$typeId);
     }
 
+    public function fillMissingAddressInfo(string $userId, array $fields): void
+    {
+        $this->userInformationRepository->fillMissingAddressInfo($userId, $fields);
+    }
 
 }

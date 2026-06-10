@@ -115,13 +115,13 @@ class ProductController extends Controller
         $infoRows = \DB::table('company_information')
             ->join('company_information_types', 'company_information.company_information_type_id', '=', 'company_information_types.id')
             ->where('company_information.company_id', $companyId)
-            ->whereIn('company_information_types.name', ['pickup_address', 'company_id'])
+            ->whereIn('company_information_types.name', ['address', 'company_id'])
             ->whereNull('company_information.deleted_at')
             ->where('company_information.value', '!=', '')
             ->pluck('company_information_types.name')
             ->toArray();
 
-        if (!in_array('pickup_address', $infoRows)) {
+        if (!in_array('address', $infoRows)) {
             return $this->apiResponseFail('Please set your shop pickup address before adding products.');
         }
 
