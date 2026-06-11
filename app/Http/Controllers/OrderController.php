@@ -98,6 +98,10 @@ class OrderController extends Controller
         return $this->apiResponseSuccess([
             'data' => [
                 'checkout_url' => $flitt['checkout_url'],
+                'token'        => (function($url) {
+                    parse_str(parse_url($url, PHP_URL_QUERY) ?? '', $q);
+                    return $q['token'] ?? null;
+                })($flitt['checkout_url']),
                 'order_id'     => $orderId,
                 'order_number' => $order->order_number,
                 'total'        => $serverTotal,
