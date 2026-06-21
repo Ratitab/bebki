@@ -22,6 +22,22 @@ class OrderController extends Controller
         private readonly UserInformationService $userInfoService
     ) {}
 
+    private function serviceFee(float $total): float
+    {
+        return match (true) {
+            $total <= 50  => 1,
+            $total <= 100 => 2,
+            $total <= 150 => 3,
+            $total <= 200 => 4,
+            $total <= 250 => 5,
+            $total <= 300 => 6,
+            $total <= 350 => 7,
+            $total <= 400 => 8,
+            $total <= 450 => 9,
+            default       => 10,
+        };
+    }
+
     public function initiate(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -56,7 +72,9 @@ class OrderController extends Controller
 
         // Generate the order ID before calling Flitt (used as our reference)
         $orderId     = (string) Str::uuid();
-        $amountTetri = (int) round($serverTotal * 100);
+        $fee         = $this->serviceFee($serverTotal);
+        $grandTotal  = $serverTotal + $fee;
+        $amountTetri = (int) round($grandTotal * 100);
         $frontendUrl = rtrim(config('app.frontend_url'), '/');
 
         try {
@@ -79,7 +97,7 @@ class OrderController extends Controller
             $orderId,
             $request->items,
             $request->shipping,
-            $serverTotal
+            $grandTotal
         );
 
         // Fill any missing address fields on the user profile — never overwrites existing values
@@ -104,7 +122,8 @@ class OrderController extends Controller
                 })($flitt['checkout_url']),
                 'order_id'     => $orderId,
                 'order_number' => $order->order_number,
-                'total'        => $serverTotal,
+                'total'        => $grandTotal,
+                'fee'          => $fee,
             ],
         ]);
     }

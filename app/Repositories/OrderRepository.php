@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Constants\OrderStatus;
+use App\Constants\PaymentStatus;
 use App\Models\Order;
 use Illuminate\Support\Str;
 
@@ -54,6 +55,7 @@ class OrderRepository
     {
         return $this->orderModel
             ->where('user_id', $userId)
+            ->where('payment_status', PaymentStatus::PAID)
             ->orderByDesc('created_at')
             ->get();
     }
