@@ -68,7 +68,7 @@ class CompanyController extends Controller
                 'image_for' => $request->image_for,
             ],
             [
-                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'images.*' => ['nullable', 'image', 'max:10240'], // Add image validation rules for each image
                 'image_for' => ['required','in:individual,store,pawnshop,stock_exchange'],
             ]
         );
@@ -88,7 +88,7 @@ class CompanyController extends Controller
                 'image_for' => $request->image_for,
             ],
             [
-                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'images.*' => ['nullable', 'image', 'max:10240'], // Add image validation rules for each image
                 'image_for' => ['required','in:individual,store,pawnshop,stock_exchange'],
             ]
         );
@@ -108,7 +108,7 @@ class CompanyController extends Controller
                 'image_for' => $request->image_for,
             ],
             [
-                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'images.*' => ['nullable', 'image', 'max:10240'], // Add image validation rules for each image
                 'image_for' => ['required','in:individual,store,pawnshop,stock_exchange'],
             ]
         );
@@ -128,7 +128,7 @@ class CompanyController extends Controller
                 'image_for' => $request->image_for,
             ],
             [
-                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                'images.*' => ['nullable', 'image', 'max:10240'],
                 'image_for' => ['required', 'in:individual,store,pawnshop,stock_exchange'],
             ]
         );

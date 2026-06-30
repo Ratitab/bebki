@@ -139,17 +139,17 @@ class ProductRepository
         return is_string($id) && preg_match('/^[0-9a-fA-F]{24}$/', $id);
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null)
     {
         $product = new $this->productModel;
         return $this->setProductAttributes(
             $product, $createdBy, $user, $title, $category, $material, $stamp, $weight,
             $gem, $size, $gender, $phoneNumber, $description, $customization, $city,
-            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity
+            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode
         );
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null)
     {
         $product = $this->findOneById($id);
         if (!$product) {
@@ -158,7 +158,7 @@ class ProductRepository
         return $this->setProductAttributes(
             $product, $createdBy, $user, $title, $category, $material, $stamp, $weight,
             $gem, $size, $gender, $phoneNumber, $description, $customization, $city,
-            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity
+            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode
         );
     }
 
@@ -177,7 +177,7 @@ class ProductRepository
         return $product;
     }
 
-    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null)
+    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null)
     {
         if (!isset($product->product_sku)) {
             $product->product_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
@@ -223,6 +223,9 @@ class ProductRepository
         $product->image_urls = $imageUrls;
         $product->passport_urls = $passportUrls;
         $product->variants = is_array($variants) ? $variants : [];
+        if (!is_null($stockMode)) {
+            $product->stock_mode = $stockMode;
+        }
         if (!is_null($quantity)) {
             $product->quantity = (int)$quantity;
             $product->lead_time = null;
@@ -261,7 +264,7 @@ class ProductRepository
         $featuredRaw = $this->productModel->raw(function ($collection) use ($fields, $excludeCompanyIds) {
             $project = array_fill_keys($fields, 1);
             $project['favorite_count'] = ['$ifNull' => ['$favorite_count', 0]];
-            $match = ['is_sold' => 0];
+            $match = ['is_sold' => 0, 'deleted_at' => null];
             if (!empty($excludeCompanyIds)) {
                 $match['created_by.id'] = ['$nin' => $excludeCompanyIds];
             }
@@ -273,10 +276,17 @@ class ProductRepository
             ]);
         });
 
+        $unique = $baseQuery()
+            ->where('stock_mode', 'unique')
+            ->orderBy('update_date', 'desc')
+            ->limit(12)
+            ->get($fields);
+
         return [
             'popular'  => $popular,
             'new'      => $new,
             'featured' => $featuredRaw,
+            'unique'   => $unique,
         ];
     }
 

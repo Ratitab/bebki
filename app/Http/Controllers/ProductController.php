@@ -129,7 +129,7 @@ class ProductController extends Controller
             return $this->apiResponseFail('Please set your shop identification code (ID) before adding products.');
         }
 
-        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants, $request->lead_time, $request->quantity);
+        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants, $request->lead_time, $request->quantity, $request->stock_mode);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }
@@ -160,7 +160,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size,$request->gender, $request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants, $request->lead_time, $request->quantity);
+        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size,$request->gender, $request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants, $request->lead_time, $request->quantity, $request->stock_mode);
         if ($updateProduct) {
             return $this->apiResponseSuccess(['data' => $updateProduct]);
         }
@@ -260,7 +260,7 @@ class ProductController extends Controller
                 'image_for' => $request->image_for,
             ],
             [
-                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Add image validation rules for each image
+                'images.*' => ['nullable', 'image', 'max:10240'],
                 'image_for' => ['required', 'in:individual,shop,pawnshop,store,stock_exchange'],
             ]
         );
@@ -342,6 +342,7 @@ class ProductController extends Controller
             'popular'  => array_values($feed['popular']->toArray()),
             'new'      => array_values($feed['new']->toArray()),
             'featured' => array_values($feed['featured']->toArray()),
+            'unique'   => array_values($feed['unique']->toArray()),
         ]);
     }
 }

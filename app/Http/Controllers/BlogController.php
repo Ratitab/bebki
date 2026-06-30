@@ -147,7 +147,7 @@ class BlogController extends Controller
                 'images' => $request->file('images'),
             ],
             [
-                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                'images.*' => ['nullable', 'image', 'max:10240'],
             ]
         );
 

@@ -135,7 +135,7 @@ class AnnouncementsController extends Controller
                 'images' => $request->file('images'),
             ],
             [
-                'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                'images.*' => ['nullable', 'image', 'max:10240'],
             ]
         );
         // aq gvchirdeba check if user is admin
