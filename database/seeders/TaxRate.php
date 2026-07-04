@@ -19,8 +19,10 @@ class TaxRate extends Seeder
         ];
 
         foreach ($taxRates as $taxRate) {
-            \DB::connection('mongodb')->table('tax_rates')->insert([
-                'title' => $taxRate,
-            ]);}
+            \DB::connection('mongodb')->table('tax_rates')->updateOrInsert(
+                ['title' => $taxRate],
+                ['title' => $taxRate]
+            );
+        }
     }
 }

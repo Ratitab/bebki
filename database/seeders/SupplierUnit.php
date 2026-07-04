@@ -29,8 +29,10 @@ class SupplierUnit extends Seeder
         ];
 
         foreach ($units as $unit) {
-            \DB::connection('mongodb')->table('supplier_units')->insert([
-                'title' => $unit,
-            ]);}
+            \DB::connection('mongodb')->table('supplier_units')->updateOrInsert(
+                ['title' => $unit],
+                ['title' => $unit]
+            );
+        }
     }
 }

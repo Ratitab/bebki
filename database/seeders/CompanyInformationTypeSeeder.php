@@ -51,12 +51,10 @@ class CompanyInformationTypeSeeder extends Seeder
         ];
 
         foreach ($fields as $name) {
-            DB::table('company_information_types')->insertOrIgnore([
-                'name'       => $name,
-                'is_required' => 0,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            DB::table('company_information_types')->updateOrInsert(
+                ['name' => $name],
+                ['is_required' => 0, 'created_at' => $now, 'updated_at' => $now]
+            );
         }
     }
 }

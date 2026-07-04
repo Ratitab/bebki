@@ -32,12 +32,10 @@ class UserInformationTypeSeeder extends Seeder
         ];
 
         foreach ($types as $name) {
-            DB::table('user_information_types')->insertOrIgnore([
-                'name'        => $name,
-                'is_required' => false,
-                'created_at'  => $now,
-                'updated_at'  => $now,
-            ]);
+            DB::table('user_information_types')->updateOrInsert(
+                ['name' => $name],
+                ['is_required' => false, 'created_at' => $now, 'updated_at' => $now]
+            );
         }
     }
 }
