@@ -31,10 +31,21 @@ class PaymentController extends Controller
 
     public function flittCallback(Request $request): JsonResponse
     {
-        $payload = $request->all();
+        // DEBUG: log raw payload to diagnose callback issues — remove after fix
+        $payload = $request->json()->all() ?: $request->all();
+        Log::info('FLITT_DEBUG payload', [
+            'order_id'     => $payload['order_id'] ?? null,
+            'order_status' => $payload['order_status'] ?? null,
+            'payment_id'   => $payload['payment_id'] ?? null,
+            'sig_hint'     => $payload['response_signature_string'] ?? 'not present (live mode)',
+            'sig_received' => $payload['signature'] ?? null,
+        ]);
 
         if (!$this->flittService->verifyCallback($payload)) {
-            Log::warning('Flitt callback: invalid signature', ['order_id' => $payload['order_id'] ?? null]);
+            Log::warning('FLITT_DEBUG sig FAILED', [
+                'order_id'  => $payload['order_id'] ?? null,
+                'sig_hint'  => $payload['response_signature_string'] ?? null,
+            ]);
             return response()->json(['status' => 'invalid_signature'], 400);
         }
 
@@ -42,13 +53,15 @@ class PaymentController extends Controller
         $flittStatus   = $payload['order_status'] ?? '';
         $flittPayId    = (string) ($payload['payment_id'] ?? '');
 
+        Log::info('FLITT_DEBUG sig OK', ['order_id' => $orderId, 'flitt_status' => $flittStatus]);
+
         if (!$orderId) {
             return response()->json(['status' => 'missing_order_id'], 400);
         }
 
         $order = DB::table('orders')->where('id', $orderId)->first();
         if (!$order) {
-            Log::error('Flitt callback: order not found', ['order_id' => $orderId]);
+            Log::error('FLITT_DEBUG order not found', ['order_id' => $orderId]);
             return response()->json(['status' => 'order_not_found'], 200);
         }
 
@@ -61,6 +74,7 @@ class PaymentController extends Controller
         ];
 
         $newStatus = $statusMap[$flittStatus] ?? PaymentStatus::FAILED;
+        Log::info('FLITT_DEBUG updating status', ['order_id' => $orderId, 'new_status' => $newStatus]);
         $this->orderService->updatePaymentStatus($orderId, $newStatus, $flittPayId);
 
         if ($newStatus === PaymentStatus::PAID) {
