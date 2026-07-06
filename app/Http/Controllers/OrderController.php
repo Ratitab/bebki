@@ -84,7 +84,6 @@ class OrderController extends Controller
                 'amount'              => $amountTetri,
                 'currency'            => 'GEL',
                 'response_url'        => $frontendUrl . '/checkout/result',
-                'server_callback_url' => config('app.url') . '/api/payment/flitt/callback',
             ]);
         } catch (\Throwable $e) {
             Log::error('Flitt initiate failed', ['order_id' => $orderId, 'error' => $e->getMessage()]);
