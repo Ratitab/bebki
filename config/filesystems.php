@@ -64,6 +64,19 @@ return [
             'region' => env('DO_SPACES_REGION'),
             'bucket' => env('DO_SPACES_BUCKET'),
             'url' => env('DO_SPACES_ENDPOINT'),
+            // Public CDN host that fronts the Spaces bucket; UploadService
+            // rewrites stored URLs to this host.
+            'cdn_url' => env('DO_SPACES_CDN_URL'),
+            'use_path_style_endpoint' => false,
+            // Surface storage failures as exceptions instead of returning false.
+            'throw' => true,
+            // Retry transient network errors and bound the connection so a slow
+            // Spaces endpoint cannot pin an Octane worker indefinitely.
+            'retries' => 3,
+            'http' => [
+                'connect_timeout' => 5,
+                'timeout' => 60,
+            ],
         ],
 
     ],

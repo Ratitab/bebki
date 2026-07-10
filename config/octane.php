@@ -55,6 +55,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Swoole Server Options
+    |--------------------------------------------------------------------------
+    |
+    | Raise the maximum request/response body sizes so large (multi-image)
+    | uploads are accepted by the Swoole HTTP server before PHP ever sees
+    | them. Keep this aligned with post_max_size in the PHP configuration.
+    |
+    */
+
+    'swoole' => [
+        'options' => [
+            'package_max_length' => 64 * 1024 * 1024,
+            'buffer_output_size' => 64 * 1024 * 1024,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Octane Listeners
     |--------------------------------------------------------------------------
     |

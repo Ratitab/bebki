@@ -52,6 +52,16 @@ RUN docker-php-ext-enable opcache \
     && echo 'opcache.fast_shutdown=1' >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
     && echo 'opcache.enable_cli=1' >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
 
+# Upload / memory limits sized for multi-image requests and GD image processing.
+# Must stay >= the app's per-image validation (max:10240 KB) times the max batch.
+RUN { \
+      echo 'upload_max_filesize=12M'; \
+      echo 'post_max_size=64M'; \
+      echo 'memory_limit=256M'; \
+      echo 'max_execution_time=120'; \
+      echo 'max_file_uploads=30'; \
+    } > /usr/local/etc/php/conf.d/zz-uploads.ini
+
 # Stage 2: Build Laravel application
 FROM gogitidze AS application
 
