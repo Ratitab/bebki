@@ -129,7 +129,7 @@ class ProductController extends Controller
             return $this->apiResponseFail('Please set your shop identification code (ID) before adding products.');
         }
 
-        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants, $request->lead_time, $request->quantity, $request->stock_mode);
+        $company = $this->productService->create($request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size, $request->gender,$request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants, $request->lead_time, $request->quantity, $request->stock_mode, $request->material_details, $request->dimensions);
         if ($company) {
             return $this->apiResponseSuccess(['data' => $company]);
         }
@@ -160,7 +160,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return $this->apiResponseFail($validator->messages());
         }
-        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size,$request->gender, $request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants, $request->lead_time, $request->quantity, $request->stock_mode);
+        $updateProduct = $this->productService->update($product_id, $request->created_by, $user, $request->title, $request->category, $request->material, $request->stamp, $request->weight, $request->gem, $request->size,$request->gender, $request->phone_number,$request->description, $request->customization, $request->city, $request->price, $request->tags, $request->image_urls, $request->passport_urls, $request->variants, $request->lead_time, $request->quantity, $request->stock_mode, $request->material_details, $request->dimensions);
         if ($updateProduct) {
             return $this->apiResponseSuccess(['data' => $updateProduct]);
         }

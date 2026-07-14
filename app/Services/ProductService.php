@@ -286,24 +286,26 @@ class ProductService
         return $this->favouriteRepository->userFavouriteProducts($userId);
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null, $materialDetails = null, $dimensions = null)
     {
-        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode) {
+        return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode, $materialDetails, $dimensions) {
 
             return $this->productRepository->create(
                 $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem,
                 $size, $gender, $phoneNumber, $description, $customization, $city, $price,
-                $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode
+                $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode,
+                $materialDetails, $dimensions
             );
         });
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender,$phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender,$phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null, $materialDetails = null, $dimensions = null)
     {
         return $this->productRepository->update($id,
             $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem,
             $size, $gender, $phoneNumber, $description, $customization, $city, $price,
-            $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode
+            $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode,
+            $materialDetails, $dimensions
         );
     }
 

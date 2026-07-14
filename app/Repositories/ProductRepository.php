@@ -139,17 +139,18 @@ class ProductRepository
         return is_string($id) && preg_match('/^[0-9a-fA-F]{24}$/', $id);
     }
 
-    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null)
+    public function create($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null, $materialDetails = null, $dimensions = null)
     {
         $product = new $this->productModel;
         return $this->setProductAttributes(
             $product, $createdBy, $user, $title, $category, $material, $stamp, $weight,
             $gem, $size, $gender, $phoneNumber, $description, $customization, $city,
-            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode
+            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode,
+            $materialDetails, $dimensions
         );
     }
 
-    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null)
+    public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null, $materialDetails = null, $dimensions = null)
     {
         $product = $this->findOneById($id);
         if (!$product) {
@@ -158,7 +159,8 @@ class ProductRepository
         return $this->setProductAttributes(
             $product, $createdBy, $user, $title, $category, $material, $stamp, $weight,
             $gem, $size, $gender, $phoneNumber, $description, $customization, $city,
-            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode
+            $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode,
+            $materialDetails, $dimensions
         );
     }
 
@@ -177,7 +179,7 @@ class ProductRepository
         return $product;
     }
 
-    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null)
+    private function setProductAttributes($product, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender, $phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null, $materialDetails = null, $dimensions = null)
     {
         if (!isset($product->product_sku)) {
             $product->product_sku = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
@@ -200,6 +202,8 @@ class ProductRepository
         $product->title = $title;
         $product->category = $category;
         $product->material = $material;
+        $product->material_details = $materialDetails;
+        $product->dimensions = $dimensions;
         $product->stamp = $stamp;
         $product->weight = $weight;
         $product->gem = $gem;
