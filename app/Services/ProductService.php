@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Constants\CacheKeys;
 use App\DTO\SearchProductsDTO;
 use App\DTO\SingleProductDTO;
 use App\Models\Products\Product;
@@ -14,6 +15,7 @@ use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -31,10 +33,13 @@ class ProductService
 
     public function findMany(SearchProductsDTO $searchDTO)
     {
-        // Only exclude out-of-order shops when browsing general listings,
-        // not when viewing a specific shop (owner or buyer navigating directly).
+        // Only exclude out-of-order / non-verified shops when browsing general listings,
+        // not when viewing a specific shop (owner managing their own shop, or buyer navigating directly).
         $excludeIds = empty($searchDTO->createdById)
-            ? $this->companyRepository->findOutOfOrderIds()
+            ? array_unique(array_merge(
+                $this->companyRepository->findOutOfOrderIds(),
+                $this->companyRepository->findNonVerifiedCompanyIds()
+            ))
             : [];
 
         $products = $this->productRepository->findMany(
@@ -290,23 +295,27 @@ class ProductService
     {
         return \DB::transaction(function () use ($createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size, $gender,$phoneNumber,$description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode, $materialDetails, $dimensions) {
 
-            return $this->productRepository->create(
+            $product = $this->productRepository->create(
                 $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem,
                 $size, $gender, $phoneNumber, $description, $customization, $city, $price,
                 $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode,
                 $materialDetails, $dimensions
             );
+            self::invalidateHomepageFeedCache();
+            return $product;
         });
     }
 
     public function update($id, $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem, $size,$gender,$phoneNumber, $description, $customization, $city, $price, $tags, $imageUrls, $passportUrls, $variants = null, $leadTime = null, $quantity = null, $stockMode = null, $materialDetails = null, $dimensions = null)
     {
-        return $this->productRepository->update($id,
+        $product = $this->productRepository->update($id,
             $createdBy, $user, $title, $category, $material, $stamp, $weight, $gem,
             $size, $gender, $phoneNumber, $description, $customization, $city, $price,
             $tags, $imageUrls, $passportUrls, $variants, $leadTime, $quantity, $stockMode,
             $materialDetails, $dimensions
         );
+        self::invalidateHomepageFeedCache();
+        return $product;
     }
 
     public function update_product_order($id, $createdBy, $user)
@@ -367,18 +376,32 @@ class ProductService
 
     public function delete($productId)
     {
-        return $this->productRepository->delete($productId);
+        $result = $this->productRepository->delete($productId);
+        self::invalidateHomepageFeedCache();
+        return $result;
     }
 
     public function sold($productId)
     {
-        return $this->productRepository->sold($productId);
+        $result = $this->productRepository->sold($productId);
+        self::invalidateHomepageFeedCache();
+        return $result;
     }
 
     public function homepageFeed(): array
     {
-        $excludeIds = $this->companyRepository->findOutOfOrderIds();
-        return $this->productRepository->homepageFeed($excludeIds);
+        return Cache::remember(CacheKeys::HOMEPAGE_FEED, CacheKeys::HOMEPAGE_FEED_TTL, function () {
+            $excludeIds = array_unique(array_merge(
+                $this->companyRepository->findOutOfOrderIds(),
+                $this->companyRepository->findNonVerifiedCompanyIds()
+            ));
+            return $this->productRepository->homepageFeed($excludeIds);
+        });
+    }
+
+    public static function invalidateHomepageFeedCache(): void
+    {
+        Cache::forget(CacheKeys::HOMEPAGE_FEED);
     }
 
 }

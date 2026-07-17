@@ -105,6 +105,7 @@ class CompanyService
         if (!$company) return false;
         $newValue = !$company->is_out_of_order;
         $this->companyRepository->setOutOfOrder($companyId, $newValue);
+        ProductService::invalidateHomepageFeedCache();
         return $newValue;
     }
 

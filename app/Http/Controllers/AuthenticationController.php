@@ -201,7 +201,7 @@ class AuthenticationController extends Controller
         if ($otp) {
             return $this->apiResponseSuccess(['data' => $otp]);
         }
-        return $this->apiResponseFail('Something Went Wrong');
+        return $this->apiResponseFail('Failed to send the verification code. Please try again in a moment.');
     }
 
     public function otp_update_email_or_phone(Request $request)
@@ -222,7 +222,7 @@ class AuthenticationController extends Controller
         if ($otp) {
             return $this->apiResponseSuccess(['data' => $otp]);
         }
-        return $this->apiResponseFail('Something Went Wrong');
+        return $this->apiResponseFail('Failed to send the verification code. Please try again in a moment.');
     }
     public function update_email_or_phone(Request $request)
     {
@@ -351,7 +351,7 @@ class AuthenticationController extends Controller
         if ($otp) {
             return $this->apiResponseSuccess(['data' => $otp]);
         }
-        return $this->apiResponseFail('Something Went Wrong');
+        return $this->apiResponseFail('Failed to send the verification code. Please try again in a moment.');
     }
 
     public function forgot_password(Request $request)

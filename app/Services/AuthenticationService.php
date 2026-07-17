@@ -7,6 +7,8 @@ use App\Mail\DynamicEmail;
 use App\Models\Users\PasswordResetToken;
 use App\Traits\Resp;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -67,40 +69,64 @@ class AuthenticationService
     {
         $otp = random_int(100000, 999999);
 
-        // Create the OTP code in the service
-        $this->otpCodeService->create($username,$otp, 'registration',$phone);
+        try {
+            return DB::transaction(function () use ($username, $otp, $phone) {
+                // Create the OTP code in the service
+                $this->otpCodeService->create($username,$otp, 'registration',$phone);
 
-        Mail::to($username)->send(new DynamicEmail(
-            'emails.otp',
-            ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
-            'დაადასტურეთ თქვენი ანგარიში — ბებკი'
-        ));
+                Mail::to($username)->send(new DynamicEmail(
+                    'emails.otp',
+                    ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
+                    'დაადასტურეთ თქვენი ანგარიში — ბებკი'
+                ));
 
-        return true;
+                return true;
+            });
+        } catch (\Throwable $e) {
+            // Roll back the OTP row on failure — no dangling code the user never received.
+            Log::error('Registration OTP email failed', ['username' => $username, 'error' => $e->getMessage()]);
+            return false;
+        }
     }
 
     public function otpUpdateEmailOrPhone($username)
     {
         $otp = random_int(100000, 999999);
-        $this->otpCodeService->create($username, $otp, 'update_email_or_phone');
-        Mail::to($username)->send(new DynamicEmail(
-            'emails.otp',
-            ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
-            'დაადასტურეთ თქვენი ანგარიში — ბებკი'
-        ));
-        return true;
+
+        try {
+            return DB::transaction(function () use ($username, $otp) {
+                $this->otpCodeService->create($username, $otp, 'update_email_or_phone');
+                Mail::to($username)->send(new DynamicEmail(
+                    'emails.otp',
+                    ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
+                    'დაადასტურეთ თქვენი ანგარიში — ბებკი'
+                ));
+                return true;
+            });
+        } catch (\Throwable $e) {
+            Log::error('Update email/phone OTP failed', ['username' => $username, 'error' => $e->getMessage()]);
+            return false;
+        }
     }
 
     public function otpForgotPassword($username)
     {
         $otp = random_int(100000, 999999);
-        $this->otpCodeService->create($username, $otp, 'forgot_password');
-        Mail::to($username)->send(new DynamicEmail(
-            'emails.otp',
-            ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
-            'დაადასტურეთ თქვენი ანგარიში — ბებკი'
-        ));
-        return true;
+
+        try {
+            return DB::transaction(function () use ($username, $otp) {
+                $this->otpCodeService->create($username, $otp, 'forgot_password');
+                Mail::to($username)->send(new DynamicEmail(
+                    'emails.otp',
+                    ['otp' => $otp, 'email' => $username, 'expiry_minutes' => 10],
+                    'დაადასტურეთ თქვენი ანგარიში — ბებკი'
+                ));
+                return true;
+            });
+        } catch (\Throwable $e) {
+            Log::error('Forgot password OTP failed', ['username' => $username, 'error' => $e->getMessage()]);
+            return false;
+        }
     }
 
     public function requestPasswordReset(string $email): bool
@@ -110,24 +136,33 @@ class AuthenticationService
             return true; // silent — don't reveal whether email exists
         }
 
-        PasswordResetToken::where('email', $email)->delete();
+        try {
+            return DB::transaction(function () use ($email) {
+                PasswordResetToken::where('email', $email)->delete();
 
-        $token = Str::random(64);
-        PasswordResetToken::create([
-            'email'      => $email,
-            'token'      => $token,
-            'expires_at' => now()->addHour(),
-        ]);
+                $token = Str::random(64);
+                PasswordResetToken::create([
+                    'email'      => $email,
+                    'token'      => $token,
+                    'expires_at' => now()->addHour(),
+                ]);
 
-        $resetLink = rtrim(config('app.frontend_url'), '/') . '/reset-password?token=' . $token;
+                $resetLink = rtrim(config('app.frontend_url'), '/') . '/reset-password?token=' . $token;
 
-        Mail::to($email)->send(new DynamicEmail(
-            'emails.password-reset',
-            ['reset_link' => $resetLink, 'email' => $email],
-            'პაროლის აღდგენა — ბებკი'
-        ));
+                Mail::to($email)->send(new DynamicEmail(
+                    'emails.password-reset',
+                    ['reset_link' => $resetLink, 'email' => $email],
+                    'პაროლის აღდგენა — ბებკი'
+                ));
 
-        return true;
+                return true;
+            });
+        } catch (\Throwable $e) {
+            // Roll back the reset token on failure, and stay silent to the caller
+            // (this method never reveals send failures — matches the enumeration-safe contract above).
+            Log::error('Password reset email failed', ['email' => $email, 'error' => $e->getMessage()]);
+            return false;
+        }
     }
 
     public function validateResetToken(string $token): ?string

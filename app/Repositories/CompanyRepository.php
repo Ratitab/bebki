@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Constants\ShopStatus;
 use App\Models\Companies\Company;
 use App\Models\Companies\CompanyInformation;
 use App\Models\Companies\CompanyUser;
@@ -16,6 +17,7 @@ class CompanyRepository
         private readonly Company $companyModel,
         private readonly CompanyInformation $companyInformationModel,
         private readonly AddressRepository $addressRepository,
+        private readonly UserInformationTypeRepository $userInformationTypeRepository,
     ) {
     }
 
@@ -163,6 +165,31 @@ class CompanyRepository
             ->where('is_out_of_order', 1)
             ->whereNull('deleted_at')
             ->pluck('id')
+            ->toArray();
+    }
+
+    /**
+     * Company IDs whose owning user's shop is not (or no longer) verified —
+     * e.g. rejected after products were already added while verified, or still pending.
+     * Used to keep such shops' listings out of public browse/search/homepage feeds.
+     */
+    public function findNonVerifiedCompanyIds(): array
+    {
+        $typeId = $this->userInformationTypeRepository->getAllInformationTypes()['shop_status'] ?? null;
+        if (!$typeId) {
+            return [];
+        }
+
+        return DB::table('company_users')
+            ->join('user_information', function ($join) use ($typeId) {
+                $join->on('company_users.user_id', '=', 'user_information.user_id')
+                    ->where('user_information.user_information_type_id', $typeId)
+                    ->whereNull('user_information.deleted_at');
+            })
+            ->where('user_information.value', '!=', ShopStatus::VERIFIED)
+            ->pluck('company_users.company_id')
+            ->unique()
+            ->values()
             ->toArray();
     }
 

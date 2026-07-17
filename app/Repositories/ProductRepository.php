@@ -270,7 +270,7 @@ class ProductRepository
             $project['favorite_count'] = ['$ifNull' => ['$favorite_count', 0]];
             $match = ['is_sold' => 0, 'deleted_at' => null];
             if (!empty($excludeCompanyIds)) {
-                $match['created_by.id'] = ['$nin' => $excludeCompanyIds];
+                $match['created_by._id'] = ['$nin' => $excludeCompanyIds];
             }
             return $collection->aggregate([
                 ['$match'   => $match],

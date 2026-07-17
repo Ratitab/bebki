@@ -43,6 +43,7 @@ class UserInformationService
     public function updateShopStatus(string $userId, string $status): void
     {
         $this->userInformationRepository->updateShopStatus($userId, $status);
+        ProductService::invalidateHomepageFeedCache();
     }
 
     public function findByUserIdAndType($userId,$typeId)
