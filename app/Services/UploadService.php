@@ -17,7 +17,7 @@ class UploadService
     /** Images wider than this are downscaled before compression. */
     private const MAX_WIDTH = 1500;
 
-    /** Max simultaneous in-flight uploads to Spaces. */
+    /** Max simultaneous in-flight uploads to Ceph. */
     private const UPLOAD_CONCURRENCY = 5;
 
     public function __construct()
@@ -125,7 +125,7 @@ class UploadService
      * Upload a batch of images to a storage path.
      *
      * Images are compressed sequentially (CPU-bound) and then uploaded to
-     * Spaces concurrently (network-bound), which is the big win for
+     * Ceph concurrently (network-bound), which is the big win for
      * multi-image requests. Failures are logged with context. If images were
      * provided but every one failed, a RuntimeException is thrown so the caller
      * returns an error instead of a misleading "success" with missing images.
@@ -197,7 +197,7 @@ class UploadService
         $urls = [];
         foreach ($jobs as $i => $job) {
             if (!empty($succeeded[$i])) {
-                $urls[] = $this->toCdnUrl(Storage::disk('spaces')->url($job['key']));
+                $urls[] = $this->publicUrl($job['key']);
             }
         }
 
@@ -216,8 +216,8 @@ class UploadService
      */
     private function uploadJobsConcurrently(array $jobs): array
     {
-        $client = Storage::disk('spaces')->getClient();
-        $bucket = config('filesystems.disks.spaces.bucket');
+        $client = Storage::disk('ceph')->getClient();
+        $bucket = config('filesystems.disks.ceph.bucket');
         $succeeded = [];
 
         $commands = function () use ($client, $bucket, $jobs) {
@@ -226,7 +226,6 @@ class UploadService
                     'Bucket'      => $bucket,
                     'Key'         => $job['key'],
                     'SourceFile'  => $job['path'],
-                    'ACL'         => 'public-read',
                     'ContentType' => $job['contentType'],
                 ]);
             }
@@ -260,7 +259,7 @@ class UploadService
         $succeeded = [];
         foreach ($jobs as $i => $job) {
             try {
-                $stored = Storage::disk('spaces')->put($job['key'], fopen($job['path'], 'r'), 'public');
+                $stored = Storage::disk('ceph')->put($job['key'], fopen($job['path'], 'r'), 'private');
                 if ($stored !== false) {
                     $succeeded[$i] = true;
                 }
@@ -277,20 +276,13 @@ class UploadService
     }
 
     /**
-     * Rewrite a raw Spaces endpoint URL to the CDN host. Falls back to the
-     * production defaults when the env is not configured, and returns the URL
-     * untouched when it does not start with the Spaces endpoint.
+     * Public URL for a stored object. Ceph RGW is only reachable on the LAN,
+     * so files are served through the /api/files route instead of RGW directly.
+     * Objects stay private in the bucket; the route reads them with our keys.
      */
-    private function toCdnUrl(string $url): string
+    private function publicUrl(string $key): string
     {
-        $endpoint = rtrim((string) (config('filesystems.disks.spaces.endpoint') ?: 'https://fra1.digitaloceanspaces.com'), '/');
-        $cdn      = rtrim((string) (config('filesystems.disks.spaces.cdn_url') ?: 'https://cdn.gegold.ge'), '/');
-
-        if ($cdn !== '' && $endpoint !== '' && str_starts_with($url, $endpoint)) {
-            return $cdn . substr($url, strlen($endpoint));
-        }
-
-        return $url;
+        return rtrim((string) config('services.ceph.cdn_url'), '/') . '/' . ltrim($key, '/');
     }
 
     /**

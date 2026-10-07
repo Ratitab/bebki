@@ -11,6 +11,7 @@ use App\Rules\ValidUniqueCompanyIdentification;
 use App\Rules\ValidGuestLoginCode;
 use App\Services\AuthenticationService;
 use App\Services\EmailSendingService;
+use App\Services\ImageSignatureService;
 use App\Services\OtpCodeService;
 use App\Services\CompanyService;
 use App\Services\PlatformFeatureService;
@@ -28,6 +29,7 @@ class AuthenticationController extends Controller
     public function __construct(private readonly AuthenticationService $authenticationService, private readonly OtpCodeService   $otpCodeService,
                                 private readonly UploadService $uploadService,
                                 private readonly PlatformFeatureService $platformFeatureService,
+                                private readonly ImageSignatureService $imageSignatureService,
                                 private readonly CompanyService $companyService,
                                 private readonly EmailSendingService $emailSendingService)
     {
@@ -406,6 +408,10 @@ class AuthenticationController extends Controller
         $user->setAttribute(
             'platform_features',
             $this->platformFeatureService->findByUserId($user->id)
+        );
+        $user->setAttribute(
+            'image_signature',
+            $this->imageSignatureService->checkExpired($user->id)
         );
         return $user->append('information');
     }

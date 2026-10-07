@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin.token' => \App\Http\Middleware\AdminTokenMiddleware::class,
+            'check.image.signature' => \App\Http\Middleware\CheckImageSignature::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -56,22 +56,21 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
-        'spaces' => [
+        'ceph' => [
             'driver' => 's3',
-            'key' => env('DO_SPACES_KEY'),
-            'secret' => env('DO_SPACES_SECRET'),
-            'endpoint' => env('DO_SPACES_ENDPOINT'),
-            'region' => env('DO_SPACES_REGION'),
-            'bucket' => env('DO_SPACES_BUCKET'),
-            'url' => env('DO_SPACES_ENDPOINT'),
-            // Public CDN host that fronts the Spaces bucket; UploadService
-            // rewrites stored URLs to this host.
-            'cdn_url' => env('DO_SPACES_CDN_URL'),
-            'use_path_style_endpoint' => false,
+            'key' => env('CEPH_KEY'),
+            'secret' => env('CEPH_SECRET'),
+            // Ceph RGW ignores the region, but the AWS SDK requires one.
+            'region' => 'us-east-1',
+            'bucket' => env('CEPH_BUCKET'),
+            // RGW is only reachable on the LAN; browsers get files through
+            // the /api/files route (see FileAccessController).
+            'endpoint' => env('CEPH_ENDPOINT'),
+            'use_path_style_endpoint' => true,
             // Surface storage failures as exceptions instead of returning false.
             'throw' => true,
             // Retry transient network errors and bound the connection so a slow
-            // Spaces endpoint cannot pin an Octane worker indefinitely.
+            // RGW cannot pin an Octane worker indefinitely.
             'retries' => 3,
             'http' => [
                 'connect_timeout' => 5,

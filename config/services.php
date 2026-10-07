@@ -41,6 +41,31 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET_KEY'),
     ],
 
+    'ceph' => [
+        // Public base URL for stored files, e.g. https://api.bebki.ge/api/files.
+        // UploadService returns "{cdn_url}/{object key}".
+        'cdn_url' => env('CDN_URL', 'http://127.0.0.1:8000/api/files'),
+
+        // Folders (the object's parent directory) that anyone may read without
+        // an image signature: marketplace images shown to guests. Everything
+        // else needs a valid ?signature= (see CheckImageSignature).
+        'public_folders' => [
+            'product-images',
+            'cover-images',
+            'portofio_images',
+            'feedback-images',
+            'blogs',
+            'announcements',
+            'individual-images',
+            'store-images',
+            'pawnshop-images',
+            'stock_exchange-images',
+        ],
+
+        // Lifetime of a user's image signature, in minutes.
+        'signature_ttl' => 60,
+    ],
+
     'flitt' => [
         'merchant_id' => env('FLITT_MERCHANT_ID'),
         'secret_key'  => env('FLITT_SECRET_KEY'),

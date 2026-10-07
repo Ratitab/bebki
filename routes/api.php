@@ -8,6 +8,7 @@ use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\FileAccessController;
 use App\Http\Controllers\GoogleMerchantController;
 use App\Http\Controllers\PawnshopProductController;
 use App\Http\Controllers\ProductController;
@@ -125,6 +126,18 @@ Route::post('/reset-password', [AuthenticationController::class, 'reset_password
 |
 */
 Route::post('/upload-pawnshop-images', [ProductController::class, 'upload_images']);
+/*
+|--------------------------------------------------------------------------
+| FILES (Ceph)
+|--------------------------------------------------------------------------
+|
+| Streams uploaded files from the LAN-only Ceph bucket. Public folders are
+| open; anything else needs ?signature= from /auth/check.
+|
+*/
+Route::get('/files/{path}', [FileAccessController::class, 'show'])
+    ->where('path', '.*')
+    ->middleware('check.image.signature');
 /*
 |--------------------------------------------------------------------------
 | AUTHORIZED ENDPOINTS
