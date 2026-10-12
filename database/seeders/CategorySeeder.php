@@ -9,8 +9,11 @@ class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        // Disable foreign key checks and truncate for a clean slate
-        DB::statement('TRUNCATE TABLE categories RESTART IDENTITY CASCADE');
+        // Only for an empty table: the seeders run on every container start, and
+        // categories are edited by admins afterwards.
+        if (DB::table('categories')->exists()) {
+            return;
+        }
 
         $categories = [
             // ── Product types (type_id = 1) ──────────────────────────────
@@ -20,7 +23,7 @@ class CategorySeeder extends Seeder
             ['id' => 4,  'title' => 'tableware',   'type_id' => 1, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 5,  'title' => 'kids',        'type_id' => 1, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 6,  'title' => 'jewellery',   'type_id' => 1, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
-            ['id' => 7,  'title' => 'other',       'type_id' => 1, 'order_id' => 2, 'parent_id' => 0, 'icon' => '1'],
+            ['id' => 7,  'title' => 'other',       'type_id' => 1, 'order_id' => 9999, 'parent_id' => 0, 'icon' => '1'],
 
             // ── Materials (type_id = 0) ───────────────────────────────────
             ['id' => 8,  'title' => 'ceramics',   'type_id' => 0, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
@@ -29,7 +32,7 @@ class CategorySeeder extends Seeder
             ['id' => 11, 'title' => 'leather',    'type_id' => 0, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 12, 'title' => 'concrete',   'type_id' => 0, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
             ['id' => 13, 'title' => 'metalwork',  'type_id' => 0, 'order_id' => 1, 'parent_id' => 0, 'icon' => null],
-            ['id' => 14, 'title' => 'other',      'type_id' => 0, 'order_id' => 2, 'parent_id' => 0, 'icon' => '1'],
+            ['id' => 14, 'title' => 'other',      'type_id' => 0, 'order_id' => 9999, 'parent_id' => 0, 'icon' => '1'],
         ];
 
         foreach ($categories as $cat) {
