@@ -1,0 +1,43 @@
+# Files that must not get into the image (COPY . in docker/Dockerfile).
+
+# Secrets: the environment comes from the runtime (compose env_file, k3s Secret),
+# the Passport keys from PASSPORT_PRIVATE_KEY / PASSPORT_PUBLIC_KEY.
+.env
+.env.*
+!.env.example
+auth.json
+storage/*.key
+
+# Installed in the image by composer.
+vendor
+node_modules
+
+# Runtime files of the machine that builds. The .gitignore files stay, so the
+# folders exist in the image.
+storage/logs/*
+storage/pail
+storage/app/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+bootstrap/cache/*
+!storage/**/.gitignore
+!bootstrap/cache/.gitignore
+public/hot
+public/storage
+
+# Not needed to run the app.
+.git
+.gitattributes
+.editorconfig
+.phpunit.cache
+.phpunit.result.cache
+.idea
+.vscode
+.fleet
+.zed
+tests
+phpunit.xml
+*.deb
+docker/docker-compose.yml
