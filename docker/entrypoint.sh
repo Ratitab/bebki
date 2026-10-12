@@ -8,19 +8,21 @@ until nc -z "${DB_HOST:-postgres}" "${DB_PORT:-5432}" 2>/dev/null; do
 done
 echo "✅ PostgreSQL is ready."
 
+# One run for database/migrations and all its subfolders: AppServiceProvider registers
+# every subfolder. --force: no confirmation prompt when APP_ENV=production.
 echo "⏳ Running migrations..."
-php artisan migrate --path=database/migrations
-php artisan migrate --path=database/migrations/companies
-php artisan migrate --path=database/migrations/users
-php artisan migrate --path=database/migrations/categories
-php artisan migrate --path=database/migrations/countries
-php artisan migrate --path=database/migrations/payments
+php artisan migrate --force
 
 echo "🌱 Seeding reference data..."
-php artisan db:seed
+php artisan db:seed --force
 
-echo "🔑 Installing Passport keys (skip if already exist)..."
-php artisan passport:keys --force 2>/dev/null || true
+# Passport keys must stay the same across restarts, or every login becomes invalid.
+# Set PASSPORT_PRIVATE_KEY and PASSPORT_PUBLIC_KEY in the environment; only without
+# them a key pair is generated, once, into storage/.
+if [ -z "$PASSPORT_PRIVATE_KEY" ] && [ ! -f storage/oauth-private.key ]; then
+  echo "🔑 Generating Passport keys..."
+  php artisan passport:keys
+fi
 
 echo "🚀 Starting Octane..."
 exec php artisan octane:start --host=0.0.0.0 --port=8585
