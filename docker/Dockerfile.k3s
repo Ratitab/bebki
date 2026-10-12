@@ -1,0 +1,47 @@
+# Production image for k3s (infra repo: gitlab.com/carsphere/infra, tenants/bebki.yaml).
+#
+# Build from the repo root:
+#   docker build -f docker/Dockerfile.k3s -t <registry>/bebki/backend:<sha> .
+#
+# The Helm chart picks the command of this one image:
+#   api         octane:start (default CMD)
+#   migrations  migrate --force, as a Job before each new version starts
+# There is no entrypoint script: nothing is seeded on start (run "php artisan db:seed"
+# by hand on a new, empty database) and the Passport keys come from the environment.
+#
+# Configuration comes only from environment variables (the .env is a Kubernetes Secret,
+# filled from OpenBao); .dockerignore keeps .env and other local files out of the image.
+
+# PHP with its extensions and Composer come from the shared base image
+# (carsphere/infra: images/backend-requirements/Dockerfile). The mongodb2 tag has the
+# MongoDB extension 2.x that mongodb/mongodb 2.3 needs.
+FROM 192.168.1.6:5000/backend-requirements:php8.4-mongodb2
+
+# Upload / memory limits sized for multi-image requests and GD image processing.
+# Must stay >= the app's per-image validation (max:10240 KB) times the max batch.
+RUN { \
+        echo 'upload_max_filesize=12M'; \
+        echo 'post_max_size=64M'; \
+        echo 'memory_limit=256M'; \
+        echo 'max_execution_time=120'; \
+        echo 'max_file_uploads=30'; \
+    } > /usr/local/etc/php/conf.d/zz-uploads.ini
+
+# Dependencies before the code, so a code-only change reuses this layer.
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader --prefer-dist \
+    && composer clear-cache
+
+COPY . .
+# HOME is /tmp in the base image, so the build (running as root) leaves root-owned folders
+# there. The app runs as nobody and tinker creates its own, so they are removed at the end.
+RUN composer dump-autoload --optimize --no-dev \
+    && mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions \
+        storage/framework/views storage/logs bootstrap/cache \
+    && chown -R nobody:nobody storage bootstrap/cache \
+    && rm -rf /tmp/.cache /tmp/.config /tmp/.local
+
+USER nobody
+EXPOSE 8585
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["php", "artisan", "octane:start", "--server=swoole", "--host=0.0.0.0", "--port=8585"]

@@ -1,0 +1,28 @@
+# Builds the k3s image of the backend and deploys it into the bebki release in k3s,
+# using the shared jobs from carsphere/infra (ci/templates.gitlab-ci.yml, see its
+# docs/ARCHITECTURE.md). Runs only on the default branch, on the ci-runner VM.
+# Whoever starts a pipeline needs read access to carsphere/infra.
+#
+# The image is 192.168.1.6:5000/bebki/backend:<commit>-<pipeline number>; the deploy sets
+# only that tag in the release. Settings: carsphere/infra, tenants/bebki.yaml.
+
+include:
+  - project: carsphere/infra
+    ref: main
+    file: ci/templates.gitlab-ci.yml
+
+variables:
+  TENANT: bebki
+
+build-backend:
+  extends: .image-build
+  variables:
+    COMPONENT: backend
+    DOCKERFILE: docker/Dockerfile.k3s
+    CONTEXT: .
+
+deploy:
+  extends: .deploy
+  needs: [build-backend]
+  variables:
+    COMPONENTS: backend

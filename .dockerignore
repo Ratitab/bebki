@@ -1,4 +1,4 @@
-# Files that must not get into the image (COPY . in docker/Dockerfile).
+# Files that must not get into the image (COPY . in docker/Dockerfile and docker/Dockerfile.k3s).
 
 # Secrets: the environment comes from the runtime (compose env_file, k3s Secret),
 # the Passport keys from PASSPORT_PRIVATE_KEY / PASSPORT_PUBLIC_KEY.
@@ -41,3 +41,4 @@ tests
 phpunit.xml
 *.deb
 docker/docker-compose.yml
+.gitlab-ci.yml
